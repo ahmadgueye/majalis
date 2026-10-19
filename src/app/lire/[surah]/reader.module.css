@@ -1,0 +1,123 @@
+.page {
+  min-height: 100%;
+  background: var(--surface);
+}
+
+.top {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 56px;
+  padding-inline: max(16px, env(safe-area-inset-left, 0px)) max(16px, env(safe-area-inset-right, 0px));
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+}
+
+.mark {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  display: grid;
+  place-items: center;
+  font-family: "Geeza Pro", "Noto Naskh Arabic", var(--f-ui);
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 1;
+  flex: none;
+}
+
+.nav {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.reader {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 8px max(16px, env(safe-area-inset-right, 0px)) 48px max(16px, env(safe-area-inset-left, 0px));
+}
+
+.head {
+  text-align: center;
+  padding: 28px 0 6px;
+}
+
+.headAr {
+  font-family: var(--f-ar);
+  font-size: 34px;
+  line-height: 1.6;
+}
+
+.sub {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.basmala {
+  font-family: var(--f-ar);
+  text-align: center;
+  font-size: 24px;
+  color: var(--muted);
+  margin: 6px 0 14px;
+}
+
+.verses {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.verse {
+  border-radius: 12px;
+  padding: 14px 16px;
+  scroll-margin-top: 72px;
+}
+
+.verse:hover {
+  background: var(--surface-2);
+}
+
+.num {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.ar {
+  font-family: var(--f-ar);
+  font-size: 28px;
+  line-height: 2.05;
+  margin: 4px 0 4px;
+  text-align: right;
+}
+
+.tr {
+  font-family: var(--f-read);
+  font-size: 17.5px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.foot {
+  margin-top: 28px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  color: var(--faint);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.foot a {
+  text-decoration: underline;
+}
