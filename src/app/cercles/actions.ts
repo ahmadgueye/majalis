@@ -106,17 +106,14 @@ export async function createSession(fd: FormData) {
   redirect(`${path}/seances/${data.id}`);
 }
 
-export async function renameSession(fd: FormData) {
-  const spaceId = text(fd, "space_id");
-  const id = text(fd, "session_id");
-  const path = `/cercles/${spaceId}/seances/${id}`;
-  const { supabase } = await requireViewer(path);
-  const title = text(fd, "title");
-  if (!title) fail(path, "nom");
-  const { data, error } = await supabase.from("sessions").update({ title }).eq("id", id).select("id");
-  if (error || !data?.length) fail(path, "modification");
-  revalidatePath(path);
-  redirect(path);
+/** Renomme une séance depuis le titre modifiable de son en-tête ; renvoie false si c'est refusé. */
+export async function setSessionTitle(spaceId: string, sessionId: string, title: string) {
+  const { supabase } = await requireViewer(`/cercles/${spaceId}/seances/${sessionId}`);
+  const clean = title.trim().slice(0, 120);
+  if (!clean) return false;
+  const { data, error } = await supabase.from("sessions").update({ title: clean }).eq("id", sessionId).select("id");
+  revalidatePath(`/cercles/${spaceId}`);
+  return !error && !!data?.length;
 }
 
 /** Crée un lien d'invitation ; appelée depuis la fenêtre « Inviter », qui reste ouverte. */

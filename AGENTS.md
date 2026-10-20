@@ -113,6 +113,8 @@ src/lib/auth.ts              getViewer() / requireViewer(next)
 src/lib/circles.ts           teintes, motifs, rythme, libellés des rôles (client et serveur)
 src/lib/circles-server.ts    loadCircles(), URL signées des couvertures, noms des membres
 src/components/circles/      carte, couverture (motifs SVG), avatars, fenêtres, carte du Coran
+src/components/session/      SessionView : page de séance (lecture, tableau, panneau Repères)
+src/lib/highlights.ts        les quatre surlignages et leur sens
 src/app/api/verset/          un verset depuis les données locales (aperçu dans la fenêtre du cercle)
 src/app/auth/callback/       échange du code contre une session
 src/app/auth/deconnexion/    ferme la session (POST), utilisé par le menu de l'avatar (UserMenu)
@@ -175,18 +177,26 @@ Branche `feat/fondations`, rien n'est encore poussé.
 
   Testé avec deux comptes : image envoyée puis supprimée, et règles du stockage vérifiées en SQL.
 - **Cercles et séances** (`/cercles`) : créer et renommer un cercle, liste des membres (le responsable change les rôles et retire des membres), liens d'invitation (rôle au choix, 14 jours, copier, supprimer), page `/rejoindre/<jeton>`. Séances : créer (titre, sourate), renommer, ouvrir ; une séance affiche pour l'instant le texte de sa sourate. **Testé de bout en bout avec deux comptes** et règles RLS vérifiées en SQL (un lecteur ne peut ni créer, ni renommer, ni inviter, ni changer son rôle ; un inconnu ne voit rien).
+- **Page de séance** (mise en page de la v2) :
+  - en-tête avec titre modifiable sur place (éditeurs) ;
+  - lecture à gauche, repliable (« Masquer la lecture » / « Afficher la lecture »), avec choix de la sourate (`?sourate=`) ;
+  - zone du tableau (pour l'instant un message qui l'annonce) ;
+  - panneau à droite « Repères de couleurs » (légende, versets surlignés, clic pour y aller) ;
+  - sur téléphone, onglets Lecture / Tableau.
+
+  Un éditeur sélectionne un verset : la rangée d'actions ne montre que **Surligner**, et les couleurs n'apparaissent qu'au clic. Les surlignages sont écrits dans `highlights` par le client navigateur (RLS) et **reçus en direct** par les autres membres (Supabase Realtime, `postgres_changes`). Testé : ajout, retrait, réception en direct, lecture seule.
+- **Règle suivie** : les actions « Ajouter au tableau », « Réflexion », « Commenter » et « Tafsir » de la v2 seront ajoutées à la rangée **quand leur fonction existera** (aucun bouton inactif).
 - Pas encore : supprimer un cercle ou une séance, quitter un cercle.
 - Le type-check, le lint et le build passent.
 
 **À faire, dans l'ordre conseillé**
 1. Créer le projet Supabase en ligne et le relier à Vercel (quand on voudra déployer).
-2. Mise en page de la v2 dans l'app : en-tête, lecture repliable, panneau à droite, actions sur un verset, surlignages.
-3. **Porter le tableau** de la v2 en React, avec persistance dans `board_elements`.
-4. **Temps réel** : présence (curseurs), diffusion des changements du tableau, reconnexion.
-5. Mot à mot wolof, suggestions et glossaire, sur `wbw_translations`.
-6. Discussion : commentaires, mentions, notifications dans l'app.
-7. Tafsir (As-Sa'di, Al-Muyassar : à importer localement comme le texte).
-8. PWA, puis tests (Vitest, Playwright, tests des règles RLS) et CI GitHub Actions.
+2. **Porter le tableau** de la v2 en React, avec persistance dans `board_elements`.
+3. **Temps réel** : présence (curseurs), diffusion des changements du tableau, reconnexion.
+4. Mot à mot wolof, suggestions et glossaire, sur `wbw_translations`.
+5. Discussion : commentaires, mentions, notifications dans l'app.
+6. Tafsir (As-Sa'di, Al-Muyassar : à importer localement comme le texte).
+7. PWA, puis tests (Vitest, Playwright, tests des règles RLS) et CI GitHub Actions.
 
 <!-- ## Le mémoire de master 2
 
