@@ -106,6 +106,21 @@
 
   --radius-control: 9px;
 
+  /* Curseur de présence qui se promène (aperçu de la page d'accueil). */
+  --animate-drift: drift 7s ease-in-out infinite;
+  @keyframes drift {
+    0%,
+    100% {
+      transform: translate(0, 0);
+    }
+    40% {
+      transform: translate(-26px, 18px);
+    }
+    70% {
+      transform: translate(10px, 30px);
+    }
+  }
+
   /* Tailles du texte coranique et des traductions. */
   --text-ar: 28px;
   --text-ar--line-height: 2.05;

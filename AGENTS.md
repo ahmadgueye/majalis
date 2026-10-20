@@ -33,7 +33,7 @@ Le but est une app **très simple et sans ambiguïté**, en réaction aux défau
 
 ## Référence visuelle : les prototypes
 
-`prototypes/majalis-v2.html` est **la référence d'UX à reproduire** dans l'app Next.js. C'est un fichier HTML autonome, à ouvrir dans un navigateur. `prototypes/majalis-v1.html` est l'ancienne version (trois colonnes), gardée pour comparer.
+`prototypes/majalis-v2.html` est **la référence d'UX à reproduire** dans l'app Next.js. C'est un fichier HTML autonome, à ouvrir dans un navigateur. `prototypes/majalis-v1.html` est l'ancienne version (trois colonnes), gardée pour comparer. `prototypes/landing-v1.html` est la maquette de la page d'accueil publique (publiée sur https://claude.ai/artifact/Rde9tE8osyrkJGhfKYdzpt), portée dans `src/app/page.tsx`.
 
 Les deux sont aussi publiés en ligne (pages privées du porteur sur claude.ai) :
 - v2 : https://claude.ai/artifact/Ho3AeDVMKsVHcUnf75czJe
@@ -102,7 +102,8 @@ src/app/lire/[surah]/        page Lecture, 114 pages générées en statique
 src/app/connexion/           formulaire de lien magique
 src/app/auth/callback/       échange du code contre une session
 supabase/migrations/         schéma SQL
-prototypes/                  prototypes HTML v1 et v2 (référence UX)
+prototypes/                  prototypes HTML v1, v2 et maquette de l'accueil (référence UX)
+src/components/landing/      aperçu de séance de la page d'accueil
 ```
 
 ### Données coraniques
@@ -134,7 +135,7 @@ Branche `feat/fondations`, rien n'est encore poussé.
 - Projet Next.js, polices et jetons de design.
 - Coran local : 114 sourates, 6236 versets, traduction Hamidullah.
 - Page Lecture statique, choix de la sourate, sourate précédente et suivante.
-- Page d'accueil minimale.
+- Page d'accueil publique (landing) : accroche, aperçu d'une séance, fonctions, verset 47:24, trois étapes. Les versets viennent des données locales, jamais recopiés à la main.
 - Supabase local dans Docker, migration appliquée, clients typés.
 - Connexion par lien e-mail **testée de bout en bout en local** (e-mail reçu dans Mailpit, session ouverte, profil créé par le déclencheur).
 - Schéma SQL avec RLS.
@@ -152,7 +153,7 @@ Branche `feat/fondations`, rien n'est encore poussé.
 8. Tafsir (As-Sa'di, Al-Muyassar : à importer localement comme le texte).
 9. PWA, puis tests (Vitest, Playwright, tests des règles RLS) et CI GitHub Actions.
 
-## Le mémoire de master 2
+<!-- ## Le mémoire de master 2
 
 L'école **autorise l'usage de l'IA**. Il faut le déclarer dans le mémoire et le porteur doit pouvoir défendre chaque choix technique.
 
@@ -166,4 +167,4 @@ L'école **autorise l'usage de l'IA**. Il faut le déclarer dans le mémoire et 
   - concevoir la synchronisation du tableau **derrière une interface interchangeable**, pour pouvoir brancher et comparer les deux stratégies ;
   - **instrumenter** latence et conflits ;
   - garder une trace des décisions d'architecture (des ADR dans `docs/` seraient utiles).
-- **Complexité estimée** : 7 sur 10. Le cœur technique est le temps réel. Le hors-ligne (PWA) est une perspective, pas un objectif de la v1.
+- **Complexité estimée** : 7 sur 10. Le cœur technique est le temps réel. Le hors-ligne (PWA) est une perspective, pas un objectif de la v1. -->
