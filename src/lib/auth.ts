@@ -21,8 +21,3 @@ export async function requireViewer(next: string): Promise<Viewer> {
   return viewer;
 }
 
-export const ROLE_LABELS: Record<string, string> = {
-  owner: "Responsable",
-  editor: "Peut modifier",
-  viewer: "Lecture seule",
-};

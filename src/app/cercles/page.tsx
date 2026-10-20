@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { Users } from "lucide-react";
 import { AppHeader } from "@/components/AppHeader";
 import { ErrorNotice } from "@/components/Notice";
-import { ROLE_LABELS, requireViewer } from "@/lib/auth";
+import { CircleCard } from "@/components/circles/CircleCard";
+import { NewCircleSheet } from "@/components/circles/CircleSheets";
+import { requireViewer } from "@/lib/auth";
+import { loadCircles } from "@/lib/circles-server";
 import { errorMessage } from "@/lib/messages";
 import { createSpace } from "./actions";
 
@@ -13,78 +16,43 @@ type Props = { searchParams: Promise<{ erreur?: string }> };
 export default async function CirclesPage({ searchParams }: Props) {
   const viewer = await requireViewer("/cercles");
   const { erreur } = await searchParams;
-
-  const { data } = await viewer.supabase
-    .from("space_members")
-    .select("role, spaces (id, name, created_at, sessions (count), space_members (count))")
-    .eq("user_id", viewer.user.id);
-  const circles = (data ?? [])
-    .filter((m) => m.spaces)
-    .map((m) => ({
-      role: m.role,
-      ...m.spaces!,
-      sessions: m.spaces!.sessions[0]?.count ?? 0,
-      members: m.spaces!.space_members[0]?.count ?? 0,
-    }))
-    .sort((a, b) => b.created_at.localeCompare(a.created_at));
+  const circles = await loadCircles(viewer);
+  const me = { id: viewer.user.id, name: viewer.name || viewer.email };
 
   return (
     <>
       <AppHeader viewer={viewer} crumbs={[{ label: "Mes cercles" }]} />
-      <main className="px-safe mx-auto grid max-w-[720px] gap-8 pt-10 pb-16">
-        <div className="grid gap-2">
-          <h1 className="font-read text-[34px] leading-tight font-medium">Mes cercles</h1>
-          <p className="text-muted">
-            Un cercle réunit les personnes qui étudient ensemble. Chaque cercle a ses séances, son tableau et son mot
-            à mot wolof.
-          </p>
+      <main className="px-safe mx-auto grid max-w-[1080px] gap-6 pb-16">
+        <div className="flex flex-wrap items-end justify-between gap-4 pt-9">
+          <div className="grid gap-1.5">
+            <h1 className="font-read text-[36px] leading-[1.1] font-medium">Mes cercles</h1>
+            <p className="max-w-[52ch] text-muted">
+              Les cercles où tu étudies. Chacun a ses séances, son tableau et son mot à mot wolof.
+            </p>
+          </div>
+          {circles.length > 0 && <NewCircleSheet me={me} action={createSpace} />}
         </div>
 
         <ErrorNotice message={errorMessage(erreur)} />
 
-        <form action={createSpace} className="grid gap-2 rounded-2xl border border-line bg-surface p-4 shadow-card">
-          <label htmlFor="name" className="text-[13px] font-semibold">
-            Nouveau cercle
-          </label>
-          <div className="flex flex-wrap gap-2">
-            <input
-              id="name"
-              name="name"
-              required
-              maxLength={80}
-              placeholder="Par exemple : Cercle du mardi"
-              className="min-w-0 flex-1 basis-56 rounded-control border border-line bg-surface px-3 py-[9px] text-ink placeholder:text-faint"
-            />
-            <button type="submit" className="btn primary">
-              Créer le cercle
-            </button>
-          </div>
-        </form>
-
         {circles.length === 0 ? (
-          <p className="rounded-2xl border border-dashed border-line px-5 py-8 text-center text-muted">
-            Tu ne fais partie d&apos;aucun cercle pour l&apos;instant. Crée le tien ci-dessus, ou ouvre le lien
-            d&apos;invitation qu&apos;on t&apos;a envoyé.
-          </p>
+          <div className="grid justify-items-center gap-3 rounded-2xl border border-line bg-surface px-6 py-12 text-center">
+            <span className="tone-teal grid size-14 place-items-center rounded-full bg-(--tone-soft) text-(--tone)">
+              <Users aria-hidden className="size-6" />
+            </span>
+            <h2 className="font-read text-[24px] font-medium">Ton premier cercle</h2>
+            <p className="max-w-[46ch] text-muted">
+              Crée un cercle pour ta famille, une classe ou des amis, puis invite-les avec un lien. Si on t&apos;a
+              envoyé une invitation, ouvre simplement le lien.
+            </p>
+            <NewCircleSheet me={me} action={createSpace} />
+          </div>
         ) : (
-          <ul className="grid gap-2.5">
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,320px),1fr))] gap-[18px]">
             {circles.map((c) => (
-              <li key={c.id}>
-                <Link
-                  href={`/cercles/${c.id}`}
-                  className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-2xl border border-line bg-surface px-5 py-4 hover:bg-surface-2"
-                >
-                  <span className="min-w-0 basis-full truncate text-[17px] font-semibold sm:basis-0 sm:flex-1">{c.name}</span>
-                  <span className="text-[13px] text-muted">
-                    {c.sessions} séance{c.sessions > 1 ? "s" : ""} · {c.members} membre{c.members > 1 ? "s" : ""}
-                  </span>
-                  <span className="rounded-full bg-accent-soft px-2.5 py-0.5 text-[12px] font-semibold text-accent">
-                    {ROLE_LABELS[c.role]}
-                  </span>
-                </Link>
-              </li>
+              <CircleCard key={c.id} circle={c} href={`/cercles/${c.id}`} />
             ))}
-          </ul>
+          </div>
         )}
       </main>
     </>

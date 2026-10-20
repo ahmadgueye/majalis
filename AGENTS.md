@@ -33,7 +33,7 @@ Le but est une app **très simple et sans ambiguïté**, en réaction aux défau
 
 ## Référence visuelle : les prototypes
 
-`prototypes/majalis-v2.html` est **la référence d'UX à reproduire** dans l'app Next.js. C'est un fichier HTML autonome, à ouvrir dans un navigateur. `prototypes/majalis-v1.html` est l'ancienne version (trois colonnes), gardée pour comparer. `prototypes/landing-v1.html` est la maquette de la page d'accueil publique (publiée sur https://claude.ai/artifact/Rde9tE8osyrkJGhfKYdzpt), portée dans `src/app/page.tsx`.
+`prototypes/majalis-v2.html` est **la référence d'UX à reproduire** dans l'app Next.js. C'est un fichier HTML autonome, à ouvrir dans un navigateur. `prototypes/majalis-v1.html` est l'ancienne version (trois colonnes), gardée pour comparer. `prototypes/cercles-v1.html` est la maquette des cercles (https://claude.ai/artifact/BRv6ZaVeGgwYosnixYzxib), portée dans `src/app/cercles/`. `prototypes/landing-v1.html` est la maquette de la page d'accueil publique (publiée sur https://claude.ai/artifact/Rde9tE8osyrkJGhfKYdzpt), portée dans `src/app/page.tsx`.
 
 Les deux sont aussi publiés en ligne (pages privées du porteur sur claude.ai) :
 - v2 : https://claude.ai/artifact/Ho3AeDVMKsVHcUnf75czJe
@@ -79,7 +79,14 @@ La v2 contient déjà, en JavaScript pur, la logique à porter :
 - **Règle** : jamais de couleur ni de police en dur dans un composant, ni de `style={{ … }}` pour de la mise en forme. Pour changer une couleur ou une police, on modifie la variable dans `:root` (et sa version sombre), rien d'autre.
 - Le mode sombre passe par les variables : pas besoin de classes `dark:`. Il suit `prefers-color-scheme`, sauf si la personne a choisi avec le bouton de thème (`ThemeToggle`, choix dans `localStorage` sous `majalis-theme`, posé en `data-theme` sur `<html>` par un script du layout avant l'affichage). Les valeurs sombres existent donc **deux fois** dans `globals.css` (bloc `@media` et bloc `[data-theme="dark"]`) : les garder identiques.
 - Le code qui dessine (SVG du tableau, trait main levée) lit les variables CSS (`var(--accent)`), jamais des valeurs copiées.
-- `.btn` et `.btn.primary` sont des classes de composant (`@layer components`) ; `px-safe` donne les marges latérales qui respectent les encoches.
+- Classes de composant (`@layer components`) :
+  - `.btn`, `.btn.primary`, `.btn.ghost` ;
+  - `.field-input` pour les champs ;
+  - `dialog.sheet` pour les fenêtres (composant `Sheet`) ;
+  - `.tone-<teinte>`, qui pose `--tone` et `--tone-soft` pour la teinte d'un cercle (utilisées en `bg-(--tone)`, `text-(--tone)`).
+
+  `px-safe` donne les marges latérales qui respectent les encoches.
+- **Icônes** : `lucide-react` (licence ISC), toujours à côté d'un libellé. Une icône seule doit avoir `aria-label` et `title`.
 
 ## Stack et architecture
 
@@ -102,7 +109,11 @@ src/app/lire/[surah]/        page Lecture, 114 pages générées en statique
 src/app/connexion/           formulaire de lien magique (?suite= : page où revenir après connexion)
 src/app/cercles/             Mes cercles, page d'un cercle, séances ; actions.ts = server actions
 src/app/rejoindre/[token]/   ouverture d'un lien d'invitation
-src/lib/auth.ts              getViewer() / requireViewer(next), libellés des rôles
+src/lib/auth.ts              getViewer() / requireViewer(next)
+src/lib/circles.ts           teintes, motifs, rythme, libellés des rôles (client et serveur)
+src/lib/circles-server.ts    loadCircles(), URL signées des couvertures, noms des membres
+src/components/circles/      carte, couverture (motifs SVG), avatars, fenêtres, carte du Coran
+src/app/api/verset/          un verset depuis les données locales (aperçu dans la fenêtre du cercle)
 src/app/auth/callback/       échange du code contre une session
 src/app/auth/deconnexion/    ferme la session (POST), utilisé par le menu de l'avatar (UserMenu)
 supabase/migrations/         schéma SQL
@@ -132,6 +143,11 @@ src/components/landing/      aperçu de séance de la page d'accueil
   - `invite_info(token)` : ce qu'une personne invitée voit avant de rejoindre (nom du cercle, qui invite, rôle) ;
   - une politique qui laisse le propriétaire changer le rôle des autres membres.
 - **Rôles affichés** : owner = « Responsable », editor = « Peut modifier », viewer = « Lecture seule ».
+- `20261021000000_personnalisation.sql` ajoute aux cercles :
+  - la personnalisation : `tone`, `cover_pattern`, `cover_path`, `intention`, `verse_ref`, `meet_day` (1 = lundi), `meet_time` ;
+  - la réflexion épinglée : `pinned_note`, `pinned_by`, `pinned_at`, modifiée par `pin_note()` et réservée aux éditeurs ;
+  - `is_owner()` ;
+  - le **bucket privé `couvertures`** (`<space_id>/<fichier>`, 2 Mo au plus) : lecture par les membres via des URL signées, écriture par le responsable. Le navigateur réduit l'image (1600 px, WebP) avant la server action (`bodySizeLimit` à 3 Mo dans `next.config.ts`). L'ancienne image est supprimée quand on la remplace ou qu'on revient à un motif.
 - Un non-membre qui ouvre l'adresse d'un cercle obtient la page introuvable (`not-found.tsx`) : RLS ne lui renvoie rien.
 - **En local**, la migration s'applique au démarrage (`npm run db:start`) et a été vérifiée : 10 tables avec RLS, publication Realtime sur les 5 tables prévues. Types générés dans `src/lib/supabase/database.types.ts` (`npm run db:types` après chaque migration), utilisés par les clients.
 - **Pas encore de projet Supabase en ligne** : à créer plus tard (`supabase link` puis `db push`, Redirect URLs, variables Vercel).
@@ -151,6 +167,13 @@ Branche `feat/fondations`, rien n'est encore poussé.
 - Schéma SQL avec RLS.
 - Style migré vers Tailwind v4, branché sur les jetons.
 - Bouton de thème clair/sombre (accueil et Lecture). Une fois connecté, l'en-tête de l'accueil montre un avatar (initiales) qui ouvre le nom, l'e-mail et « Se déconnecter ».
+- **Cercles personnalisés** (maquette `cercles-v1`) :
+  - cartes avec couverture (motif ou image), pastille, intention, rythme, dernière séance et avatars ;
+  - fenêtre de création et de paramètres avec aperçu en direct : couverture, six teintes, verset du cercle, jour et heure ;
+  - page d'un cercle : bandeau, verset, prochaine rencontre, séances en tuiles, réflexion épinglée, **carte du Coran** (sourates des séances), membres ;
+  - fenêtres « Inviter » et « Nouvelle séance ».
+
+  Testé avec deux comptes : image envoyée puis supprimée, et règles du stockage vérifiées en SQL.
 - **Cercles et séances** (`/cercles`) : créer et renommer un cercle, liste des membres (le responsable change les rôles et retire des membres), liens d'invitation (rôle au choix, 14 jours, copier, supprimer), page `/rejoindre/<jeton>`. Séances : créer (titre, sourate), renommer, ouvrir ; une séance affiche pour l'instant le texte de sa sourate. **Testé de bout en bout avec deux comptes** et règles RLS vérifiées en SQL (un lecteur ne peut ni créer, ni renommer, ni inviter, ni changer son rôle ; un inconnu ne voit rien).
 - Pas encore : supprimer un cercle ou une séance, quitter un cercle.
 - Le type-check, le lint et le build passent.

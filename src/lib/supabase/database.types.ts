@@ -209,14 +209,14 @@ isOneToOne: false
                   ]
                 },"spaces": {
                   Row: {
-                    "created_at": string,"id": string,"name": string,"owner_id": string
+                    "cover_path": string | null,"cover_pattern": string,"created_at": string,"id": string,"intention": string,"meet_day": number | null,"meet_time": string | null,"name": string,"owner_id": string,"pinned_at": string | null,"pinned_by": string | null,"pinned_note": string | null,"tone": string,"verse_ref": string | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"id"?: string,"name": string,"owner_id"?: string
+                    "cover_path"?: string | null,"cover_pattern"?: string,"created_at"?: string,"id"?: string,"intention"?: string,"meet_day"?: number | null,"meet_time"?: string | null,"name": string,"owner_id"?: string,"pinned_at"?: string | null,"pinned_by"?: string | null,"pinned_note"?: string | null,"tone"?: string,"verse_ref"?: string | null
                   }
                   Update: {
-                    "created_at"?: string,"id"?: string,"name"?: string,"owner_id"?: string
+                    "cover_path"?: string | null,"cover_pattern"?: string,"created_at"?: string,"id"?: string,"intention"?: string,"meet_day"?: number | null,"meet_time"?: string | null,"name"?: string,"owner_id"?: string,"pinned_at"?: string | null,"pinned_by"?: string | null,"pinned_note"?: string | null,"tone"?: string,"verse_ref"?: string | null
                   }
                   Relationships: [
                     
@@ -263,6 +263,12 @@ isOneToOne: false
                            },
 "is_member":
 { Args: { "sid": string }; Returns: boolean
+                           },
+"is_owner":
+{ Args: { "sid": string }; Returns: boolean
+                           },
+"pin_note":
+{ Args: { "note": string,"sid": string }; Returns: undefined
                            }
           }
           Enums: {

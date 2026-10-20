@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
 import { ErrorNotice } from "@/components/Notice";
-import { ROLE_LABELS, requireViewer } from "@/lib/auth";
+import { requireViewer } from "@/lib/auth";
+import { ROLE_LABELS } from "@/lib/circles";
 import { errorMessage } from "@/lib/messages";
 import { joinSpace } from "../../cercles/actions";
 

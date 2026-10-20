@@ -209,6 +209,32 @@
 }
 
 @layer components {
+  /* Teinte d'un cercle : bg-(--tone), text-(--tone), bg-(--tone-soft)… */
+  .tone-teal {
+    --tone: var(--accent);
+    --tone-soft: var(--accent-soft);
+  }
+  .tone-sage {
+    --tone: var(--c-sage);
+    --tone-soft: var(--hl-theme);
+  }
+  .tone-sky {
+    --tone: var(--c-sky);
+    --tone-soft: var(--hl-question);
+  }
+  .tone-sand {
+    --tone: var(--c-sand);
+    --tone-soft: var(--hl-reflect);
+  }
+  .tone-rose {
+    --tone: var(--c-rose);
+    --tone-soft: var(--hl-link);
+  }
+  .tone-plum {
+    --tone: var(--k);
+    --tone-soft: color-mix(in srgb, var(--k) 16%, var(--surface));
+  }
+
   .btn {
     display: inline-flex;
     align-items: center;
@@ -234,5 +260,62 @@
   .btn:disabled {
     opacity: 0.6;
     cursor: default;
+  }
+  .btn.ghost {
+    border-color: transparent;
+    background: transparent;
+    color: var(--muted);
+  }
+  .btn.ghost:hover {
+    background: var(--surface-2);
+    color: var(--ink);
+  }
+  .btn svg {
+    width: 16px;
+    height: 16px;
+    flex: none;
+  }
+
+  /* Fenêtres (<dialog>) : CircleDialog et les fenêtres d'action. */
+  dialog.sheet {
+    width: min(860px, calc(100% - 24px));
+    max-height: calc(100% - 24px);
+    margin: auto;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    background: var(--surface);
+    color: var(--ink);
+    box-shadow: var(--shadow-lg);
+  }
+  dialog.sheet.small {
+    width: min(480px, calc(100% - 24px));
+  }
+  dialog.sheet::backdrop {
+    background: color-mix(in srgb, var(--ink) 40%, transparent);
+    backdrop-filter: blur(2px);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    dialog.sheet[open] {
+      animation: sheet-in 0.22s ease-out;
+    }
+  }
+  @keyframes sheet-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px) scale(0.98);
+    }
+  }
+
+  .field-input {
+    width: 100%;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink);
+    border-radius: var(--radius-control);
+    padding: 9px 12px;
+  }
+  .field-input::placeholder {
+    color: var(--faint);
   }
 }
