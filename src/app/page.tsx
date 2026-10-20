@@ -60,7 +60,7 @@ export default async function Home() {
   const [v28, v29] = [sad!.verses[27], sad!.verses[28]];
   const v24 = muhammad!.verses[23];
 
-  const start = user ? { href: "/lire/1", label: "Ouvrir la lecture" } : { href: "/connexion", label: "Créer mon cercle" };
+  const start = user ? { href: "/cercles", label: "Mes cercles" } : { href: "/connexion", label: "Créer mon cercle" };
 
   return (
     <>

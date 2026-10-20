@@ -1,10 +1,17 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
+import { getViewer } from "@/lib/auth";
 import { LoginForm } from "./LoginForm";
 
 export const metadata: Metadata = { title: "Connexion" };
 
-export default async function LoginPage({ searchParams }: { searchParams: Promise<{ erreur?: string }> }) {
-  const { erreur } = await searchParams;
+type Props = { searchParams: Promise<{ erreur?: string; suite?: string }> };
+
+export default async function LoginPage({ searchParams }: Props) {
+  const { erreur, suite } = await searchParams;
+  // Page où revenir après la connexion (lien d'invitation, page protégée) ; chemin interne seulement.
+  const next = suite && suite.startsWith("/") && !suite.startsWith("//") ? suite : "/cercles";
+  if (await getViewer()) redirect(next);
   return (
     <main className="grid min-h-full place-items-center p-6">
       <div className="grid w-full max-w-[400px] gap-3 rounded-2xl border border-line bg-surface p-6 shadow-card">
@@ -17,7 +24,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
             Ce lien a expiré ou a déjà servi. Demande-en un nouveau.
           </p>
         )}
-        <LoginForm />
+        <LoginForm next={next} />
       </div>
     </main>
   );

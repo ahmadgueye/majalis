@@ -253,6 +253,14 @@ isOneToOne: false
 "can_edit":
 { Args: { "sid": string }; Returns: boolean
                            },
+"create_space":
+{ Args: { "space_name": string }; Returns: string
+                           },
+"invite_info":
+{ Args: { "invite_token": string }; Returns: {
+              "already_member": boolean,"expires_at": string,"invited_by": string,"role": string,"space_id": string,"space_name": string
+            }[]
+                           },
 "is_member":
 { Args: { "sid": string }; Returns: boolean
                            }

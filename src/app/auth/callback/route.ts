@@ -6,7 +6,7 @@ export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
   const next = searchParams.get("next");
-  const safeNext = next && next.startsWith("/") && !next.startsWith("//") ? next : "/";
+  const safeNext = next && next.startsWith("/") && !next.startsWith("//") ? next : "/cercles";
 
   const supabase = await createClient();
   if (code && supabase) {

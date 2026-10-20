@@ -99,7 +99,10 @@ scripts/fetch-translation.mts récupère une traduction (npm run quran:fetch -- 
 src/data/quran/              surahs.json (index) + s/<n>.json (un fichier par sourate)
 src/lib/quran.ts             accès aux données (server-only), séparation de la basmala, words()
 src/app/lire/[surah]/        page Lecture, 114 pages générées en statique
-src/app/connexion/           formulaire de lien magique
+src/app/connexion/           formulaire de lien magique (?suite= : page où revenir après connexion)
+src/app/cercles/             Mes cercles, page d'un cercle, séances ; actions.ts = server actions
+src/app/rejoindre/[token]/   ouverture d'un lien d'invitation
+src/lib/auth.ts              getViewer() / requireViewer(next), libellés des rôles
 src/app/auth/callback/       échange du code contre une session
 src/app/auth/deconnexion/    ferme la session (POST), utilisé par le menu de l'avatar (UserMenu)
 supabase/migrations/         schéma SQL
@@ -114,7 +117,7 @@ src/components/landing/      aperçu de séance de la page d'accueil
 - **Traduction française** : Muhammad Hamidullah (Quran.com, ressource 31), appels de note `<sup>` retirés. Usage personnel et non commercial : vérifier la licence avant une diffusion publique. Autre option française sur Quran.com : Rashid Maash (ressource 779). tanzil.net ne répondait pas pour les traductions.
 - **À venir** : découpage en mots et racines via le **Quranic Arabic Corpus**, pour suggérer aussi les traductions des mots de même racine.
 
-### Schéma Supabase (`supabase/migrations/20261019000000_init.sql`)
+### Schéma Supabase (`supabase/migrations/`)
 
 - `profiles` : créé automatiquement à l'inscription par un déclencheur.
 - `spaces`, `space_members` (rôles owner, editor, viewer), `space_invites` (jeton, expire après 14 jours), fonction `accept_invite(token)`.
@@ -124,6 +127,12 @@ src/components/landing/      aperçu de séance de la page d'accueil
 - `comments` (ancre en `jsonb`, `parent_id` pour les réponses, `resolved`) et `mentions`.
 - `wbw_translations` : mot à mot wolof **partagé à l'échelle de l'espace**. Colonnes : `words jsonb` (index du premier mot vers traduction), `joins smallint[]`, `free`.
 - RLS via `is_member(space_id)` et `can_edit(space_id)` (security definer). Publication Realtime active sur le tableau, les surlignages, les commentaires, les mentions et le mot à mot.
+- `20261020000000_espaces.sql` ajoute :
+  - `create_space(name)` : un insert direct suivi d'un select échoue, car le membre propriétaire est ajouté par un déclencheur après l'insert ;
+  - `invite_info(token)` : ce qu'une personne invitée voit avant de rejoindre (nom du cercle, qui invite, rôle) ;
+  - une politique qui laisse le propriétaire changer le rôle des autres membres.
+- **Rôles affichés** : owner = « Responsable », editor = « Peut modifier », viewer = « Lecture seule ».
+- Un non-membre qui ouvre l'adresse d'un cercle obtient la page introuvable (`not-found.tsx`) : RLS ne lui renvoie rien.
 - **En local**, la migration s'applique au démarrage (`npm run db:start`) et a été vérifiée : 10 tables avec RLS, publication Realtime sur les 5 tables prévues. Types générés dans `src/lib/supabase/database.types.ts` (`npm run db:types` après chaque migration), utilisés par les clients.
 - **Pas encore de projet Supabase en ligne** : à créer plus tard (`supabase link` puis `db push`, Redirect URLs, variables Vercel).
 - **Port** : l'app tourne sur **http://localhost:3100** (`npm run dev`), car le 3000 est pris par un autre projet du porteur. `site_url` et les redirections de `supabase/config.toml` suivent ce port.
@@ -142,18 +151,19 @@ Branche `feat/fondations`, rien n'est encore poussé.
 - Schéma SQL avec RLS.
 - Style migré vers Tailwind v4, branché sur les jetons.
 - Bouton de thème clair/sombre (accueil et Lecture). Une fois connecté, l'en-tête de l'accueil montre un avatar (initiales) qui ouvre le nom, l'e-mail et « Se déconnecter ».
+- **Cercles et séances** (`/cercles`) : créer et renommer un cercle, liste des membres (le responsable change les rôles et retire des membres), liens d'invitation (rôle au choix, 14 jours, copier, supprimer), page `/rejoindre/<jeton>`. Séances : créer (titre, sourate), renommer, ouvrir ; une séance affiche pour l'instant le texte de sa sourate. **Testé de bout en bout avec deux comptes** et règles RLS vérifiées en SQL (un lecteur ne peut ni créer, ni renommer, ni inviter, ni changer son rôle ; un inconnu ne voit rien).
+- Pas encore : supprimer un cercle ou une séance, quitter un cercle.
 - Le type-check, le lint et le build passent.
 
 **À faire, dans l'ordre conseillé**
 1. Créer le projet Supabase en ligne et le relier à Vercel (quand on voudra déployer).
-2. Espaces : créer, lister, inviter par lien, rejoindre. Séances : créer, renommer, changer.
-3. Mise en page de la v2 dans l'app : en-tête, lecture repliable, panneau à droite, actions sur un verset, surlignages.
-4. **Porter le tableau** de la v2 en React, avec persistance dans `board_elements`.
-5. **Temps réel** : présence (curseurs), diffusion des changements du tableau, reconnexion.
-6. Mot à mot wolof, suggestions et glossaire, sur `wbw_translations`.
-7. Discussion : commentaires, mentions, notifications dans l'app.
-8. Tafsir (As-Sa'di, Al-Muyassar : à importer localement comme le texte).
-9. PWA, puis tests (Vitest, Playwright, tests des règles RLS) et CI GitHub Actions.
+2. Mise en page de la v2 dans l'app : en-tête, lecture repliable, panneau à droite, actions sur un verset, surlignages.
+3. **Porter le tableau** de la v2 en React, avec persistance dans `board_elements`.
+4. **Temps réel** : présence (curseurs), diffusion des changements du tableau, reconnexion.
+5. Mot à mot wolof, suggestions et glossaire, sur `wbw_translations`.
+6. Discussion : commentaires, mentions, notifications dans l'app.
+7. Tafsir (As-Sa'di, Al-Muyassar : à importer localement comme le texte).
+8. PWA, puis tests (Vitest, Playwright, tests des règles RLS) et CI GitHub Actions.
 
 <!-- ## Le mémoire de master 2
 
