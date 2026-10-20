@@ -6,25 +6,14 @@ export const metadata: Metadata = { title: "Connexion" };
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ erreur?: string }> }) {
   const { erreur } = await searchParams;
   return (
-    <main style={{ minHeight: "100%", display: "grid", placeItems: "center", padding: 24 }}>
-      <div
-        style={{
-          width: "min(400px, 100%)",
-          background: "var(--surface)",
-          border: "1px solid var(--line)",
-          borderRadius: 16,
-          padding: 24,
-          boxShadow: "var(--shadow)",
-          display: "grid",
-          gap: 12,
-        }}
-      >
-        <h1 style={{ margin: 0, fontSize: 20 }}>Se connecter à Majalis</h1>
-        <p style={{ margin: 0, color: "var(--muted)", lineHeight: 1.5 }}>
+    <main className="grid min-h-full place-items-center p-6">
+      <div className="grid w-full max-w-[400px] gap-3 rounded-2xl border border-line bg-surface p-6 shadow-card">
+        <h1 className="text-xl font-bold">Se connecter à Majalis</h1>
+        <p className="leading-normal text-muted">
           Entre ton adresse e-mail : tu recevras un lien pour te connecter, sans mot de passe.
         </p>
         {erreur === "lien" && (
-          <p role="alert" style={{ margin: 0, color: "var(--c-rose)" }}>
+          <p role="alert" className="text-c-rose">
             Ce lien a expiré ou a déjà servi. Demande-en un nouveau.
           </p>
         )}

@@ -6,31 +6,17 @@ export default async function Home() {
   const user = supabase ? (await supabase.auth.getUser()).data.user : null;
 
   return (
-    <main style={{ minHeight: "100%", display: "grid", placeItems: "center", padding: 24 }}>
-      <div style={{ textAlign: "center", display: "grid", gap: 14, justifyItems: "center", maxWidth: 420 }}>
+    <main className="grid min-h-full place-items-center p-6">
+      <div className="grid max-w-[420px] justify-items-center gap-3.5 text-center">
         <span
           aria-hidden
-          style={{
-            width: 56,
-            height: 56,
-            borderRadius: 14,
-            background: "var(--accent)",
-            color: "var(--accent-ink)",
-            display: "grid",
-            placeItems: "center",
-            fontFamily: '"Geeza Pro", "Noto Naskh Arabic", var(--f-ui)',
-            fontWeight: 700,
-            fontSize: 32,
-            lineHeight: 1,
-          }}
+          className="grid size-14 place-items-center rounded-[14px] bg-accent font-mark text-[32px] leading-none font-bold text-accent-ink"
         >
           م
         </span>
-        <h1 style={{ margin: 0, fontSize: 28 }}>Majalis</h1>
-        <p style={{ margin: 0, color: "var(--muted)", lineHeight: 1.5 }}>
-          Lire, méditer et annoter le Coran ensemble.
-        </p>
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" }}>
+        <h1 className="text-[28px] font-bold">Majalis</h1>
+        <p className="leading-normal text-muted">Lire, méditer et annoter le Coran ensemble.</p>
+        <div className="flex flex-wrap justify-center gap-2">
           <Link className="btn primary" href="/lire/1">
             Ouvrir la lecture
           </Link>
@@ -45,7 +31,7 @@ export default async function Home() {
           )}
         </div>
         {!supabase && (
-          <p style={{ margin: 0, fontSize: 12, color: "var(--faint)" }}>
+          <p className="text-xs text-faint">
             Supabase n&apos;est pas encore configuré : renseigne <code>.env.local</code> pour activer la connexion.
           </p>
         )}

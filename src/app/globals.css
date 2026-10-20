@@ -1,4 +1,7 @@
-/* Jetons de design de Majalis (repris du prototype v2). Les polices viennent de next/font (layout.tsx). */
+@import "tailwindcss";
+
+/* Jetons de design de Majalis (repris du prototype v2). Les polices viennent de next/font (layout.tsx).
+   Ces variables sont la seule source des couleurs et des polices : Tailwind les expose plus bas (@theme). */
 :root {
   --bg: #f4f6f4;
   --surface: #ffffff;
@@ -60,67 +63,116 @@
   }
 }
 
-* {
-  box-sizing: border-box;
+/* La palette et les polices par défaut de Tailwind sont retirées : seules les classes tirées des jetons
+   existent (bg-surface, text-accent, font-ar…), ce qui empêche les couleurs en dur. */
+@theme {
+  --color-*: initial;
+  --font-*: initial;
 }
 
-html,
-body {
-  height: 100%;
-  margin: 0;
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-grid: var(--grid);
+  --color-hl-theme: var(--hl-theme);
+  --color-hl-question: var(--hl-question);
+  --color-hl-reflect: var(--hl-reflect);
+  --color-hl-link: var(--hl-link);
+  --color-c-ink: var(--c-ink);
+  --color-c-sand: var(--c-sand);
+  --color-c-sage: var(--c-sage);
+  --color-c-rose: var(--c-rose);
+  --color-c-sky: var(--c-sky);
+  --color-me: var(--me);
+  --color-k: var(--k);
+
+  --font-ui: var(--f-ui);
+  --font-read: var(--f-read);
+  --font-hand: var(--f-hand);
+  --font-ar: var(--f-ar);
+  /* Logo « م » : police arabe système (Amiri Quran ne l'affichait pas dans la pastille). */
+  --font-mark: "Geeza Pro", "Noto Naskh Arabic", var(--f-ui);
+
+  --shadow-card: var(--shadow);
+  --shadow-pop: var(--shadow-lg);
+
+  --radius-control: 9px;
+
+  /* Tailles du texte coranique et des traductions. */
+  --text-ar: 28px;
+  --text-ar--line-height: 2.05;
+  --text-tr: 17.5px;
+  --text-tr--line-height: 1.5;
 }
 
-body {
-  background: var(--bg);
-  color: var(--ink);
-  font-family: var(--f-ui);
-  font-size: 14px;
-  -webkit-font-smoothing: antialiased;
+/* Marges latérales de 16px qui respectent les encoches (iPhone en paysage). */
+@utility px-safe {
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+@layer base {
+  html,
+  body {
+    height: 100%;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--f-ui);
+    font-size: 14px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  [hidden] {
+    display: none !important;
+  }
 }
 
-button {
-  font: inherit;
-  color: inherit;
-  cursor: pointer;
-}
-
-:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-[hidden] {
-  display: none !important;
-}
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  border: 1px solid var(--line);
-  background: var(--surface);
-  border-radius: 9px;
-  padding: 7px 14px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-.btn:hover {
-  background: var(--surface-2);
-}
-.btn.primary {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--accent-ink);
-}
-.btn.primary:hover {
-  filter: brightness(1.07);
-}
-.btn:disabled {
-  opacity: 0.6;
-  cursor: default;
+@layer components {
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    border-radius: var(--radius-control);
+    padding: 7px 14px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .btn:hover {
+    background: var(--surface-2);
+  }
+  .btn.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-ink);
+  }
+  .btn.primary:hover {
+    filter: brightness(1.07);
+  }
+  .btn:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
 }

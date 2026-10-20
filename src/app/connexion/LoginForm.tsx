@@ -11,7 +11,7 @@ export function LoginForm() {
 
   if (!supabase) {
     return (
-      <p style={{ margin: 0, color: "var(--muted)" }}>
+      <p className="text-muted">
         La connexion n&apos;est pas encore configurée : renseigne <code>.env.local</code> (voir le README).
       </p>
     );
@@ -32,15 +32,15 @@ export function LoginForm() {
 
   if (state === "sent") {
     return (
-      <p role="status" style={{ margin: 0, lineHeight: 1.5 }}>
+      <p role="status" className="leading-normal">
         Lien envoyé à <b>{email}</b>. Ouvre ta boîte mail et clique sur le lien pour te connecter.
       </p>
     );
   }
 
   return (
-    <form onSubmit={onSubmit} style={{ display: "grid", gap: 10 }}>
-      <label htmlFor="email" style={{ fontWeight: 600, fontSize: 13 }}>
+    <form onSubmit={onSubmit} className="grid gap-2.5">
+      <label htmlFor="email" className="text-[13px] font-semibold">
         Adresse e-mail
       </label>
       <input
@@ -50,21 +50,14 @@ export function LoginForm() {
         autoComplete="email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        style={{
-          font: "inherit",
-          color: "var(--ink)",
-          background: "var(--surface)",
-          border: "1px solid var(--line)",
-          borderRadius: 9,
-          padding: "9px 12px",
-        }}
+        className="rounded-control border border-line bg-surface px-3 py-[9px] text-ink"
       />
       {state === "error" && (
-        <p role="alert" style={{ margin: 0, color: "var(--c-rose)" }}>
+        <p role="alert" className="text-c-rose">
           L&apos;envoi a échoué : {message}
         </p>
       )}
-      <button className="btn primary" type="submit" disabled={state === "sending"} style={{ justifyContent: "center" }}>
+      <button className="btn primary justify-center" type="submit" disabled={state === "sending"}>
         {state === "sending" ? "Envoi…" : "Recevoir le lien de connexion"}
       </button>
     </form>

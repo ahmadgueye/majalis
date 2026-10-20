@@ -71,6 +71,16 @@ La v2 contient déjà, en JavaScript pur, la logique à porter :
   - Caveat pour le style main levée.
 - Le logo « م » utilise une police arabe système, car Amiri Quran ne l'affichait pas dans la pastille.
 
+### Style : Tailwind v4 et jetons
+
+- **Tailwind v4** (via `@tailwindcss/postcss`, sans fichier `tailwind.config`). Tout se règle dans `src/app/globals.css`.
+- **Les jetons restent la seule source** des couleurs et des polices. `@theme inline` les expose en classes : `bg-surface`, `text-muted`, `border-line`, `bg-hl-question`, `text-c-rose`, `font-ar`, `font-read`, `font-hand`, `font-mark`, `shadow-card`, `rounded-control`, `text-ar`, `text-tr`.
+- La palette et les polices par défaut de Tailwind sont **retirées** (`--color-*: initial`) : `bg-red-500` n'existe pas, c'est voulu.
+- **Règle** : jamais de couleur ni de police en dur dans un composant, ni de `style={{ … }}` pour de la mise en forme. Pour changer une couleur ou une police, on modifie la variable dans `:root` (et sa version sombre), rien d'autre.
+- Le mode sombre suit `prefers-color-scheme` par les variables : pas besoin de classes `dark:`.
+- Le code qui dessine (SVG du tableau, trait main levée) lit les variables CSS (`var(--accent)`), jamais des valeurs copiées.
+- `.btn` et `.btn.primary` sont des classes de composant (`@layer components`) ; `px-safe` donne les marges latérales qui respectent les encoches.
+
 ## Stack et architecture
 
 - **Next.js 15** (App Router, TypeScript, Turbopack), `src/` comme racine, alias `@/*`.
@@ -128,6 +138,7 @@ Branche `feat/fondations`, rien n'est encore poussé.
 - Supabase local dans Docker, migration appliquée, clients typés.
 - Connexion par lien e-mail **testée de bout en bout en local** (e-mail reçu dans Mailpit, session ouverte, profil créé par le déclencheur).
 - Schéma SQL avec RLS.
+- Style migré vers Tailwind v4, branché sur les jetons.
 - Le type-check, le lint et le build passent.
 
 **À faire, dans l'ordre conseillé**
