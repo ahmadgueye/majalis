@@ -1,0 +1,1059 @@
+<title>Majalis</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Caveat:wght@500;600;700&family=Figtree:wght@400;500;600;700&family=EB+Garamond:wght@400;500;600&display=swap">
+<style>
+/* Layout v2 : deux zones (lecture | tableau). Discussion, tafsir, glossaire et repères s'ouvrent dans un panneau à droite, à la demande. */
+:root{
+  --bg:#f4f6f4; --surface:#ffffff; --surface-2:#eef2ef; --line:#e1e7e3; --ink:#15221e; --muted:#5b6a64; --faint:#8a9792;
+  --accent:#0d5c52; --accent-ink:#ffffff; --accent-soft:#dcebe6; --grid:#d5ddd8;
+  --hl-theme:#e2eedb; --hl-question:#dde9f5; --hl-reflect:#f6ebcd; --hl-link:#f5e0e5;
+  --c-ink:#1f2d29; --c-sand:#b07a14; --c-sage:#4a7a45; --c-rose:#ad4259; --c-sky:#2c6b9b;
+  --note-ink:#ffffff; --note-sand:#fbf0d2; --note-sage:#e3efdb; --note-rose:#f8e1e6; --note-sky:#dde9f5;
+  --me:#0d5c52; --k:#8f45ab; --shadow:0 1px 2px rgba(20,40,34,.05),0 6px 20px rgba(20,40,34,.08); --shadow-lg:0 8px 40px rgba(20,40,34,.16);
+  --f-ui:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-read:"EB Garamond",Garamond,Georgia,"Times New Roman",serif;
+  --f-hand:"Caveat","Segoe Print","Bradley Hand",cursive;
+  --f-ar:"Amiri Quran","Amiri","Geeza Pro","Traditional Arabic",serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f1513; --surface:#161e1b; --surface-2:#1c2622; --line:#26312d; --ink:#e5ece9; --muted:#97a6a0; --faint:#6f7d78;
+  --accent:#62bcac; --accent-ink:#06201b; --accent-soft:#1c3a34; --grid:#24302b;
+  --hl-theme:#24341e; --hl-question:#1b2e3e; --hl-reflect:#36301c; --hl-link:#382027;
+  --c-ink:#e5ece9; --c-sand:#e1b45b; --c-sage:#8cc485; --c-rose:#e68aa0; --c-sky:#80b6e2;
+  --note-ink:#1c2622; --note-sand:#373020; --note-sage:#233322; --note-rose:#382229; --note-sky:#1e2e3c;
+  --me:#62bcac; --k:#c88be2; --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35); --shadow-lg:0 10px 44px rgba(0,0,0,.5); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1513; --surface:#161e1b; --surface-2:#1c2622; --line:#26312d; --ink:#e5ece9; --muted:#97a6a0; --faint:#6f7d78;
+  --accent:#62bcac; --accent-ink:#06201b; --accent-soft:#1c3a34; --grid:#24302b;
+  --hl-theme:#24341e; --hl-question:#1b2e3e; --hl-reflect:#36301c; --hl-link:#382027;
+  --c-ink:#e5ece9; --c-sand:#e1b45b; --c-sage:#8cc485; --c-rose:#e68aa0; --c-sky:#80b6e2;
+  --note-ink:#1c2622; --note-sand:#373020; --note-sage:#233322; --note-rose:#382229; --note-sky:#1e2e3c;
+  --me:#62bcac; --k:#c88be2; --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35); --shadow-lg:0 10px 44px rgba(0,0,0,.5); color-scheme:dark}
+
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-ui);font-size:14px;overflow:hidden}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+svg{flex:none}
+.app{height:100%;display:grid;grid-template-rows:auto 1fr}
+
+/* En-tête : séance à gauche, présence + discussion + inviter à droite */
+header{display:flex;align-items:center;gap:12px;height:52px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));background:var(--surface);border-bottom:1px solid var(--line);min-width:0}
+.mark{width:28px;height:28px;border-radius:8px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-family:var(--f-ar);font-size:18px;line-height:1;flex:none}
+.sess{display:flex;align-items:center;min-width:0;flex:1;gap:2px}
+#sessTitle{min-width:40px;max-width:440px;width:100%;border:1px solid transparent;background:transparent;border-radius:8px;padding:6px 8px;font:600 15px var(--f-ui);color:var(--ink);text-overflow:ellipsis}
+#sessTitle:hover{background:var(--surface-2)} #sessTitle:focus{border-color:var(--accent);background:var(--surface);outline:none}
+.icon-btn{border:0;background:transparent;border-radius:8px;width:32px;height:32px;display:grid;place-items:center;color:var(--muted);flex:none}
+.icon-btn:hover{background:var(--surface-2);color:var(--ink)}
+.icon-btn svg{width:18px;height:18px}
+.hright{display:flex;align-items:center;gap:8px}
+.avatars{display:flex;align-items:center;margin-right:4px}
+.av{width:28px;height:28px;border-radius:50%;background:var(--c,var(--accent));color:#fff;display:grid;place-items:center;font-weight:700;font-size:12px;border:2px solid var(--surface);position:relative;flex:none}
+.avatars .av+.av{margin-left:-7px}
+.av .on{position:absolute;right:-2px;bottom:-2px;width:9px;height:9px;border-radius:50%;background:#3fae62;border:2px solid var(--surface)}
+.btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:6px 12px;font-weight:600;white-space:nowrap;position:relative}
+.btn:hover{background:var(--surface-2)}
+.btn svg{width:16px;height:16px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn[aria-pressed="true"]{background:var(--accent-soft);border-color:transparent}
+.btn .n{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.btn .dot{position:absolute;top:-3px;right:-3px;min-width:16px;height:16px;border-radius:8px;background:var(--c-rose);color:#fff;font-size:10.5px;font-weight:700;display:grid;place-items:center;padding:0 4px;border:2px solid var(--surface)}
+
+/* Zones */
+main{display:grid;grid-template-columns:var(--rw,400px) 1fr;min-height:0;position:relative;overflow:hidden}
+body.wbw main{--rw:560px}
+body.no-reader main{--rw:0px}
+body.no-reader #reader{display:none}
+#reader{grid-column:1;grid-row:1} #stage{grid-column:2;grid-row:1}
+#reader{background:var(--surface);border-right:1px solid var(--line);min-height:0;display:flex;flex-direction:column;min-width:0}
+.rhead{display:flex;align-items:center;gap:6px;padding:10px 12px 8px 16px}
+select{font:600 14px var(--f-ui);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:7px 8px;flex:1;min-width:0}
+.modebar{display:flex;align-items:center;gap:10px;padding:0 16px 10px;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.segm{display:flex;background:var(--surface-2);border-radius:9px;padding:3px}
+.segm button{border:0;background:transparent;border-radius:7px;padding:5px 14px;font-weight:600;color:var(--muted)}
+.segm button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.chars{display:flex;gap:3px;margin-left:auto;align-items:center}
+.chars small{font-size:11px;color:var(--muted);margin-right:3px}
+.chars button{border:1px solid var(--line);background:var(--surface);border-radius:6px;width:27px;height:27px;font-weight:600;font-size:14px;padding:0}
+.chars button:hover{background:var(--surface-2)}
+.scroll{overflow:auto;min-height:0;flex:1}
+
+/* Lecture */
+.surah-head{text-align:center;padding:22px 16px 6px}
+.surah-head .ar{font-family:var(--f-ar);font-size:30px;line-height:1.6}
+.surah-head .sub{color:var(--muted);font-size:12.5px}
+.bism{font-family:var(--f-ar);text-align:center;font-size:21px;padding:2px 0 10px;color:var(--muted)}
+.verses{list-style:none;margin:0;padding:4px 8px 20px;display:flex;flex-direction:column;gap:2px}
+.verse{border-radius:12px;padding:12px 14px;cursor:pointer;position:relative;border:1px solid transparent}
+.verse:hover{background:var(--surface-2)}
+.verse.hl-theme{background:var(--hl-theme)} .verse.hl-question{background:var(--hl-question)} .verse.hl-reflect{background:var(--hl-reflect)} .verse.hl-link{background:var(--hl-link)}
+.verse.is-sel{border-color:var(--accent)}
+.vtop{display:flex;align-items:center;gap:8px;min-height:20px}
+.vnum{font-size:11.5px;font-weight:600;color:var(--faint);font-variant-numeric:tabular-nums}
+.vtop .grow{flex:1}
+.mini{font-size:11px;font-weight:600;color:var(--muted);display:inline-flex;align-items:center;gap:3px}
+.mini svg{width:12px;height:12px}
+.kpres{display:none;width:20px;height:20px;border-radius:50%;background:var(--k);color:#fff;font-size:10px;font-weight:700;place-items:center}
+.verse.k-here .kpres{display:grid}
+.verse .ar{font-family:var(--f-ar);font-size:25px;line-height:2;margin:4px 0 2px;text-align:right}
+.verse .fr{font-family:var(--f-read);font-size:16.5px;line-height:1.5;margin:0}
+.vbar{display:flex;flex-wrap:wrap;gap:4px;margin-top:10px;cursor:default}
+.vbar button{border:0;background:var(--surface);border-radius:8px;padding:6px 10px;font-size:12.5px;font-weight:600;display:inline-flex;align-items:center;gap:6px;box-shadow:inset 0 0 0 1px var(--line)}
+.vbar button:hover{background:var(--surface-2)}
+.vbar button svg{width:14px;height:14px;color:var(--muted)}
+.vbar button[aria-expanded="true"]{box-shadow:inset 0 0 0 1.5px var(--ink)}
+.hlpick{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;cursor:default}
+.hlpick button{border:0;border-radius:999px;padding:5px 11px;font-size:12.5px;font-weight:600;display:inline-flex;align-items:center;gap:6px;background:var(--surface);box-shadow:inset 0 0 0 1px var(--line)}
+.hlpick button::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--hlc,transparent)}
+.hlpick button[aria-pressed="true"]{box-shadow:inset 0 0 0 1.5px var(--ink)}
+.hlpick .none::before{display:none}
+.t-theme{--hlc:var(--c-sage)} .t-question{--hlc:var(--c-sky)} .t-reflect{--hlc:var(--c-sand)} .t-link{--hlc:var(--c-rose)}
+.reader-foot{font-size:12px;color:var(--faint);padding:4px 22px 24px;line-height:1.5}
+.wol{margin-top:8px;padding-top:8px;border-top:1px dashed color-mix(in srgb,var(--ink) 16%,transparent)}
+.wolh{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.wol .lab{font-size:10.5px;font-weight:700;letter-spacing:.08em;color:var(--accent);text-transform:uppercase}
+.wol .free{font:16.5px/1.5 var(--f-read);margin:2px 0 0}
+.card .wol .free{font-size:15.5px}
+.ilin{display:flex;flex-wrap:wrap;direction:rtl;gap:4px 12px;margin-top:6px}
+.ilin>span{display:flex;flex-direction:column;align-items:center;direction:ltr}
+.ilin .a{font-family:var(--f-ar);font-size:16px;line-height:1.5;color:var(--muted)}
+.ilin .w{font-size:12.5px;font-weight:600;color:var(--accent)}
+.ilin .w.e{color:var(--faint);font-weight:400}
+.link{border:0;background:transparent;color:var(--muted);font-size:12px;font-weight:600;padding:3px 6px;border-radius:6px}
+.link:hover{background:var(--surface-2);color:var(--ink)}
+
+/* Mot à mot */
+.prog{height:5px;border-radius:3px;background:var(--surface-2);margin:10px auto 4px;max-width:220px;overflow:hidden}
+.prog i{display:block;height:100%;background:var(--accent);border-radius:3px;transition:width .3s}
+.whelp{font-size:12px;color:var(--muted);line-height:1.5;margin:6px 16px 10px;text-align:center}
+.whelp b{color:var(--ink);font-weight:600}
+.wverse{border-radius:12px;padding:10px 12px 12px;border:1px solid var(--line);background:var(--surface)}
+.wverse:focus-within{border-color:var(--accent)}
+.wprog{font-size:11px;font-weight:700;color:var(--faint);font-variant-numeric:tabular-nums}
+.wprog.full{color:var(--c-sage)}
+.wtiles{display:flex;flex-wrap:wrap;direction:rtl;gap:10px 6px;margin:8px 0}
+.wt{direction:ltr;display:flex;flex-direction:column;align-items:stretch;gap:3px;min-width:86px;max-width:200px;text-align:center}
+.wt.merged .wa{background:var(--accent-soft)}
+.wa{border:0;background:transparent;border-radius:8px;padding:0 8px;font-family:var(--f-ar);font-size:23px;line-height:1.75;position:relative;color:var(--ink)}
+.wa:hover{background:var(--surface-2)}
+.wdot{position:absolute;top:4px;left:3px;width:7px;height:7px;border-radius:50%;background:var(--c-rose)}
+.wi{font:500 14px var(--f-ui);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:5px 6px;text-align:center;width:100%;min-width:0}
+.wi:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.wt.done .wi{background:var(--accent-soft);border-color:transparent}
+.wi.sug::placeholder{color:var(--accent);opacity:.8;font-style:italic}
+.wh{font-size:11px;color:var(--muted);line-height:1.3}
+.ws{font-size:10.5px;color:var(--accent);font-weight:600}
+.wfree{font:16px var(--f-read);color:var(--ink);background:transparent;border:0;border-top:1px dashed var(--line);padding:8px 2px 2px;width:100%}
+.wfree:focus{outline:none;border-top-color:var(--accent)}
+.wfr{font:14px/1.45 var(--f-read);color:var(--muted);margin:6px 0 0}
+.chip{border:0;background:var(--surface);border-radius:999px;padding:4px 10px;font-size:12px;font-weight:600;box-shadow:inset 0 0 0 1px var(--line)}
+.chip:hover{background:var(--surface-2)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);box-shadow:none}
+
+/* Tableau */
+#stage{position:relative;overflow:hidden;touch-action:none;background-color:var(--bg);background-image:radial-gradient(var(--grid) 1.1px,transparent 1.2px);min-width:0;user-select:none;-webkit-user-select:none}
+#stage.t-select{cursor:default} #stage.t-hand,#stage.panning{cursor:grab} #stage.panning{cursor:grabbing}
+#stage.t-pen,#stage.t-rect,#stage.t-arrow{cursor:crosshair} #stage.t-note,#stage.t-text{cursor:copy}
+#stage.drop{box-shadow:inset 0 0 0 3px var(--accent)}
+#world{position:absolute;left:0;top:0;transform-origin:0 0}
+.svgl{position:absolute;left:0;top:0;width:1px;height:1px;overflow:visible;pointer-events:none}
+.hit{stroke:transparent;fill:none;pointer-events:stroke;cursor:move}
+#stage.t-arrow .hit{cursor:crosshair}
+.handle{fill:var(--surface);stroke:var(--accent);pointer-events:all;cursor:nwse-resize}
+.selbox{fill:none;stroke:var(--accent);stroke-width:1.5;stroke-dasharray:5 4}
+.hovbox{fill:none;stroke:var(--accent);stroke-width:2.5}
+#els{position:absolute;left:0;top:0}
+.el{position:absolute;cursor:move}
+#stage.t-arrow .el{cursor:crosshair}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:10px 14px 12px;border-top:4px solid var(--line)}
+.card.hl-theme{border-top-color:var(--c-sage)} .card.hl-question{border-top-color:var(--c-sky)} .card.hl-reflect{border-top-color:var(--c-sand)} .card.hl-link{border-top-color:var(--c-rose)}
+.card .vh{display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;color:var(--muted);letter-spacing:.03em}
+.card .vh .grow{flex:1}
+.card .ar{font-family:var(--f-ar);font-size:24px;line-height:1.9;text-align:right;margin:4px 0}
+.card .fr{font-family:var(--f-read);font-size:15.5px;line-height:1.45}
+.cbadge{display:inline-flex;align-items:center;gap:3px;background:var(--accent-soft);color:var(--ink);border-radius:999px;padding:1px 7px;font-size:11px}
+.cbadge svg{width:11px;height:11px}
+.wcard .wrow{display:flex;flex-wrap:wrap;gap:6px 12px;margin:8px 0 4px}
+.wc{display:flex;flex-direction:column;align-items:center}
+.wcard .wc .ar{font-size:22px;margin:0;line-height:1.6;text-align:center}
+.wo{font-size:13px;font-weight:600;color:var(--accent);font-family:var(--f-ui)}
+.wo.empty{color:var(--faint);font-weight:400}
+.wfree-c{border-top:1px dashed var(--line);padding-top:6px;margin-top:4px}
+.note{border-radius:4px 4px 14px 4px;box-shadow:var(--shadow);padding:12px 14px 10px;font-family:var(--f-read);font-size:16.5px;line-height:1.45;border:1px solid color-mix(in srgb,var(--ink) 8%,transparent)}
+.n-ink{background:var(--note-ink)} .n-sand{background:var(--note-sand)} .n-sage{background:var(--note-sage)} .n-rose{background:var(--note-rose)} .n-sky{background:var(--note-sky)}
+.editable{white-space:pre-wrap;word-break:break-word;outline:none;min-height:1.5em}
+.editable[contenteditable="true"]{cursor:text;user-select:text;-webkit-user-select:text}
+.editable:empty::before{content:attr(data-ph);color:var(--muted)}
+.nby{display:flex;align-items:center;gap:6px;margin-top:8px;font-family:var(--f-ui);font-size:11.5px;color:var(--muted);font-weight:600}
+.nby i{width:8px;height:8px;border-radius:50%;background:var(--c)}
+.text{font-weight:700;line-height:1.25;padding:2px 4px}
+.text.s-lg{font-size:28px;letter-spacing:-.01em} .text.s-md{font-size:18px}
+.note.hand{font-family:var(--f-hand);font-size:22px;line-height:1.2;font-weight:500}
+.note.hand .nby{margin-top:6px}
+.text.hand{font-family:var(--f-hand);font-weight:700;letter-spacing:0}
+.text.hand.s-lg{font-size:38px} .text.hand.s-md{font-size:26px}
+.bendh{fill:var(--surface);stroke:var(--accent);pointer-events:all;cursor:grab}
+.palette .psep{width:1px;align-self:stretch;background:var(--line);margin:0 4px}
+.segm.sm{padding:2px} .segm.sm button{padding:3px 10px;font-size:12px}
+.tc-ink{color:var(--c-ink)} .tc-sand{color:var(--c-sand)} .tc-sage{color:var(--c-sage)} .tc-rose{color:var(--c-rose)} .tc-sky{color:var(--c-sky)}
+
+/* Contrôles flottants du tableau : outils en bas au centre, le reste dans les coins */
+.dock{position:absolute;left:50%;bottom:calc(14px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;z-index:6;max-width:calc(100% - 24px)}
+.toolbar{display:flex;align-items:stretch;gap:2px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:4px;box-shadow:var(--shadow);overflow-x:auto;max-width:100%}
+.tool{display:flex;flex-direction:column;align-items:center;gap:1px;border:0;background:transparent;border-radius:10px;padding:6px 8px 4px;min-width:52px;font-size:10.5px;font-weight:600;color:var(--muted)}
+.tool svg{width:19px;height:19px;color:var(--ink)}
+.tool:hover{background:var(--surface-2)}
+.tool[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.tool[aria-pressed="true"] svg{color:var(--accent-ink)}
+.tsep{width:1px;background:var(--line);margin:6px 3px}
+.palette{display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:5px 10px;box-shadow:var(--shadow)}
+.palette small{font-size:11px;color:var(--muted);font-weight:600;margin-right:2px}
+.dotbtn{width:20px;height:20px;border-radius:50%;border:2px solid var(--surface);background:var(--dc);box-shadow:0 0 0 1px var(--line);padding:0}
+.dotbtn[aria-pressed="true"]{box-shadow:0 0 0 2px var(--ink)}
+.toolhint{background:var(--ink);color:var(--bg);border-radius:10px;padding:7px 12px;font-size:12.5px;line-height:1.45;max-width:440px;text-align:center;box-shadow:var(--shadow);animation:tin .2s ease}
+.toolhint b{font-weight:700}
+.corner{position:absolute;display:flex;gap:2px;background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:3px;box-shadow:var(--shadow);z-index:5}
+.corner button{border:0;background:transparent;border-radius:8px;padding:5px 8px;font-weight:600;font-size:12.5px;display:flex;align-items:center;gap:5px;font-variant-numeric:tabular-nums;color:var(--ink)}
+.corner button:hover:not(:disabled){background:var(--surface-2)} .corner button:disabled{opacity:.35;cursor:default}
+.corner svg{width:16px;height:16px}
+.c-zoom{right:14px;top:14px}
+.csep{width:1px;background:var(--line);margin:4px 3px}
+.c-open{left:14px;top:14px}
+.c-open button{white-space:nowrap;padding:6px 10px}
+#seltools{position:absolute;z-index:7;display:flex;flex-wrap:wrap;justify-content:center;max-width:calc(100% - 16px);gap:2px;background:var(--ink);color:var(--bg);border-radius:10px;padding:3px;box-shadow:var(--shadow);transform:translate(-50%,-100%)}
+#seltools button{border:0;background:transparent;color:inherit;border-radius:7px;padding:6px 10px;font-size:12.5px;font-weight:600;white-space:nowrap}
+#seltools button:hover{background:color-mix(in srgb,var(--bg) 18%,transparent)}
+#seltools button.danger{color:var(--c-rose)}
+.empty-board{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;text-align:center;color:var(--muted);padding:24px}
+.empty-board b{display:block;color:var(--ink);font-size:16px;margin-bottom:4px}
+#kcursor{position:absolute;left:0;top:0;pointer-events:none;transition:transform 1.6s cubic-bezier(.4,0,.2,1);z-index:3}
+#kcursor .inner{transform:scale(var(--iz,1));transform-origin:0 0;display:flex;align-items:flex-start}
+#kcursor svg{width:20px;height:20px;color:var(--k)}
+#kcursor span{background:var(--k);color:#fff;font-size:12px;font-weight:600;padding:2px 8px;border-radius:6px;margin:14px 0 0 -4px}
+
+/* Panneau à la demande */
+#drawer{position:absolute;top:0;right:0;bottom:0;width:min(400px,100%);background:var(--surface);border-left:1px solid var(--line);box-shadow:var(--shadow-lg);z-index:20;display:flex;flex-direction:column;transform:translateX(104%);transition:transform .22s ease,visibility .22s;visibility:hidden}
+body.drawer-open #drawer{transform:none;visibility:visible}
+.dhead{display:flex;align-items:center;gap:8px;padding:12px 10px 10px 18px;border-bottom:1px solid var(--line)}
+.dhead h2{margin:0;font-size:16px;flex:1}
+.seg{display:flex;gap:4px;padding:12px 14px 4px;flex-wrap:wrap}
+.threads{display:flex;flex-direction:column;gap:10px;padding:8px 14px 16px}
+.thread{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--surface)}
+.thread.resolved{opacity:.7}
+.thread.flash{animation:flash 1.2s ease}
+@keyframes flash{0%{box-shadow:0 0 0 3px var(--accent)}100%{box-shadow:0 0 0 0 transparent}}
+.anchor-chip{border:0;background:var(--surface-2);border-radius:6px;padding:3px 8px;font-size:11.5px;font-weight:600;color:var(--muted);margin-bottom:8px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
+.anchor-chip:hover{color:var(--ink)}
+.msg{display:flex;gap:8px;margin-top:6px}
+.msg .av{width:24px;height:24px;font-size:11px;border:0}
+.msg .body{min-width:0;flex:1}
+.mh{display:flex;gap:6px;align-items:baseline;font-size:12.5px}
+.mh time{color:var(--muted);font-size:11.5px}
+.msg p{margin:2px 0 0;line-height:1.5;word-break:break-word}
+.reply{margin-left:32px}
+.mention{color:var(--accent);font-weight:600;background:var(--accent-soft);border-radius:4px;padding:0 3px}
+.tactions{display:flex;gap:4px;margin-top:8px;flex-wrap:wrap}
+.replybox{display:flex;gap:6px;margin-top:8px}
+textarea{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 10px;resize:none;width:100%;line-height:1.45}
+textarea:focus{outline:none;border-color:var(--accent)}
+.composer{border-top:1px solid var(--line);padding:10px 14px calc(12px + env(safe-area-inset-bottom,0px));position:relative;display:flex;flex-direction:column;gap:6px;background:var(--surface)}
+.composer .crow{display:flex;align-items:center;gap:8px}
+.composer .crow small{flex:1;color:var(--muted);font-size:11.5px}
+.ctx{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);min-width:0}
+.ctx b{color:var(--ink);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ctx button{border:0;background:var(--surface-2);border-radius:6px;padding:1px 7px;font-size:12px}
+.mpop{position:absolute;left:14px;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);padding:4px;min-width:180px;z-index:10}
+.mpop button{display:flex;align-items:center;gap:8px;width:100%;border:0;background:transparent;padding:6px 8px;border-radius:7px;text-align:left}
+.mpop button:hover,.mpop button.act{background:var(--surface-2)}
+.mpop .av{width:22px;height:22px;font-size:10px;border:0}
+.empty{color:var(--muted);text-align:center;padding:28px 18px;line-height:1.5}
+.pad{padding:14px 18px;display:flex;flex-direction:column;gap:12px}
+.tafsir-v .ar{font-family:var(--f-ar);font-size:24px;line-height:1.9;text-align:right}
+.tafsir-v .fr{font-family:var(--f-read);font-size:16px;line-height:1.5}
+.sources{display:flex;gap:6px;flex-wrap:wrap}
+.placeholder{border:1px dashed var(--line);border-radius:12px;padding:14px;color:var(--muted);line-height:1.55;font-family:var(--f-read)}
+.placeholder b{color:var(--ink);font-family:var(--f-ui)}
+.legend{display:flex;flex-direction:column;gap:16px}
+.legend h4{margin:0;display:flex;align-items:center;gap:8px;font-size:13.5px}
+.legend h4 .sq{width:12px;height:12px;border-radius:50%;background:var(--hlc)}
+.legend p{margin:2px 0 6px;color:var(--muted);font-size:12.5px}
+.refs{display:inline-flex;gap:4px;flex-wrap:wrap}
+.refs button{border:0;box-shadow:inset 0 0 0 1px var(--line);background:var(--surface);border-radius:6px;padding:2px 8px;font-size:12px;font-weight:600;font-variant-numeric:tabular-nums}
+.refs button:hover{background:var(--surface-2)}
+.muted{color:var(--muted)}
+.btnrow{display:flex;gap:6px;flex-wrap:wrap}
+.glist{display:flex;flex-direction:column}
+.gl{display:flex;gap:14px;align-items:flex-start;border-bottom:1px solid var(--line);padding:8px 2px}
+.gar{font-family:var(--f-ar);font-size:22px;line-height:1.7;min-width:84px;text-align:right}
+.gtr{flex:1;display:flex;flex-direction:column;gap:4px;min-width:0;padding-top:7px}
+.gtr .refs button{font-size:11px;padding:0 6px}
+#glossQ{font:inherit;color:var(--ink);background:var(--surface-2);border:1px solid transparent;border-radius:9px;padding:8px 12px;width:100%}
+#glossQ:focus{outline:none;border-color:var(--accent);background:var(--surface)}
+
+/* Menus, fenêtres, notifications */
+.menu{position:fixed;z-index:70;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow-lg);padding:6px;min-width:250px;max-width:calc(100vw - 32px)}
+.menu .mi{display:flex;flex-direction:column;align-items:flex-start;width:100%;border:0;background:transparent;padding:8px 10px;border-radius:8px;text-align:left}
+.menu .mi:hover{background:var(--surface-2)}
+.menu .mi.cur{background:var(--accent-soft)}
+.menu .mi small{color:var(--muted)}
+.menu .mi.row{flex-direction:row;align-items:center;gap:10px}
+.menu .mi .ck{width:18px;height:18px;border-radius:5px;box-shadow:inset 0 0 0 1.5px var(--line);display:grid;place-items:center;flex:none}
+.menu .mi .ck.on{background:var(--accent);box-shadow:none;color:var(--accent-ink)}
+.menu .mi .ck svg{width:12px;height:12px}
+.menu hr{border:0;border-top:1px solid var(--line);margin:6px 0}
+.menu .mh2{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:6px 10px 2px}
+.scrim{position:fixed;inset:0;background:color-mix(in srgb,#000 35%,transparent);display:grid;place-items:center;z-index:80;padding:16px}
+.modal{background:var(--surface);border-radius:16px;box-shadow:var(--shadow-lg);width:min(480px,100%);max-height:calc(100% - 32px);overflow:auto;padding:22px}
+.modal h3{margin:0 0 4px;font-size:18px}
+.modal .sub{color:var(--muted);margin:0 0 16px;line-height:1.5}
+.member{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
+.member .grow{flex:1} .member small{color:var(--muted)}
+.copyrow{display:flex;gap:6px;margin-top:14px}
+.copyrow input{flex:1;min-width:0;font:inherit;color:var(--ink);background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:7px 10px}
+.note-demo{margin-top:14px;font-size:12.5px;color:var(--muted);background:var(--surface-2);border-radius:10px;padding:10px 12px;line-height:1.5}
+.keys{display:grid;grid-template-columns:auto 1fr;gap:8px 14px;align-items:center}
+kbd.k{font:600 12px var(--f-ui);border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;padding:2px 7px;background:var(--surface-2);white-space:nowrap}
+.mfoot{display:flex;justify-content:flex-end;margin-top:18px}
+#toasts{position:fixed;left:50%;top:64px;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;z-index:90;align-items:center;pointer-events:none}
+.toast{background:var(--ink);color:var(--bg);border-radius:10px;padding:9px 14px;font-weight:500;box-shadow:var(--shadow);display:flex;gap:12px;align-items:center;pointer-events:auto;animation:tin .2s ease}
+.toast button{border:0;background:transparent;color:var(--c-sand);font-weight:700;padding:0}
+@keyframes tin{from{opacity:0;transform:translateY(-6px)}}
+.wolf{font-family:var(--f-read);font-size:16.5px;line-height:1.5;margin:4px 0 0;color:var(--accent)}
+.card .wolf{font-size:15.5px;line-height:1.45}
+.wolf .wedit{opacity:0;font-family:var(--f-ui);vertical-align:1px}
+.verse:hover .wolf .wedit,.wolf .wedit:focus-visible{opacity:1}
+@media (hover:none){.wolf .wedit{opacity:1}}
+.mobnav{display:none}
+.mob{display:none}
+
+@media (max-width:1100px){ main{--rw:340px} body.wbw main{--rw:460px} body.no-reader main{--rw:0px} }
+@media (max-width:900px){
+  main{grid-template-columns:1fr}
+  #reader,#stage{grid-area:1/1;display:none}
+  body[data-pane="reader"] #reader{display:flex} body[data-pane="board"] #stage{display:block}
+  .app{grid-template-rows:auto 1fr auto}
+  .mobnav{display:flex;border-top:1px solid var(--line);background:var(--surface);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  .mobnav button{flex:1;border:0;background:transparent;padding:11px 4px;font-weight:600;color:var(--muted);border-top:2px solid transparent}
+  .mobnav button[aria-selected="true"]{color:var(--ink);border-top-color:var(--accent)}
+  .desk{display:none!important} .mob{display:inline}
+  #drawer{position:fixed;top:0;width:100%;border-left:0;z-index:60;padding-top:env(safe-area-inset-top,0px)}
+  .tool{min-width:42px;padding:7px 7px} .tool .tl{display:none}
+  .c-zoom .fit-l{display:none}
+  .c-open{display:none}
+  .avatars{display:none}
+  header{gap:8px}
+}
+@media (prefers-reduced-motion:reduce){#kcursor{transition:none}.toast,.toolhint{animation:none}.thread.flash{animation:none}#drawer{transition:none}}
+</style>
+
+<div class="app">
+  <header>
+    <span class="mark" title="Majalis" aria-label="Majalis">م</span>
+    <div class="sess">
+      <input id="sessTitle" aria-label="Titre de la séance" maxlength="80">
+      <button class="icon-btn" id="sessBtn" aria-haspopup="true" title="Changer de séance" aria-label="Changer de séance"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
+    </div>
+    <div class="hright">
+      <div class="avatars" title="Toi et Khadija sont dans l'espace">
+        <span class="av" style="--c:var(--me)">T<span class="on"></span></span>
+        <span class="av" style="--c:var(--k)">K<span class="on"></span></span>
+      </div>
+      <button class="btn" id="discBtn" aria-pressed="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 01-11.6 7.1L4 20l1-4.6A8 8 0 1121 12z"/></svg>
+        <span class="desk">Discussion</span><span class="n" id="discN"></span><span class="dot" id="discDot" hidden></span>
+      </button>
+      <button class="btn primary" id="shareBtn">Inviter</button>
+      <button class="icon-btn" id="moreBtn" aria-label="Plus d'options" title="Plus d'options"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></button>
+    </div>
+  </header>
+
+  <main>
+    <section id="reader" aria-label="Lecture">
+      <div class="rhead">
+        <select id="surahSel" aria-label="Sourate"></select>
+        <button class="icon-btn" id="readerMore" aria-label="Options de lecture" title="Options de lecture"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></button>
+        <button class="icon-btn desk" id="readerHide" aria-label="Masquer la lecture" title="Masquer la lecture"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 17l-5-5 5-5M18 17l-5-5 5-5"/></svg></button>
+      </div>
+      <div class="modebar" id="modebar"></div>
+      <div class="scroll" id="readerScroll"><div id="readerBody"></div></div>
+    </section>
+
+    <section id="stage" class="t-select" aria-label="Tableau">
+      <div id="world">
+        <svg class="svgl" id="svgBack"></svg>
+        <div id="els"></div>
+        <svg class="svgl" id="svgFront"></svg>
+        <div id="kcursor"><div class="inner"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 2l16 9-7 2-3 7z"/></svg><span>Khadija</span></div></div>
+      </div>
+      <div class="empty-board" id="emptyBoard" hidden><div><b>Le tableau est vide</b>Glisse un verset depuis la lecture, ou choisis un outil en bas.</div></div>
+      <div class="corner c-open" id="openReader" hidden><button id="openReaderBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 17l5-5-5-5M6 17l5-5-5-5"/></svg>Afficher la lecture</button></div>
+      <div class="corner c-zoom">
+        <button id="undoBtn" title="Annuler (Ctrl+Z)" aria-label="Annuler"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 010 10h-3"/></svg></button>
+        <button id="redoBtn" title="Rétablir (Ctrl+Maj+Z)" aria-label="Rétablir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14l5-5-5-5"/><path d="M20 9H9a5 5 0 000 10h3"/></svg></button>
+        <span class="csep"></span>
+        <button id="zOut" title="Dézoomer" aria-label="Dézoomer">−</button>
+        <button id="zPct" title="Revenir à 100 %">100 %</button>
+        <button id="zIn" title="Zoomer" aria-label="Zoomer">+</button>
+        <button id="zFit" title="Tout afficher"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><span class="fit-l">Tout voir</span></button>
+      </div>
+      <div class="dock">
+        <div class="toolhint" id="toolhint" hidden></div>
+        <div class="palette" id="palette" hidden></div>
+        <div class="toolbar" id="toolbar" role="toolbar" aria-label="Outils du tableau"></div>
+      </div>
+      <div id="seltools" hidden></div>
+    </section>
+
+    <aside id="drawer" aria-label="Panneau">
+      <div class="dhead"><h2 id="dTitle">Discussion</h2><button class="icon-btn" id="dClose" aria-label="Fermer le panneau" title="Fermer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+      <div class="scroll" id="sideBody"></div>
+      <form class="composer" id="composer" autocomplete="off">
+        <div class="ctx" id="ctx"></div>
+        <textarea id="cmtInput" rows="2" placeholder="Écris un commentaire… Tape @ pour mentionner quelqu'un"></textarea>
+        <div class="mpop" id="mpop" hidden></div>
+        <div class="crow"><small>Ctrl + Entrée pour envoyer</small><button class="btn primary" type="submit">Envoyer</button></div>
+      </form>
+    </aside>
+  </main>
+
+  <nav class="mobnav" role="tablist" aria-label="Vues">
+    <button data-pane="reader" role="tab">Lecture</button>
+    <button data-pane="board" role="tab">Tableau</button>
+  </nav>
+</div>
+<div id="toasts" aria-live="polite"></div>
+
+<script>
+/* ---------- Données ---------- */
+const SURAHS={
+  1:{name:"Al-Fâtiha",fr:"L'Ouverture",ar:"الفاتحة",bism:false,verses:[
+    ["بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ","Au nom d'Allah, le Tout Miséricordieux, le Très Miséricordieux."],
+    ["الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ","Louange à Allah, Seigneur des mondes,"],
+    ["الرَّحْمَٰنِ الرَّحِيمِ","le Tout Miséricordieux, le Très Miséricordieux,"],
+    ["مَالِكِ يَوْمِ الدِّينِ","Maître du Jour de la Rétribution."],
+    ["إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ","C'est Toi que nous adorons, et c'est Toi dont nous implorons l'aide."],
+    ["اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ","Guide-nous sur le droit chemin,"],
+    ["صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ","le chemin de ceux que Tu as comblés de bienfaits, non de ceux qui ont encouru Ta colère, ni des égarés."]]},
+  93:{name:"Ad-Duhâ",fr:"Le Jour montant",ar:"الضحى",bism:true,verses:[
+    ["وَالضُّحَىٰ","Par le jour montant !"],
+    ["وَاللَّيْلِ إِذَا سَجَىٰ","Et par la nuit quand elle s'apaise !"],
+    ["مَا وَدَّعَكَ رَبُّكَ وَمَا قَلَىٰ","Ton Seigneur ne t'a ni abandonné, ni détesté."],
+    ["وَلَلْآخِرَةُ خَيْرٌ لَّكَ مِنَ الْأُولَىٰ","La vie dernière est meilleure pour toi que la première."],
+    ["وَلَسَوْفَ يُعْطِيكَ رَبُّكَ فَتَرْضَىٰ","Ton Seigneur te donnera, et tu seras satisfait."],
+    ["أَلَمْ يَجِدْكَ يَتِيمًا فَآوَىٰ","Ne t'a-t-Il pas trouvé orphelin ? Alors Il t'a accueilli."],
+    ["وَوَجَدَكَ ضَالًّا فَهَدَىٰ","Il t'a trouvé sans guide, alors Il t'a guidé."],
+    ["وَوَجَدَكَ عَائِلًا فَأَغْنَىٰ","Il t'a trouvé dans le besoin, alors Il t'a enrichi."],
+    ["فَأَمَّا الْيَتِيمَ فَلَا تَقْهَرْ","Quant à l'orphelin, ne l'opprime pas."],
+    ["وَأَمَّا السَّائِلَ فَلَا تَنْهَرْ","Quant à celui qui demande, ne le repousse pas."],
+    ["وَأَمَّا بِنِعْمَةِ رَبِّكَ فَحَدِّثْ","Et le bienfait de ton Seigneur, proclame-le."]]},
+  103:{name:"Al-'Asr",fr:"Le Temps",ar:"العصر",bism:true,verses:[
+    ["وَالْعَصْرِ","Par le Temps !"],
+    ["إِنَّ الْإِنسَانَ لَفِي خُسْرٍ","L'être humain est certes en perdition,"],
+    ["إِلَّا الَّذِينَ آمَنُوا وَعَمِلُوا الصَّالِحَاتِ وَتَوَاصَوْا بِالْحَقِّ وَتَوَاصَوْا بِالصَّبْرِ","sauf ceux qui croient, font de bonnes œuvres, s'enjoignent mutuellement la vérité et s'enjoignent mutuellement l'endurance."]]}
+};
+const HL={
+  theme:{label:"Thème",desc:"Idée centrale ou sujet du passage."},
+  question:{label:"Question",desc:"Ce qu'on veut approfondir ou se demander."},
+  reflect:{label:"À méditer",desc:"Un verset qui touche, à relire et à garder."},
+  link:{label:"Lien",desc:"Un verset qui fait écho à un autre."}
+};
+/* Indices français mot à mot (indicatifs), alignés sur le découpage en mots entiers */
+const WBW_HINTS={
+  "1:1":"au nom|d'Allah|le Tout Miséricordieux|le Très Miséricordieux",
+  "1:2":"la louange|à Allah|Seigneur|des mondes",
+  "1:3":"le Tout Miséricordieux|le Très Miséricordieux",
+  "1:4":"Maître|du Jour|de la Rétribution",
+  "1:5":"Toi seul|nous adorons|et Toi seul|nous demandons l'aide",
+  "1:6":"guide-nous|le chemin|droit",
+  "1:7":"le chemin|de ceux que|Tu as comblé|sur eux|non|ceux qui ont encouru la colère|sur eux|ni|les égarés",
+  "93:1":"par le jour montant",
+  "93:2":"et par la nuit|quand|elle s'apaise",
+  "93:3":"ne … pas|t'a abandonné|ton Seigneur|et ne … pas|a détesté",
+  "93:4":"et certes la dernière|meilleure|pour toi|que|la première",
+  "93:5":"et certes|te donnera|ton Seigneur|et tu seras satisfait",
+  "93:6":"ne … pas ?|Il t'a trouvé|orphelin|alors Il a accueilli",
+  "93:7":"et Il t'a trouvé|sans guide|alors Il a guidé",
+  "93:8":"et Il t'a trouvé|dans le besoin|alors Il a enrichi",
+  "93:9":"quant à|l'orphelin|alors ne … pas|opprime",
+  "93:10":"et quant à|celui qui demande|alors ne … pas|repousse",
+  "93:11":"et quant à|le bienfait|de ton Seigneur|alors proclame",
+  "103:1":"par le Temps",
+  "103:2":"certes|l'être humain|est certes dans|une perte",
+  "103:3":"sauf|ceux qui|ont cru|et ont fait|les bonnes œuvres|et se sont enjoint|la vérité|et se sont enjoint|l'endurance"
+};
+const seedWbw=()=>({"93:3":{t:{2:"sa Boroom"},joins:[],free:""},"1:1":{t:{1:"Yàlla"},joins:[],free:""}});
+const COLORS={ink:"Encre",sand:"Sable",sage:"Sauge",rose:"Rose",sky:"Ciel"};
+const MEMBERS={me:{name:"Toi",init:"T",c:"var(--me)"},k:{name:"Khadija",init:"K",c:"var(--k)"}};
+const TOOLS=[
+  {id:"select",label:"Sélection",key:"V",icon:'<path d="M5 3l14 7.5-6.2 1.8L10 19z"/>'},
+  {id:"hand",label:"Main",key:"H",icon:'<path d="M8 12V6.5a1.5 1.5 0 013 0V11M11 10.5V5a1.5 1.5 0 013 0v5.5M14 10.5V6.5a1.5 1.5 0 013 0V14a6 6 0 01-6 6h-.5a6 6 0 01-4.8-2.4L4 14.5a1.5 1.5 0 012.4-1.8L8 14"/>'},
+  {sep:true},
+  {id:"pen",label:"Crayon",key:"P",icon:'<path d="M4 20l4.5-1L19 8.5 15.5 5 5 15.5z"/><path d="M13.5 7l3.5 3.5"/>'},
+  {id:"rect",label:"Cadre",key:"R",icon:'<rect x="4" y="5" width="16" height="14" rx="2.5"/>'},
+  {id:"arrow",label:"Flèche",key:"A",icon:'<path d="M5 19L19 5M10 5h9v9"/>'},
+  {id:"note",label:"Note",key:"N",icon:'<path d="M5 4h14v10.5L14.5 19H5z"/><path d="M14 19v-5h5"/>'},
+  {id:"text",label:"Texte",key:"T",icon:'<path d="M5 7V5h14v2M12 5v14M9 19h6"/>'}
+];
+const HINTS={
+  welcome:"Glisse un verset depuis la lecture sur le tableau, ou choisis un outil ci-dessous.",
+  select:"<b>Sélection</b> · clique pour sélectionner, glisse pour déplacer. Glisser le fond déplace la vue.",
+  hand:"<b>Main</b> · glisse pour te déplacer. Ctrl + molette pour zoomer.",
+  pen:"<b>Crayon</b> · dessine librement, même sur les versets. Échap pour arrêter.",
+  rect:"<b>Cadre</b> · glisse pour entourer un groupe de versets.",
+  arrow:"<b>Flèche</b> · glisse d'un élément à un autre pour les relier, puis tire le point du milieu pour la courber.",
+  note:"<b>Note</b> · clique où poser ta réflexion.",
+  text:"<b>Texte</b> · clique pour écrire un titre."
+};
+const I=(p,sw=2)=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
+const ICON={
+  comment:I('<path d="M21 12a8 8 0 01-11.6 7.1L4 20l1-4.6A8 8 0 1121 12z"/>',2.4),
+  board:I('<rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 21h8"/>'),
+  reflect:I('<path d="M5 4h14v10.5L14.5 19H5z"/><path d="M9 9h6M9 12.5h4"/>'),
+  book:I('<path d="M4 5a2 2 0 012-2h13v16H6a2 2 0 00-2 2z"/><path d="M4 19V5"/>'),
+  hl:I('<path d="M9 11l-5 5v4h4l5-5"/><path d="M14 6l4 4-5 5-4-4z"/>'),
+  check:I('<path d="M5 12l5 5 9-10"/>',3)
+};
+/* ---------- État ---------- */
+const H=3600e3;
+function seed(){
+  const now=Date.now(), s1="s-duha", s2="s-fatiha";
+  return {v:1,current:s1,demoDone:false,readMentions:["c1"],wbw:seedWbw(),readMode:"read",wbwHints:true,
+    sessions:{
+      [s1]:{id:s1,title:"Ad-Duhâ — bienfaits reçus, devoirs rendus",surah:93,date:now},
+      [s2]:{id:s2,title:"Al-Fâtiha — introduction",surah:1,date:now-7*24*H}},
+    boards:{
+      [s1]:[
+        {id:"t1",type:"text",x:0,y:-130,w:640,text:"Ad-Duhâ : la structure de la sourate",size:"lg",color:"ink"},
+        {id:"t2",type:"text",x:0,y:-62,w:300,text:"Les deux serments",size:"md",color:"sand"},
+        {id:"r1",type:"rect",x:-18,y:-22,w:378,h:350,color:"sand"},
+        {id:"v1",type:"verse",ref:"93:1",x:0,y:0,w:340},
+        {id:"v2",type:"verse",ref:"93:2",x:0,y:160,w:340},
+        {id:"n1",type:"note",x:420,y:40,w:260,color:"sage",by:"k",style:"hand",text:"Le jour, puis la nuit qui s'apaise : la lumière revient toujours. Lien avec 93:3 et la pause de la révélation ?"},
+        {id:"v3",type:"verse",ref:"93:3",x:860,y:0,w:340},
+        {id:"a0",type:"arrow",from:{id:"n1"},to:{id:"v3"},color:"sage",style:"hand",bend:-40},
+        {id:"t3",type:"text",x:0,y:400,w:900,text:"Trois bienfaits reçus → trois devoirs rendus",size:"md",color:"sage"},
+        {id:"v6",type:"verse",ref:"93:6",x:0,y:450,w:340},
+        {id:"v7",type:"verse",ref:"93:7",x:0,y:610,w:340},
+        {id:"v8",type:"verse",ref:"93:8",x:0,y:770,w:340},
+        {id:"v9",type:"verse",ref:"93:9",x:540,y:450,w:340},
+        {id:"v10",type:"verse",ref:"93:10",x:540,y:610,w:340},
+        {id:"v11",type:"verse",ref:"93:11",x:540,y:770,w:340},
+        {id:"a1",type:"arrow",from:{id:"v6"},to:{id:"v9"},color:"sage"},
+        {id:"a2",type:"arrow",from:{id:"v7"},to:{id:"v10"},color:"sage"},
+        {id:"a3",type:"arrow",from:{id:"v8"},to:{id:"v11"},color:"sage"},
+        {id:"n2",type:"note",x:960,y:560,w:270,color:"sand",by:"me",text:"Ce qu'Allah t'a donné, donne-le à ton tour.\nOrphelin → accueilli → ne repousse pas l'orphelin."}
+      ],
+      [s2]:[
+        {id:"f0",type:"text",x:0,y:-80,w:600,text:"Al-Fâtiha : le dialogue",size:"lg",color:"ink"},
+        {id:"f5",type:"verse",ref:"1:5",x:0,y:0,w:360},
+        {id:"f6",type:"verse",ref:"1:6",x:0,y:170,w:360},
+        {id:"fn",type:"note",x:460,y:40,w:260,color:"sky",by:"me",text:"Les versets 1 à 4 parlent d'Allah, le verset 5 s'adresse à Lui. Bascule du « Il » au « Toi »."},
+        {id:"fa",type:"arrow",from:{id:"fn"},to:{id:"f5"},color:"sky"}
+      ]},
+    highlights:{
+      [s1]:{"93:3":"reflect","93:6":"theme","93:7":"theme","93:8":"theme","93:9":"link","93:10":"link","93:11":"link"},
+      [s2]:{"1:5":"reflect","1:6":"question"}},
+    comments:[
+      {id:"c1",sid:s1,anchor:{kind:"verse",ref:"93:3"},author:"k",text:"@Toi on lit le tafsir de ce verset ensemble à la prochaine séance ? Je voudrais comprendre le contexte de la pause de la révélation.",ts:now-2*H,resolved:false,
+        replies:[{author:"me",text:"Oui, je prépare As-Sa'di et Ibn Kathir pour jeudi.",ts:now-H}]},
+      {id:"c2",sid:s1,anchor:{kind:"el",id:"n2"},author:"me",text:"Idée à creuser : les flèches 6→9, 7→10, 8→11. Est-ce que c'est voulu dans l'ordre ?",ts:now-30*60e3,resolved:false,replies:[]}
+    ]};
+}
+const KEY="majlis-proto-v1";
+let state=null;
+try{state=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+if(!state||state.v!==1) state=seed();
+if(!state.wbw)state.wbw=seedWbw();if(!state.readMode)state.readMode="read";
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}}
+
+const ui={pane:"board",view:"discussion",filter:"open",selVerse:null,hlFor:null,anchor:null,replyTo:null,replyDraft:"",color:"ink",noteColor:"sand",src:"Al-Muyassar",kRef:null,glossQ:""};
+let cam={x:0,y:0,z:1},tool="select",selId=null,editingId=null,drag=null,spaceDown=false;
+let undoStack=[],redoStack=[];const sizes={};
+
+/* ---------- Utilitaires ---------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const uid=()=>Math.random().toString(36).slice(2,10);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const cur=()=>state.sessions[state.current];
+const board=()=>state.boards[state.current]||(state.boards[state.current]=[]);
+const hls=()=>state.highlights[state.current]||(state.highlights[state.current]={});
+const el=id=>board().find(e=>e.id===id);
+function verse(ref){const[s,n]=ref.split(":").map(Number);const S=SURAHS[s];return{s,n,S,ar:S.verses[n-1][0],fr:S.verses[n-1][1],label:`${S.name} · ${s}:${n}`}}
+const rtf=new Intl.RelativeTimeFormat("fr",{numeric:"auto"});
+function ago(ts){const d=(ts-Date.now())/1000;if(d>-60)return"à l'instant";if(d>-3600)return rtf.format(Math.round(d/60),"minute");if(d>-86400)return rtf.format(Math.round(d/3600),"hour");return rtf.format(Math.round(d/86400),"day")}
+function fmtMsg(t){return esc(t).replace(/@(Toi|Khadija)\b/g,'<span class="mention">@$1</span>')}
+function toast(msg,action){const t=document.createElement("div");t.className="toast";t.innerHTML=`<span>${esc(msg)}</span>`;if(action){const b=document.createElement("button");b.textContent=action.label;b.onclick=()=>{action.fn();t.remove()};t.appendChild(b)}$("#toasts").appendChild(t);setTimeout(()=>t.remove(),action?6000:2600)}
+const isMobile=()=>matchMedia("(max-width:900px)").matches;
+function setPane(p){ui.pane=p;document.body.dataset.pane=p;document.querySelectorAll(".mobnav button").forEach(b=>b.setAttribute("aria-selected",b.dataset.pane===p));if(p==="board")requestAnimationFrame(renderBoard)}
+function closeMenus(){document.querySelectorAll(".menu,.scrim").forEach(m=>m.remove())}
+function popMenu(anchor,html,onclick,align){closeMenus();const m=document.createElement("div");m.className="menu";m.innerHTML=html;document.body.appendChild(m);
+  const r=anchor.getBoundingClientRect(),mw=m.offsetWidth,mh=m.offsetHeight;let x=align==="right"?r.right-mw:r.left+r.width/2-mw/2;if(align==="left")x=r.left;
+  m.style.left=clamp(x,16,innerWidth-mw-16)+"px";m.style.top=(r.bottom+6+mh>innerHeight-16?Math.max(16,r.top-mh-6):r.bottom+6)+"px";
+  m.addEventListener("click",ev=>{const b=ev.target.closest("[data-k]");if(b){const keep=onclick(b.dataset.k,b);if(!keep)closeMenus()}});return m}
+document.addEventListener("click",e=>{if(!e.target.closest(".menu")&&!e.target.closest("[data-menu-btn]"))document.querySelectorAll(".menu").forEach(m=>m.remove())});
+const ck=on=>`<span class="ck ${on?"on":""}">${on?ICON.check:""}</span>`;
+
+/* ---------- Historique ---------- */
+function checkpoint(){undoStack.push(JSON.stringify(board()));if(undoStack.length>100)undoStack.shift();redoStack=[];updUndo()}
+function undo(){if(!undoStack.length)return;redoStack.push(JSON.stringify(board()));state.boards[state.current]=JSON.parse(undoStack.pop());afterHist()}
+function redo(){if(!redoStack.length)return;undoStack.push(JSON.stringify(board()));state.boards[state.current]=JSON.parse(redoStack.pop());afterHist()}
+function afterHist(){if(selId&&!el(selId))selId=null;save();renderBoard();renderReader();updUndo()}
+function updUndo(){$("#undoBtn").disabled=!undoStack.length;$("#redoBtn").disabled=!redoStack.length}
+
+/* ---------- Géométrie ---------- */
+const stage=$("#stage"),world=$("#world"),svgBack=$("#svgBack"),svgFront=$("#svgFront"),els=$("#els");
+function toWorld(cx,cy){const r=stage.getBoundingClientRect();return{x:(cx-r.left-cam.x)/cam.z,y:(cy-r.top-cam.y)/cam.z}}
+function bbox(e){
+  if(!e)return null;
+  if(e.type==="rect")return{x:Math.min(e.x,e.x+e.w),y:Math.min(e.y,e.y+e.h),w:Math.abs(e.w),h:Math.abs(e.h)};
+  if(e.type==="stroke"){let a=1e9,b=1e9,c=-1e9,d=-1e9;for(const[px,py]of e.points){a=Math.min(a,px);b=Math.min(b,py);c=Math.max(c,px);d=Math.max(d,py)}return{x:e.x+a,y:e.y+b,w:c-a,h:d-b}}
+  if(e.type==="arrow"){const p=arrowPts(e);if(!p)return null;const[p1,p2]=p;const m=arrowMid(e);const xs=[p1.x,p2.x,m.x],ys=[p1.y,p2.y,m.y];const x=Math.min(...xs),y=Math.min(...ys);return{x,y,w:Math.max(...xs)-x,h:Math.max(...ys)-y}}
+  const s=sizes[e.id]||{w:e.w||260,h:140};return{x:e.x,y:e.y,w:s.w,h:s.h};
+}
+const center=b=>({x:b.x+b.w/2,y:b.y+b.h/2});
+function edgeTo(b,t,gap=8){const c=center(b);const dx=t.x-c.x,dy=t.y-c.y;if(!dx&&!dy)return c;const s=Math.min(dx?(b.w/2+gap)/Math.abs(dx):1e9,dy?(b.h/2+gap)/Math.abs(dy):1e9);return{x:c.x+dx*s,y:c.y+dy*s}}
+function endCenter(end){if(end.id){const t=el(end.id);if(!t)return null;return center(bbox(t))}return end}
+function arrowPts(a){const c1=endCenter(a.from),c2=endCenter(a.to);if(!c1||!c2)return null;const b=a.bend||0;const dx=c2.x-c1.x,dy=c2.y-c1.y,L=Math.hypot(dx,dy)||1;const n={x:-dy/L,y:dx/L};
+  const C0={x:(c1.x+c2.x)/2+n.x*b*2,y:(c1.y+c2.y)/2+n.y*b*2};
+  const p1=a.from.id?edgeTo(bbox(el(a.from.id)),b?C0:c2):c1;const p2=a.to.id?edgeTo(bbox(el(a.to.id)),b?C0:c1):c2;
+  const C={x:(p1.x+p2.x)/2+n.x*b*2,y:(p1.y+p2.y)/2+n.y*b*2};return[p1,p2,C,n]}
+function arrowMid(a){const p=arrowPts(a);if(!p)return null;const[p1,p2,C]=p;return{x:.25*p1.x+.5*C.x+.25*p2.x,y:.25*p1.y+.5*C.y+.25*p2.y}}
+function rng(seed){let h=2166136261;for(const c of seed)h=Math.imul(h^c.charCodeAt(0),16777619);return()=>{h+=0x6D2B79F5;let t=h;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296}}
+function sketchLine(a,b,r){const len=Math.hypot(b.x-a.x,b.y-a.y)||1;const j=Math.min(2.6,len*.02+.6);const o=()=>(r()-.5)*2*j;return`M${a.x+o()} ${a.y+o()}Q${(a.x+b.x)/2+o()*1.6} ${(a.y+b.y)/2+o()*1.6} ${b.x+o()} ${b.y+o()}`}
+function sketchQuad(a,c,b,r){const o=()=>(r()-.5)*4.4;return`M${a.x+o()} ${a.y+o()}Q${c.x+o()*2} ${c.y+o()*2} ${b.x+o()} ${b.y+o()}`}
+function rectSvg(e,iz){const r=bbox(e),col=`var(--c-${e.color||"ink"})`;const hit=`<rect class="hit" x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}" rx="14" stroke-width="${14*iz}"/>`;
+  if(e.style!=="hand")return`<g data-id="${e.id}">${hit}<rect x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}" rx="14" fill="none" style="stroke:${col}" stroke-width="2" stroke-dasharray="8 6"/></g>`;
+  const R=rng(e.id);const P=[{x:r.x,y:r.y},{x:r.x+r.w,y:r.y},{x:r.x+r.w,y:r.y+r.h},{x:r.x,y:r.y+r.h}];let d="";for(let k=0;k<2;k++)for(let i=0;i<4;i++)d+=sketchLine(P[i],P[(i+1)%4],R);
+  return`<g data-id="${e.id}">${hit}<path d="${d}" fill="none" style="stroke:${col}" stroke-width="1.7" stroke-linecap="round"/></g>`}
+function arrowSvg(e,iz){const p=arrowPts(e);if(!p)return"";const[p1,p2,C]=p;const col=`var(--c-${e.color||"ink"})`;const an=Math.atan2(p2.y-C.y,p2.x-C.x),L=13;
+  const h1={x:p2.x-L*Math.cos(an-.42),y:p2.y-L*Math.sin(an-.42)},h2={x:p2.x-L*Math.cos(an+.42),y:p2.y-L*Math.sin(an+.42)};const d=`M${p1.x} ${p1.y}Q${C.x} ${C.y} ${p2.x} ${p2.y}`;
+  let body;if(e.style==="hand"){const R=rng(e.id);body=`<path d="${sketchQuad(p1,C,p2,R)}${sketchQuad(p1,C,p2,R)}" fill="none" style="stroke:${col}" stroke-width="1.8" stroke-linecap="round"/><path d="${sketchLine(h1,p2,R)}${sketchLine(p2,h2,R)}${sketchLine(h1,p2,R)}" fill="none" style="stroke:${col}" stroke-width="1.8" stroke-linecap="round"/>`}
+  else body=`<path d="${d}" fill="none" style="stroke:${col}" stroke-width="2.2" stroke-linecap="round"/><path d="M${h1.x} ${h1.y}L${p2.x} ${p2.y}L${h2.x} ${h2.y}" fill="none" style="stroke:${col}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>`;
+  return`<g data-id="${e.id}"><path class="hit" d="${d}" stroke-width="${16*iz}"/>${body}</g>`}
+function pathD(pts,ox,oy){if(pts.length<3)return pts.map((p,i)=>`${i?"L":"M"}${p[0]+ox} ${p[1]+oy}`).join("");let d=`M${pts[0][0]+ox} ${pts[0][1]+oy}`;for(let i=1;i<pts.length-1;i++){const mx=(pts[i][0]+pts[i+1][0])/2+ox,my=(pts[i][1]+pts[i+1][1])/2+oy;d+=`Q${pts[i][0]+ox} ${pts[i][1]+oy} ${mx} ${my}`}const l=pts[pts.length-1];return d+`L${l[0]+ox} ${l[1]+oy}`}
+
+/* ---------- Caméra ---------- */
+function applyCam(){world.style.transform=`translate(${cam.x}px,${cam.y}px) scale(${cam.z})`;world.style.setProperty("--iz",1/cam.z);stage.style.backgroundSize=`${24*cam.z}px ${24*cam.z}px`;stage.style.backgroundPosition=`${cam.x}px ${cam.y}px`;$("#zPct").textContent=Math.round(cam.z*100)+" %";positionSelTools()}
+function zoomAt(px,py,nz){nz=clamp(nz,.2,3);cam.x=px-(px-cam.x)*nz/cam.z;cam.y=py-(py-cam.y)*nz/cam.z;cam.z=nz;applyCam();renderBoard()}
+function zoomCenter(f){const r=stage.getBoundingClientRect();zoomAt(r.width/2,r.height/2,cam.z*f)}
+function fitView(){const b=board();const r=stage.getBoundingClientRect();if(!r.width)return;if(!b.length){cam={x:r.width/2,y:r.height/2,z:1};applyCam();return}
+  let a=1e9,c=1e9,d=-1e9,e=-1e9;for(const x of b){const bb=bbox(x);if(!bb)continue;a=Math.min(a,bb.x);c=Math.min(c,bb.y);d=Math.max(d,bb.x+bb.w);e=Math.max(e,bb.y+bb.h)}
+  const top=66,bot=100,padX=50;const z=clamp(Math.min((r.width-padX*2)/(d-a),(r.height-top-bot)/(e-c)),.25,1.1);cam.z=z;cam.x=(r.width-(d-a)*z)/2-a*z;cam.y=top+((r.height-top-bot)-(e-c)*z)/2-c*z;applyCam();renderBoard()}
+function centerOn(b,readable){const r=stage.getBoundingClientRect();if(readable)cam.z=clamp(Math.max(cam.z,.8),.2,Math.min(1,(r.width-40)/b.w));const c=center(b);cam.x=r.width/2-c.x*cam.z;cam.y=r.height/2-c.y*cam.z;applyCam()}
+function viewCenter(){const r=stage.getBoundingClientRect();return toWorld(r.left+r.width/2,r.top+r.height/2)}
+
+/* ---------- Mot à mot : données ---------- */
+const norm=w=>w.replace(/[ؐ-ًؚ-ٰٟۖ-ۭـ]/g,"").replace(/[أإآٱ]/g,"ا");
+const loose=k=>k.split(" ").map(x=>x.replace(/^[وف](?=\S{2})/,"")).join(" ");
+const wbwData=ref=>state.wbw[ref]||(state.wbw[ref]={t:{},joins:[],free:""});
+const words=ref=>verse(ref).ar.split(/\s+/);
+function tiles(ref){const w=words(ref),hs=(WBW_HINTS[ref]||"").split("|"),h=hs.length===w.length?hs:w.map(()=>""),d=state.wbw[ref]||{joins:[]};const out=[];let i=0;
+  while(i<w.length){let j=i;while((d.joins||[]).includes(j)&&j<w.length-1)j++;out.push({i,j,ar:w.slice(i,j+1).join(" "),hint:h.slice(i,j+1).join(" ")});i=j+1}return out}
+function allTiles(){const out=[];for(const ref in state.wbw){const d=state.wbw[ref];for(const t of tiles(ref)){const tx=(d.t[t.i]||"").trim();if(tx)out.push({ref,i:t.i,ar:t.ar,key:norm(t.ar),text:tx})}}return out}
+function suggest(ref,t){const k=norm(t.ar);const all=allTiles().filter(x=>!(x.ref===ref&&x.i===t.i));let kind="same",m=all.filter(x=>x.key===k);
+  if(!m.length){const lk=loose(k);m=all.filter(x=>loose(x.key)===lk);kind="close"}if(!m.length)return null;
+  const cnt={};m.forEach(x=>cnt[x.text]=(cnt[x.text]||0)+1);const text=Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a])[0];return{text,kind,ref:m.find(x=>x.text===text).ref}}
+function surahProgress(s){let n=0,d=0;SURAHS[s].verses.forEach((v,k)=>{const ref=`${s}:${k+1}`,dd=state.wbw[ref];tiles(ref).forEach(t=>{n++;if(dd&&(dd.t[t.i]||"").trim())d++})});return{n,d}}
+function wolText(ref){const d=state.wbw[ref];if(!d)return"";const free=(d.free||"").trim();if(free)return free;return tiles(ref).map(t=>(d.t[t.i]||"").trim()).filter(Boolean).join(" ")}
+function wolBlock(ref,edit=true){if(state.showWolof===false)return"";const tx=wolText(ref);if(!tx)return"";
+  return`<p class="wolf" lang="wo">${esc(tx)}${edit?` <button class="link wedit" data-wedit="${ref}">Modifier</button>`:""}</p>`}
+
+/* ---------- Rendu du tableau ---------- */
+function commentCount(kind,key){return state.comments.filter(c=>c.sid===state.current&&c.anchor&&c.anchor.kind===kind&&(kind==="verse"?c.anchor.ref===key:c.anchor.id===key)).length}
+function htmlFor(e){
+  const st=`left:${e.x}px;top:${e.y}px;width:${e.w}px`;
+  if(e.type==="verse"&&e.mode==="wbw"){const v=verse(e.ref);const d=state.wbw[e.ref]||{t:{}};const cc=commentCount("el",e.id);
+    return`<div class="el card wcard" data-id="${e.id}" style="${st}"><div class="vh"><span class="grow">${esc(v.label)} · mot à mot</span>${cc?`<span class="cbadge">${ICON.comment}${cc}</span>`:""}</div><div class="wrow" dir="rtl">${tiles(e.ref).map(t=>`<span class="wc"><span class="ar" lang="ar">${t.ar}</span><span class="wo ${d.t[t.i]?"":"empty"}" dir="ltr">${esc(d.t[t.i]||"—")}</span></span>`).join("")}</div>${d.free?`<div class="fr wfree-c">${esc(d.free)}</div>`:""}</div>`}
+  if(e.type==="verse"){const v=verse(e.ref);const h=hls()[e.ref];const cc=commentCount("verse",e.ref)+commentCount("el",e.id);
+    return`<div class="el card ${h?"hl-"+h:""}" data-id="${e.id}" style="${st}"><div class="vh"><span class="grow">${esc(v.label)}</span>${cc?`<span class="cbadge">${ICON.comment}${cc}</span>`:""}</div><div class="ar" lang="ar" dir="rtl">${v.ar}</div><div class="fr">${esc(v.fr)}</div>${wolBlock(e.ref,false)}</div>`}
+  if(e.type==="note"){const m=MEMBERS[e.by]||MEMBERS.me;const cc=commentCount("el",e.id);
+    return`<div class="el note n-${e.color} ${e.style==="hand"?"hand":""}" data-id="${e.id}" style="${st}"><div class="editable" data-ph="Écris ta réflexion…">${esc(e.text)}</div><div class="nby"><i style="--c:${m.c}"></i>${m.name}${cc?` · <span class="cbadge">${ICON.comment}${cc}</span>`:""}</div></div>`}
+  if(e.type==="text")return`<div class="el text s-${e.size||"md"} tc-${e.color} ${e.style==="hand"?"hand":""}" data-id="${e.id}" style="${st}"><div class="editable" data-ph="Titre…">${esc(e.text)}</div></div>`;
+  return"";
+}
+function renderBoard(){
+  const b=board();
+  if(!editingId){els.innerHTML=b.map(htmlFor).join("");els.querySelectorAll(".el").forEach(n=>sizes[n.dataset.id]={w:n.offsetWidth,h:n.offsetHeight})}
+  let back="",front="";const iz=1/cam.z;
+  for(const e of b){const col=`var(--c-${e.color||"ink"})`;
+    if(e.type==="rect")back+=rectSvg(e,iz);
+    if(e.type==="arrow")back+=arrowSvg(e,iz);
+    if(e.type==="stroke"){const d=pathD(e.points,e.x,e.y);front+=`<g data-id="${e.id}"><path class="hit" d="${d}" stroke-width="${14*iz}" stroke-linecap="round"/><path d="${d}" fill="none" style="stroke:${col}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></g>`}
+  }
+  const s=selId&&el(selId);
+  if(s&&!(drag&&["pen","rect","arrow"].includes(drag.kind))){const bb=bbox(s);if(bb){const p=6*iz;front+=`<rect class="selbox" x="${bb.x-p}" y="${bb.y-p}" width="${bb.w+2*p}" height="${bb.h+2*p}" rx="${8*iz}" vector-effect="non-scaling-stroke"/>`;
+    if(["verse","note","text","rect"].includes(s.type)){const hs=11*iz;front+=`<rect class="handle" data-handle="1" x="${bb.x+bb.w+p-hs/2}" y="${bb.y+bb.h+p-hs/2}" width="${hs}" height="${hs}" rx="${2*iz}" stroke-width="${1.6*iz}"/>`}
+    if(s.type==="arrow"){const m=arrowMid(s);if(m)front+=`<circle class="bendh" data-bend="1" cx="${m.x}" cy="${m.y}" r="${7*iz}" stroke-width="${2*iz}"><title>Tire pour courber la flèche</title></circle>`}}}
+  if(drag&&drag.hover){const hb=bbox(el(drag.hover));if(hb){const p=5*iz;front+=`<rect class="hovbox" x="${hb.x-p}" y="${hb.y-p}" width="${hb.w+2*p}" height="${hb.h+2*p}" rx="${10*iz}" vector-effect="non-scaling-stroke"/>`}}
+  svgBack.innerHTML=back;svgFront.innerHTML=front;
+  $("#emptyBoard").hidden=b.length>0;
+  positionSelTools();
+}
+
+/* ---------- Outils ---------- */
+function renderToolbar(){
+  $("#toolbar").innerHTML=TOOLS.map(x=>x.sep?'<span class="tsep"></span>':`<button class="tool" data-tool="${x.id}" aria-pressed="${tool===x.id}" title="${x.label} (${x.key})" aria-label="${x.label}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${x.icon}</svg><span class="tl">${x.label}</span></button>`).join("");
+  renderPalette();
+}
+function renderPalette(){const s=selId&&el(selId);const forSel=s&&s.type!=="verse";const show=forSel||["pen","rect","arrow","note","text"].includes(tool);const p=$("#palette");p.hidden=!show;if(!show)return;
+  const active=forSel?s.color:(tool==="note"?ui.noteColor:ui.color);
+  const SB=["rect","arrow","note","text"];const st=forSel?(SB.includes(s.type)?(s.style||"clean"):null):(SB.includes(tool)?(state.style||"clean"):null);
+  p.innerHTML=`<small>${forSel?"Couleur de l'élément":"Couleur"}</small>`+Object.entries(COLORS).map(([k,n])=>`<button class="dotbtn" data-color="${k}" style="--dc:var(--c-${k})" title="${n}" aria-label="Couleur ${n}" aria-pressed="${active===k}"></button>`).join("")+
+  (st?`<span class="psep"></span><small>Style</small><div class="segm sm" role="group" aria-label="Style du trait"><button data-style="clean" aria-pressed="${st==="clean"}">Net</button><button data-style="hand" aria-pressed="${st==="hand"}">Main levée</button></div>`:"")}
+let hintT;function flashHint(key,ms=3800){const h=$("#toolhint");h.innerHTML=HINTS[key];h.hidden=false;clearTimeout(hintT);hintT=setTimeout(()=>h.hidden=true,ms)}
+function setTool(t,quiet){const changed=tool!==t;tool=t;stage.className="t-"+t;if(t!=="select")select(null);renderToolbar();if(changed&&!quiet)flashHint(t)}
+
+/* ---------- Sélection ---------- */
+function select(id){selId=id;const e=id&&el(id);if(e&&e.type==="verse"&&ui.selVerse!==e.ref){ui.selVerse=e.ref;renderReader();if(isDrawer("tafsir"))renderSide()}renderPalette();renderBoard()}
+function positionSelTools(){const box=$("#seltools");const e=selId&&el(selId);if(!e||drag||editingId){box.hidden=true;return}
+  const b=bbox(e);if(!b){box.hidden=true;return}
+  let html="";
+  if(e.type==="verse")html+=`<button data-st="show">Voir le texte</button><button data-st="reflect">Réflexion</button>`;
+  if(e.type==="note"||e.type==="text")html+=`<button data-st="edit">Écrire</button>`;
+  if(e.type==="arrow"&&e.bend)html+=`<button data-st="straight">Redresser</button>`;
+  html+=`<button data-st="comment">Commenter</button>`;
+  if(e.type!=="arrow"&&e.type!=="verse")html+=`<button data-st="dup">Dupliquer</button>`;
+  html+=`<button data-st="del" class="danger">Supprimer</button>`;
+  box.innerHTML=html;box.hidden=false;
+  let x=cam.x+(b.x+b.w/2)*cam.z,y=cam.y+b.y*cam.z-12;const r=stage.getBoundingClientRect();
+  if(y<box.offsetHeight+10){y=cam.y+(b.y+b.h)*cam.z+12+box.offsetHeight}
+  x=clamp(x,box.offsetWidth/2+8,r.width-box.offsetWidth/2-8);
+  box.style.left=x+"px";box.style.top=y+"px";
+}
+$("#seltools").addEventListener("pointerdown",e=>e.stopPropagation());
+$("#seltools").addEventListener("click",e=>{const a=e.target.closest("[data-st]")?.dataset.st;const t=el(selId);if(!a||!t)return;
+  if(a==="del")removeEl(t.id);
+  if(a==="dup"){checkpoint();const c=JSON.parse(JSON.stringify(t));c.id=uid();c.x+=28;c.y+=28;board().push(c);save();select(c.id)}
+  if(a==="comment")startComment({kind:"el",id:t.id});
+  if(a==="edit")startEdit(t.id);
+  if(a==="straight"){checkpoint();t.bend=0;save();renderBoard()}
+  if(a==="show")gotoVerse(t.ref);
+  if(a==="reflect")addReflection(t.ref);
+});
+function removeEl(id){checkpoint();state.boards[state.current]=board().filter(e=>e.id!==id&&!(e.type==="arrow"&&(e.from.id===id||e.to.id===id)));selId=null;save();renderBoard();renderReader();renderPalette();toast("Élément supprimé",{label:"Annuler",fn:undo})}
+
+/* ---------- Édition de texte ---------- */
+function startEdit(id){const e=el(id);if(!e||!["note","text"].includes(e.type))return;
+  editingId=null;selId=id;renderBoard();editingId=id;positionSelTools();
+  const n=els.querySelector(`[data-id="${id}"] .editable`);n.contentEditable="true";n.focus();
+  const r=document.createRange();r.selectNodeContents(n);r.collapse(false);const s=getSelection();s.removeAllRanges();s.addRange(r);
+  n.addEventListener("keydown",ev=>{ev.stopPropagation();if(ev.key==="Escape"||(ev.key==="Enter"&&(ev.metaKey||ev.ctrlKey))){ev.preventDefault();n.blur()}});
+  n.addEventListener("blur",()=>{const t=el(id);editingId=null;if(t){const txt=n.innerText.replace(/\n+$/,"").trim();if(txt!==t.text){checkpoint();t.text=txt}if(!txt){state.boards[state.current]=board().filter(x=>x.id!==id&&!(x.type==="arrow"&&(x.from.id===id||x.to.id===id)));selId=null}}save();renderBoard()},{once:true});
+}
+
+/* ---------- Création ---------- */
+function addVerseCard(ref,at,silent,mode){mode=mode||"read";const ex=board().find(e=>e.type==="verse"&&e.ref===ref&&(e.mode||"read")===mode);
+  if(ex){if(!silent){select(ex.id);centerOn(bbox(ex),true);renderBoard();toast(`${ref} est déjà sur le tableau`)}return ex}
+  checkpoint();const p=at||viewCenter();const c={id:uid(),type:"verse",ref,x:p.x-170,y:p.y-60,w:mode==="wbw"?440:340};if(mode==="wbw")c.mode="wbw";board().push(c);save();renderBoard();renderReader();
+  if(!silent){select(c.id);centerOn(bbox(c),true);renderBoard();toast(`Verset ${ref} ajouté au tableau`)}return c}
+function addReflection(ref){if(isMobile())setPane("board");
+  const card=addVerseCard(ref,null,true);const b=bbox(card);checkpoint();
+  const n={id:uid(),type:"note",x:b.x+b.w+70,y:b.y,w:260,color:ui.noteColor,by:"me",text:"",style:state.style||"clean"};board().push(n);
+  board().push({id:uid(),type:"arrow",from:{id:card.id},to:{id:n.id},color:ui.noteColor,style:state.style||"clean"});save();renderBoard();
+  centerOn({x:b.x,y:b.y,w:b.w+330,h:b.h},true);renderBoard();setTool("select",true);startEdit(n.id)}
+function bindable(id){const e=el(id);return e&&["verse","note","text","rect"].includes(e.type)}
+
+/* ---------- Interactions du tableau ---------- */
+stage.addEventListener("pointerdown",e=>{
+  if(e.target.closest(".dock,.corner,#seltools"))return;
+  if(editingId){if(e.target.closest('[contenteditable="true"]'))return;document.activeElement&&document.activeElement.blur()}
+  const w=toWorld(e.clientX,e.clientY);const tid=e.target.closest("[data-id]")?.dataset.id;const handle=e.target.closest("[data-handle]");
+  stage.setPointerCapture(e.pointerId);
+  if(e.button===1||tool==="hand"||spaceDown){drag={kind:"pan",sx:e.clientX,sy:e.clientY,ox:cam.x,oy:cam.y};stage.classList.add("panning");positionSelTools();return}
+  if(e.button!==0)return;
+  if(tool==="select"){
+    if(e.target.closest("[data-bend]")&&selId){drag={kind:"bend",id:selId,cp:false};positionSelTools();return}
+    if(handle&&selId){const t=el(selId);const b=bbox(t);drag={kind:"resize",id:selId,start:w,ow:t.type==="rect"?t.w:b.w,oh:t.h,cp:false};return}
+    if(tid){if(selId!==tid)select(tid);drag={kind:"move",id:tid,start:w,orig:JSON.parse(JSON.stringify(el(tid))),cp:false};return}
+    if(selId)select(null);drag={kind:"pan",sx:e.clientX,sy:e.clientY,ox:cam.x,oy:cam.y};stage.classList.add("panning");return}
+  if(tool==="note"||tool==="text"){checkpoint();const n=tool==="note"?{id:uid(),type:"note",x:w.x-20,y:w.y-20,w:260,color:ui.noteColor,by:"me",text:"",style:state.style||"clean"}:{id:uid(),type:"text",x:w.x,y:w.y-14,w:320,size:"md",color:ui.color,text:"",style:state.style||"clean"};
+    board().push(n);setTool("select",true);setTimeout(()=>startEdit(n.id),0);return}
+  checkpoint();
+  if(tool==="pen"){const n={id:uid(),type:"stroke",x:w.x,y:w.y,points:[[0,0]],color:ui.color,by:"me"};board().push(n);drag={kind:"pen",id:n.id}}
+  if(tool==="rect"){const n={id:uid(),type:"rect",x:w.x,y:w.y,w:0,h:0,color:ui.color,style:state.style||"clean"};board().push(n);drag={kind:"rect",id:n.id,sx:w.x,sy:w.y}}
+  if(tool==="arrow"){const from=tid&&bindable(tid)?{id:tid}:{x:w.x,y:w.y};const n={id:uid(),type:"arrow",from,to:{x:w.x,y:w.y},color:ui.color,style:state.style||"clean"};board().push(n);drag={kind:"arrow",id:n.id}}
+  $("#toolhint").hidden=true;renderBoard();
+});
+stage.addEventListener("pointermove",e=>{if(!drag)return;const w=toWorld(e.clientX,e.clientY);const t=drag.id&&el(drag.id);
+  switch(drag.kind){
+    case"pan":cam.x=drag.ox+e.clientX-drag.sx;cam.y=drag.oy+e.clientY-drag.sy;applyCam();return;
+    case"move":{const dx=w.x-drag.start.x,dy=w.y-drag.start.y;if(!drag.cp){if(Math.hypot(dx,dy)*cam.z<3)return;checkpoint();drag.cp=true;positionSelTools()}const o=drag.orig;
+      if(t.type==="arrow"){if(!o.from.id)t.from={x:o.from.x+dx,y:o.from.y+dy};if(!o.to.id)t.to={x:o.to.x+dx,y:o.to.y+dy}}else{t.x=o.x+dx;t.y=o.y+dy}break}
+    case"resize":{if(!drag.cp){checkpoint();drag.cp=true}const dx=w.x-drag.start.x,dy=w.y-drag.start.y;t.w=Math.max(t.type==="rect"?30:180,drag.ow+dx);if(t.type==="rect")t.h=Math.max(30,drag.oh+dy);break}
+    case"bend":{if(!drag.cp){checkpoint();drag.cp=true}const p=arrowPts({...t,bend:0});if(!p)break;const m={x:(p[0].x+p[1].x)/2,y:(p[0].y+p[1].y)/2},n=p[3];let b=Math.round((w.x-m.x)*n.x+(w.y-m.y)*n.y);t.bend=Math.abs(b)<6?0:b;break}
+    case"pen":{const l=t.points[t.points.length-1];const p=[w.x-t.x,w.y-t.y];if(Math.hypot(p[0]-l[0],p[1]-l[1])>1.5/cam.z)t.points.push(p);break}
+    case"rect":t.x=Math.min(drag.sx,w.x);t.y=Math.min(drag.sy,w.y);t.w=Math.abs(w.x-drag.sx);t.h=Math.abs(w.y-drag.sy);break;
+    case"arrow":{t.to={x:w.x,y:w.y};drag.hover=null;for(const n of document.elementsFromPoint(e.clientX,e.clientY)){const id=n.closest&&n.closest("[data-id]")?.dataset.id;if(id&&id!==t.id&&id!==t.from.id&&bindable(id)){drag.hover=id;break}}break}
+  }
+  renderBoard();
+});
+function endDrag(){if(!drag)return;const t=drag.id&&el(drag.id);const k=drag.kind;
+  if(k==="pen"&&t&&t.points.length<2){board().splice(board().indexOf(t),1);undoStack.pop()}
+  if(k==="rect"&&t){if(t.w<8||t.h<8){board().splice(board().indexOf(t),1);undoStack.pop()}else{drag=null;setTool("select",true);select(t.id)}}
+  if(k==="arrow"&&t){if(drag&&drag.hover)t.to={id:drag.hover};const p=arrowPts(t);if(!p||Math.hypot(p[1].x-p[0].x,p[1].y-p[0].y)<12){board().splice(board().indexOf(t),1);undoStack.pop()}else{drag=null;setTool("select",true);select(t.id)}}
+  drag=null;stage.classList.remove("panning");save();updUndo();renderBoard();if(k==="move"||k==="resize")renderReader()}
+stage.addEventListener("pointerup",endDrag);stage.addEventListener("pointercancel",endDrag);
+stage.addEventListener("dblclick",e=>{if(e.target.closest(".dock,.corner,#seltools"))return;const id=e.target.closest("[data-id]")?.dataset.id;const t=id&&el(id);
+  if(t&&(t.type==="note"||t.type==="text")){startEdit(id);return}
+  if(t&&t.type==="verse"){gotoVerse(t.ref);return}
+  if(!t&&tool==="select"){const w=toWorld(e.clientX,e.clientY);checkpoint();const n={id:uid(),type:"note",x:w.x-20,y:w.y-20,w:260,color:ui.noteColor,by:"me",text:"",style:state.style||"clean"};board().push(n);startEdit(n.id)}});
+stage.addEventListener("wheel",e=>{if(e.target.closest(".dock"))return;e.preventDefault();const r=stage.getBoundingClientRect();
+  if(e.ctrlKey||e.metaKey)zoomAt(e.clientX-r.left,e.clientY-r.top,cam.z*Math.exp(-e.deltaY*.01));else{cam.x-=e.deltaX;cam.y-=e.deltaY;applyCam()}},{passive:false});
+stage.addEventListener("dragover",e=>{if([...e.dataTransfer.types].includes("text/x-verse")){e.preventDefault();stage.classList.add("drop")}});
+stage.addEventListener("dragleave",()=>stage.classList.remove("drop"));
+stage.addEventListener("drop",e=>{stage.classList.remove("drop");const ref=e.dataTransfer.getData("text/x-verse");if(!ref)return;e.preventDefault();const w=toWorld(e.clientX,e.clientY);addVerseCard(ref,{x:w.x,y:w.y+40})});
+$("#toolbar").addEventListener("click",e=>{const tb=e.target.closest("[data-tool]");if(tb)setTool(tb.dataset.tool)});
+$("#palette").addEventListener("click",e=>{const sv=e.target.closest("[data-style]")?.dataset.style;if(sv){const s=selId&&el(selId);state.style=sv;if(s&&["rect","arrow","note","text"].includes(s.type)){checkpoint();s.style=sv;renderBoard()}save();renderPalette();return}
+  const c=e.target.closest("[data-color]")?.dataset.color;if(!c)return;const s=selId&&el(selId);
+  if(s&&s.type!=="verse"){checkpoint();s.color=c;if(s.type==="note")ui.noteColor=c;else ui.color=c;save();renderBoard()}else if(tool==="note")ui.noteColor=c;else ui.color=c;renderPalette()});
+$("#zIn").onclick=()=>zoomCenter(1.2);$("#zOut").onclick=()=>zoomCenter(1/1.2);$("#zFit").onclick=fitView;
+$("#zPct").onclick=()=>{const r=stage.getBoundingClientRect();zoomAt(r.width/2,r.height/2,1)};
+$("#undoBtn").onclick=undo;$("#redoBtn").onclick=redo;
+
+/* ---------- Lecture ---------- */
+function renderSurahSel(){$("#surahSel").innerHTML=Object.entries(SURAHS).map(([n,S])=>`<option value="${n}">${n}. ${S.name} — ${S.fr}</option>`).join("");$("#surahSel").value=cur().surah}
+function renderReader(){const rb=$("#readerBody");const ae=document.activeElement;let keep=null;
+  if(ae&&rb.contains(ae)&&ae.matches("input")){keep={sel:ae.dataset.free?`[data-free="${ae.dataset.free}"]`:`.wi[data-ref="${ae.dataset.ref}"][data-i="${ae.dataset.i}"]`,s:ae.selectionStart,e:ae.selectionEnd}}
+  document.body.classList.toggle("wbw",state.readMode==="wbw");renderModebar();
+  if(state.readMode==="wbw")renderWbw();else renderRead();
+  if(keep){const n=rb.querySelector(keep.sel);if(n){n.focus({preventScroll:true});try{n.setSelectionRange(keep.s,keep.e)}catch(_){}}}}
+function renderModebar(){const w=state.readMode==="wbw";
+  $("#modebar").innerHTML=`<div class="segm" role="group" aria-label="Mode de lecture"><button data-mode="read" aria-pressed="${!w}">Traduction</button><button data-mode="wbw" aria-pressed="${w}">Mot à mot</button></div>`+
+  (w?`<div class="chars"><small>Insérer</small>${["à","é","ë","ó","ñ","ŋ"].map(c=>`<button type="button" data-ch="${c}" title="Insérer ${c}" aria-label="Insérer ${c}">${c}</button>`).join("")}</div>`:"")}
+function renderRead(){
+  const s=cur().surah,S=SURAHS[s],h=hls();const on=new Set(board().filter(e=>e.type==="verse").map(e=>e.ref));
+  let out=`<div class="surah-head"><div class="ar" lang="ar">سورة ${S.ar}</div><div class="sub">${S.name} · ${S.fr} · ${S.verses.length} versets</div></div>`;
+  if(S.bism)out+=`<div class="bism" lang="ar">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>`;
+  out+=`<ol class="verses">`+S.verses.map((v,i)=>{const ref=`${s}:${i+1}`,hk=h[ref],sel=ui.selVerse===ref,cc=commentCount("verse",ref);
+    return`<li class="verse ${hk?"hl-"+hk:""} ${sel?"is-sel":""} ${ui.kRef===ref?"k-here":""}" data-ref="${ref}" draggable="true" tabindex="0" aria-label="Verset ${ref}" ${hk?`title="Surligné : ${HL[hk].label}"`:""}>
+      <div class="vtop"><span class="vnum">${ref}</span>${on.has(ref)?`<span class="mini" title="Sur le tableau">${ICON.board}</span>`:""}${cc?`<span class="mini" title="${cc} commentaire(s)">${ICON.comment}${cc}</span>`:""}<span class="grow"></span><span class="kpres" title="Khadija regarde ce verset">K</span></div>
+      <p class="ar" lang="ar" dir="rtl">${v[0]}</p><p class="fr">${esc(v[1])}</p>${wolBlock(ref)}
+      ${sel?`<div class="vbar">
+        <button data-va="add">${ICON.board}${on.has(ref)?"Voir sur le tableau":"Ajouter au tableau"}</button>
+        <button data-va="reflect">${ICON.reflect}Réflexion</button>
+        <button data-va="comment">${ICON.comment}Commenter</button>
+        <button data-va="tafsir">${ICON.book}Tafsir</button>
+        <button data-va="hl" aria-expanded="${ui.hlFor===ref}">${ICON.hl}Surligner</button></div>
+        ${ui.hlFor===ref?`<div class="hlpick">${Object.entries(HL).map(([k,x])=>`<button class="t-${k}" data-hl="${k}" aria-pressed="${hk===k}" title="${x.desc}">${x.label}</button>`).join("")}${hk?`<button class="none" data-hl="">Retirer</button>`:""}</div>`:""}`:""}</li>`}).join("")+`</ol>`;
+  out+=`<p class="reader-foot">Prototype : texte arabe et traduction française indicatifs, à remplacer par une source vérifiée (Tanzil, Quran.com). Astuce : glisse un verset directement sur le tableau.</p>`;
+  $("#readerBody").innerHTML=out;
+}
+function tileHtml(ref,t,d,showH){const tx=d.t[t.i]||"";const sg=tx?null:suggest(ref,t);const cc=state.comments.filter(c=>c.anchor&&c.anchor.kind==="word"&&c.anchor.ref===ref&&c.anchor.i===t.i).length;
+  return`<div class="wt ${tx.trim()?"done":""} ${t.j>t.i?"merged":""}"><button class="wa" lang="ar" dir="rtl" tabindex="-1" data-wmenu="${ref}|${t.i}" title="Options du mot">${t.ar}${cc?`<span class="wdot" title="${cc} commentaire(s)"></span>`:""}</button>
+    <input class="wi ${sg?"sug":""}" data-ref="${ref}" data-i="${t.i}" value="${esc(tx)}" placeholder="${esc(sg?sg.text:"…")}" data-sug="${esc(sg?sg.text:"")}" aria-label="Wolof pour ${t.ar}" autocomplete="off" spellcheck="false">
+    ${sg?`<small class="ws">${sg.kind==="same"?"déjà traduit":"forme proche"} · ${sg.ref}</small>`:""}${showH&&t.hint?`<small class="wh">${esc(t.hint)}</small>`:""}</div>`}
+function renderWbw(){const s=cur().surah,S=SURAHS[s];const p=surahProgress(s);const showH=state.wbwHints!==false;
+  let out=`<div class="surah-head"><div class="ar" lang="ar">سورة ${S.ar}</div><div class="sub">${S.name} · mot à mot en wolof</div><div class="prog"><i style="width:${p.n?p.d/p.n*100:0}%"></i></div><div class="sub" id="progTxt">${p.d} / ${p.n} mots traduits</div></div>
+  <p class="whelp"><b>Tab</b> mot suivant · <b>Entrée</b> verset suivant · suggestion en vert : <b>Tab</b> pour l'accepter, <b>Échap</b> pour l'ignorer</p>`;
+  out+=`<ol class="verses">`+S.verses.map((v,k)=>{const ref=`${s}:${k+1}`;const d=state.wbw[ref]||{t:{},free:""};const ts=tiles(ref);const done=ts.filter(t=>(d.t[t.i]||"").trim()).length;const onB=board().some(e=>e.type==="verse"&&e.ref===ref&&e.mode==="wbw");
+    return`<li class="wverse" data-ref="${ref}"><div class="vtop"><span class="vnum">${ref}</span><span class="wprog ${done===ts.length?"full":""}">${done}/${ts.length}</span><span class="grow"></span><button class="chip" data-wcard="${ref}">${onB?"Voir sur le tableau":"Mettre sur le tableau"}</button></div>
+      <div class="wtiles">${ts.map(t=>tileHtml(ref,t,d,showH)).join("")}</div>
+      <input class="wfree" data-free="${ref}" value="${esc(d.free||"")}" placeholder="Traduction wolof du verset (facultatif)" aria-label="Traduction wolof libre du verset ${ref}" autocomplete="off" spellcheck="false">
+      ${showH?`<p class="wfr">${esc(v[1])}</p>`:""}</li>`}).join("")+`</ol>`;
+  out+=`<p class="reader-foot">Clique un mot arabe pour le fusionner avec le suivant ou le commenter. Dans la vraie version, le découpage et les racines viendront du Quranic Arabic Corpus.</p>`;
+  $("#readerBody").innerHTML=out}
+function updateProgress(ref){const li=$("#readerBody").querySelector(`.wverse[data-ref="${ref}"]`);if(li){const ts=tiles(ref),d=state.wbw[ref];const done=ts.filter(t=>(d.t[t.i]||"").trim()).length;const w=li.querySelector(".wprog");w.textContent=`${done}/${ts.length}`;w.classList.toggle("full",done===ts.length)}
+  const p=surahProgress(cur().surah);const pt=$("#progTxt");if(pt){pt.textContent=`${p.d} / ${p.n} mots traduits`;$(".prog i").style.width=(p.n?p.d/p.n*100:0)+"%"}}
+let saveT,lastWi=null,wDirty=false;function saveSoon(){clearTimeout(saveT);saveT=setTimeout(save,400)}
+function refreshWCards(ref){if(!editingId&&board().some(e=>e.type==="verse"&&e.ref===ref)){cancelAnimationFrame(refreshWCards.r);refreshWCards.r=requestAnimationFrame(renderBoard)}}
+function setWord(ref,i,val){wbwData(ref).t[i]=val;wDirty=true;saveSoon();updateProgress(ref);refreshWCards(ref)}
+function goWord(ref,i){state.readMode="wbw";save();gotoVerse(ref);requestAnimationFrame(()=>{const n=$("#readerBody").querySelector(`.wi[data-ref="${ref}"][data-i="${i}"]`);n&&n.focus({preventScroll:true})})}
+function wordMenu(btn){const[ref,si]=btn.dataset.wmenu.split("|");const ts=tiles(ref);const k=ts.findIndex(t=>t.i===+si);const t=ts[k];
+  popMenu(btn,`<div class="mh2"><span lang="ar" style="font-family:var(--f-ar);font-size:20px;color:var(--ink);text-transform:none;letter-spacing:0">${t.ar}</span> · ${ref}</div>
+    ${k<ts.length-1?`<button class="mi" data-k="join"><span>Fusionner avec le mot suivant</span><small>Pour une expression qui se traduit d'un bloc</small></button>`:""}
+    ${t.j>t.i?`<button class="mi" data-k="split"><span>Séparer en mots</span><small>Revenir au découpage mot par mot</small></button>`:""}
+    <button class="mi" data-k="comment"><span>Commenter ce mot</span><small>Pour discuter d'un choix de traduction</small></button>
+    <button class="mi" data-k="gloss"><span>Voir dans le glossaire</span><small>Toutes tes traductions de ce mot</small></button>`,
+  a=>{const d=wbwData(ref);
+    if(a==="join"){const nx=ts[k+1];for(let x=t.i;x<nx.j;x++)if(!d.joins.includes(x))d.joins.push(x);d.t[t.i]=[d.t[t.i],d.t[nx.i]].filter(x=>x&&x.trim()).join(" ");delete d.t[nx.i];save();renderReader();refreshWCards(ref);toast("Mots fusionnés",{label:"Séparer",fn:()=>{d.joins=d.joins.filter(x=>x<t.i||x>=nx.j);save();renderReader();refreshWCards(ref)}})}
+    if(a==="split"){d.joins=d.joins.filter(x=>x<t.i||x>=t.j);save();renderReader();refreshWCards(ref);toast("Mots séparés")}
+    if(a==="comment")startComment({kind:"word",ref,i:t.i});
+    if(a==="gloss"){ui.glossQ=norm(t.ar);openDrawer("gloss")}})}
+function glossEntries(){const map=new Map();for(const x of allTiles()){if(!map.has(x.key))map.set(x.key,{ar:x.ar,key:x.key,tr:new Map()});const en=map.get(x.key);if(!en.tr.has(x.text))en.tr.set(x.text,[]);en.tr.get(x.text).push(x)}return[...map.values()]}
+function renderGlossList(){const box=$("#glossList");if(!box)return;const q=(ui.glossQ||"").trim();const qn=norm(q).toLowerCase();let es=glossEntries();
+  if(q)es=es.filter(e=>e.key.includes(qn)||[...e.tr.keys()].some(t=>t.toLowerCase().includes(qn)));es.sort((a,b)=>a.key.localeCompare(b.key,"ar"));
+  box.innerHTML=es.length?es.map(e=>`<div class="gl"><div class="gar" lang="ar" dir="rtl">${e.ar}</div><div class="gtr">${[...e.tr].map(([t,occ])=>`<div><b>${esc(t)}</b> <span class="refs">${occ.map(o=>`<button data-gw="${o.ref}|${o.i}" title="Aller au mot">${o.ref}</button>`).join("")}</span></div>`).join("")}${e.tr.size>1?`<small class="muted">${e.tr.size} traductions différentes</small>`:""}</div></div>`).join("")
+    :`<div class="empty">${q?"Aucun mot ne correspond.":"Ton glossaire se remplit tout seul quand tu traduis en mode « Mot à mot »."}</div>`}
+
+$("#modebar").addEventListener("mousedown",e=>{if(e.target.closest("[data-ch]"))e.preventDefault()});
+$("#modebar").addEventListener("click",e=>{const m=e.target.closest("[data-mode]");if(m){state.readMode=m.dataset.mode;save();renderReader();return}
+  const c=e.target.closest("[data-ch]");if(!c)return;const inp=lastWi&&document.body.contains(lastWi)?lastWi:null;if(!inp){toast("Clique d'abord dans un mot à traduire");return}
+  const a=inp.selectionStart??inp.value.length,b=inp.selectionEnd??a;inp.value=inp.value.slice(0,a)+c.dataset.ch+inp.value.slice(b);inp.focus();inp.setSelectionRange(a+1,a+1);inp.dispatchEvent(new Event("input",{bubbles:true}))});
+$("#readerBody").addEventListener("focusin",e=>{if(e.target.matches(".wi,.wfree"))lastWi=e.target});
+$("#readerBody").addEventListener("input",e=>{const t=e.target;
+  if(t.matches(".wi")){setWord(t.dataset.ref,+t.dataset.i,t.value);const w=t.closest(".wt");w.classList.toggle("done",!!t.value.trim());const s=w.querySelector(".ws");if(s)s.hidden=!!t.value}
+  else if(t.matches(".wfree")){wbwData(t.dataset.free).free=t.value;saveSoon();refreshWCards(t.dataset.free)}});
+$("#readerBody").addEventListener("focusout",e=>{if(e.target.matches(".wi")&&wDirty&&e.relatedTarget&&e.relatedTarget.matches&&e.relatedTarget.matches(".wi,.wfree")){wDirty=false;setTimeout(()=>{if(state.readMode==="wbw")renderReader()},0)}});
+$("#readerBody").addEventListener("keydown",e=>{const t=e.target;
+  if(t.classList.contains("verse")&&e.key==="Enter"){t.click();return}
+  if(!t.matches(".wi,.wfree"))return;
+  if(t.matches(".wi")&&e.key==="Tab"&&!e.shiftKey&&!t.value&&t.dataset.sug){t.value=t.dataset.sug;setWord(t.dataset.ref,+t.dataset.i,t.value);t.closest(".wt").classList.add("done")}
+  if(t.matches(".wi")&&e.key==="Escape"&&t.dataset.sug&&!t.value){e.preventDefault();t.dataset.sug="";t.placeholder="…";t.classList.remove("sug");t.closest(".wt").querySelector(".ws")?.remove()}
+  if(e.key==="Enter"){e.preventDefault();const nx=t.closest(".wverse").nextElementSibling?.querySelector(".wi");if(nx){nx.focus();nx.scrollIntoView({block:"nearest",behavior:"smooth"})}else{t.blur();toast("Dernier verset de la sourate")}}});
+$("#readerBody").addEventListener("click",e=>{
+  const we=e.target.closest("[data-wedit]");if(we){const ref=we.dataset.wedit,d=state.wbw[ref]||{t:{}};const t=tiles(ref).find(x=>!(d.t[x.i]||"").trim())||tiles(ref)[0];goWord(ref,t.i);return}
+  const wc=e.target.closest("[data-wcard]");if(wc){const ref=wc.dataset.wcard;if(isMobile())setPane("board");requestAnimationFrame(()=>addVerseCard(ref,null,false,"wbw"));return}
+  const wm=e.target.closest("[data-wmenu]");if(wm){e.stopPropagation();wordMenu(wm);return}
+  const li=e.target.closest(".verse");if(!li)return;const ref=li.dataset.ref;
+  const va=e.target.closest("[data-va]")?.dataset.va;const hl=e.target.closest("[data-hl]");
+  if(va==="add"){if(isMobile())setPane("board");requestAnimationFrame(()=>addVerseCard(ref));return}
+  if(va==="reflect"){addReflection(ref);return}
+  if(va==="comment"){startComment({kind:"verse",ref});return}
+  if(va==="tafsir"){openDrawer("tafsir");return}
+  if(va==="hl"){ui.hlFor=ui.hlFor===ref?null:ref;renderReader();return}
+  if(hl){const k=hl.dataset.hl;if(k)hls()[ref]=k;else delete hls()[ref];ui.hlFor=null;save();renderReader();renderBoard();if(isDrawer("marks"))renderSide();toast(k?`${ref} surligné : ${HL[k].label}`:"Surlignage retiré");return}
+  if(e.target.closest(".vbar,.hlpick,.wol"))return;
+  ui.selVerse=ui.selVerse===ref?null:ref;ui.hlFor=null;renderReader();if(isDrawer("tafsir"))renderSide()});
+$("#readerBody").addEventListener("dragstart",e=>{const li=e.target.closest(".verse");if(!li)return;e.dataTransfer.setData("text/x-verse",li.dataset.ref);e.dataTransfer.setData("text/plain",li.dataset.ref);e.dataTransfer.effectAllowed="copy"});
+$("#surahSel").addEventListener("change",e=>{cur().surah=+e.target.value;ui.selVerse=null;save();renderReader();$("#readerScroll").scrollTop=0});
+function showReader(on){document.body.classList.toggle("no-reader",!on);$("#openReader").hidden=on;requestAnimationFrame(renderBoard)}
+$("#readerHide").onclick=()=>showReader(false);$("#openReaderBtn").onclick=()=>showReader(true);
+$("#readerMore").setAttribute("data-menu-btn","");
+$("#readerMore").onclick=e=>{const b=e.currentTarget;const draw=()=>`<div class="mh2">Affichage</div>
+  <button class="mi row" data-k="wol">${ck(state.showWolof!==false)}<span>Afficher le wolof</span></button>
+  <button class="mi row" data-k="hints">${ck(state.wbwHints!==false)}<span>Indices français en mot à mot</span></button><hr>
+  <button class="mi" data-k="gloss"><span>Glossaire wolof</span><small>Tous tes mots traduits</small></button>
+  <button class="mi" data-k="marks"><span>Repères de couleurs</span><small>Le sens de chaque surlignage</small></button>`;
+  const m=popMenu(b,draw(),k=>{if(k==="wol"){state.showWolof=state.showWolof===false;save();renderReader();renderBoard();m.innerHTML=draw();return true}
+    if(k==="hints"){state.wbwHints=state.wbwHints===false;save();renderReader();m.innerHTML=draw();return true}
+    if(k==="gloss")openDrawer("gloss");if(k==="marks")openDrawer("marks")},"right")};
+function gotoVerse(ref){const s=+ref.split(":")[0];if(cur().surah!==s){cur().surah=s;$("#surahSel").value=s;save()}ui.selVerse=ref;showReader(true);if(isMobile())setPane("reader");renderReader();
+  requestAnimationFrame(()=>{const li=$("#readerBody").querySelector(`li[data-ref="${ref}"]`);li&&li.scrollIntoView({block:"center",behavior:"smooth"})})}
+
+/* ---------- Panneau à la demande ---------- */
+const VIEWS={discussion:"Discussion",tafsir:"Tafsir",gloss:"Glossaire wolof",marks:"Repères de couleurs"};
+const isDrawer=v=>document.body.classList.contains("drawer-open")&&ui.view===v;
+function openDrawer(v){ui.view=v;document.body.classList.add("drawer-open");renderSide();renderDiscBtn()}
+function closeDrawer(){document.body.classList.remove("drawer-open");$("#mpop").hidden=true;renderDiscBtn()}
+$("#dClose").onclick=closeDrawer;
+function anchorLabel(a){if(!a)return"Toute la séance";if(a.kind==="word"){const t=tiles(a.ref).find(x=>x.i===a.i);return`Mot « ${t?t.ar:"?"} » · ${a.ref}`}if(a.kind==="verse")return"Verset "+verse(a.ref).label;const t=el(a.id);if(!t)return"Élément supprimé";
+  if(t.type==="verse")return"Carte "+verse(t.ref).label;if(t.type==="note")return`Note de ${(MEMBERS[t.by]||MEMBERS.me).name} : « ${t.text.slice(0,40)}${t.text.length>40?"…":""} »`;
+  return{text:"Texte",rect:"Cadre",arrow:"Flèche",stroke:"Dessin"}[t.type]+(t.text?` : « ${t.text.slice(0,40)} »`:"")}
+const mentionsMe=c=>[{author:c.author,text:c.text},...c.replies].some(m=>m.author!=="me"&&/@Toi\b/.test(m.text));
+function unreadMentions(){return state.comments.filter(c=>mentionsMe(c)&&!state.readMentions.includes(c.id+":"+c.replies.length)&&!state.readMentions.includes(c.id))}
+function renderDiscBtn(){const open=state.comments.filter(c=>c.sid===state.current&&!c.resolved).length;$("#discN").textContent=open||"";const u=unreadMentions().length;const d=$("#discDot");d.hidden=!u;d.textContent=u;$("#discBtn").setAttribute("aria-pressed",isDrawer("discussion"))}
+$("#discBtn").onclick=()=>{if(isDrawer("discussion")){closeDrawer();return}const u=unreadMentions().length;if(u){ui.filter="mentions";state.readMentions.push(...state.comments.filter(mentionsMe).map(c=>c.id+":"+c.replies.length));save()}openDrawer("discussion")};
+const lastTs=c=>Math.max(c.ts,...c.replies.map(r=>r.ts));
+function renderSide(){
+  $("#dTitle").textContent=VIEWS[ui.view];$("#composer").hidden=ui.view!=="discussion";const body=$("#sideBody");
+  if(ui.view==="discussion"){
+    const mine=state.comments.filter(c=>c.sid===state.current);
+    let list=mine.filter(c=>ui.filter==="resolved"?c.resolved:ui.filter==="mentions"?mentionsMe(c):!c.resolved).sort((a,b)=>lastTs(b)-lastTs(a));
+    const msg=(m)=>{const p=MEMBERS[m.author];return`<div class="msg"><span class="av" style="--c:${p.c}">${p.init}</span><div class="body"><div class="mh"><b>${p.name}</b><time>${ago(m.ts)}</time></div><p>${fmtMsg(m.text)}</p></div></div>`};
+    body.innerHTML=`<div class="seg">${[["open","Ouverts"],["mentions","Mentions"],["resolved","Résolus"]].map(([k,l])=>`<button class="chip" data-filter="${k}" aria-pressed="${ui.filter===k}">${l}</button>`).join("")}</div>
+    <div class="threads">${list.length?list.map(c=>`<article class="thread ${c.resolved?"resolved":""}" data-cid="${c.id}">
+      <button class="anchor-chip" data-goto="1" title="Aller à l'élément">Sur : ${esc(anchorLabel(c.anchor))}</button>
+      ${msg(c)}${c.replies.map(r=>`<div class="reply">${msg(r)}</div>`).join("")}
+      ${ui.replyTo===c.id?`<div class="replybox"><textarea rows="2" id="replyIn" placeholder="Ta réponse… (@ pour mentionner)">${esc(ui.replyDraft)}</textarea></div><div class="tactions"><button class="btn primary" data-rsend="1">Répondre</button><button class="link" data-rcancel="1">Annuler</button></div>`
+        :`<div class="tactions"><button class="link" data-reply="1">Répondre</button><button class="link" data-resolve="1">${c.resolved?"Rouvrir":"Marquer comme résolu"}</button></div>`}
+    </article>`).join(""):`<div class="empty">${ui.filter==="mentions"?"Personne ne t'a mentionné pour l'instant.":ui.filter==="resolved"?"Aucun fil résolu.":"Aucun commentaire ouvert. Sélectionne un verset ou un élément du tableau, puis « Commenter »."}</div>`}</div>`;
+    renderCtx();
+  }
+  if(ui.view==="tafsir"){
+    if(!ui.selVerse){body.innerHTML=`<div class="empty">Sélectionne un verset dans la lecture ou sur le tableau pour afficher son tafsir ici.</div>`;return}
+    const v=verse(ui.selVerse);
+    body.innerHTML=`<div class="pad"><div class="tafsir-v"><div class="muted" style="font-size:12px;font-weight:600">${esc(v.label)}</div><div class="ar" lang="ar" dir="rtl">${v.ar}</div><div class="fr">${esc(v.fr)}</div></div>
+      <div class="sources">${["Al-Muyassar","As-Sa'di","Ibn Kathir"].map(s=>`<button class="chip" data-src="${s}" aria-pressed="${ui.src===s}">${s}</button>`).join("")}</div>
+      <div class="placeholder"><b>Tafsir ${esc(ui.src)}</b><br>Dans la vraie version, le texte du tafsir pour ${ui.selVerse} s'affichera ici, depuis une source vérifiée. Tu pourras en surligner un passage et l'envoyer sur le tableau.</div>
+      <div class="btnrow"><button class="btn" data-tv="reflect">Ajouter une réflexion</button><button class="btn" data-tv="comment">Commenter ce verset</button></div></div>`;
+  }
+  if(ui.view==="gloss"){body.innerHTML=`<div class="pad"><input type="search" id="glossQ" placeholder="Chercher en wolof ou en arabe" aria-label="Chercher dans le glossaire" value="${esc(ui.glossQ||"")}"><div id="glossList" class="glist"></div></div>`;renderGlossList()}
+  if(ui.view==="marks"){const h=hls();
+    body.innerHTML=`<div class="pad"><p class="muted" style="margin:0;line-height:1.5">Chaque couleur a toujours le même sens dans l'espace. Clique un verset pour y aller.</p><div class="legend">${Object.entries(HL).map(([k,x])=>{const refs=Object.keys(h).filter(r=>h[r]===k).sort((a,b)=>{const[a1,a2]=a.split(":").map(Number),[b1,b2]=b.split(":").map(Number);return a1-b1||a2-b2});
+      return`<div class="t-${k}"><h4><span class="sq"></span>${x.label} <span class="muted" style="font-weight:500">· ${refs.length}</span></h4><p>${x.desc}</p><div class="refs">${refs.length?refs.map(r=>`<button data-gv="${r}">${r}</button>`).join(""):'<span class="muted" style="font-size:12px">Aucun verset</span>'}</div></div>`}).join("")}</div></div>`;
+  }
+}
+function renderCtx(){$("#ctx").innerHTML=`<span>Sur :</span><b>${esc(anchorLabel(ui.anchor))}</b>${ui.anchor?`<button type="button" id="ctxClear" title="Commenter la séance entière">Retirer</button>`:""}`}
+function startComment(a){ui.anchor=a;if(ui.filter==="resolved")ui.filter="open";openDrawer("discussion");setTimeout(()=>$("#cmtInput").focus(),60)}
+$("#sideBody").addEventListener("click",e=>{
+  const gw=e.target.closest("[data-gw]");if(gw){const[r,i]=gw.dataset.gw.split("|");if(isMobile())closeDrawer();goWord(r,+i);return}
+  const f=e.target.closest("[data-filter]");if(f){ui.filter=f.dataset.filter;renderSide();return}
+  const s=e.target.closest("[data-src]");if(s){ui.src=s.dataset.src;renderSide();return}
+  const gv=e.target.closest("[data-gv]");if(gv){if(isMobile())closeDrawer();gotoVerse(gv.dataset.gv);return}
+  const tv=e.target.closest("[data-tv]");if(tv){tv.dataset.tv==="reflect"?(closeDrawer(),addReflection(ui.selVerse)):startComment({kind:"verse",ref:ui.selVerse});return}
+  const th=e.target.closest(".thread");if(!th)return;const c=state.comments.find(x=>x.id===th.dataset.cid);
+  if(e.target.closest("[data-goto]")){const a=c.anchor;if(!a)return;if(isMobile())closeDrawer();if(a.kind==="verse")gotoVerse(a.ref);else if(a.kind==="word")goWord(a.ref,a.i);else{const t=el(a.id);if(!t){toast("Cet élément a été supprimé");return}if(isMobile())setPane("board");requestAnimationFrame(()=>{setTool("select",true);select(t.id);centerOn(bbox(t),true);renderBoard()})}return}
+  if(e.target.closest("[data-reply]")){ui.replyTo=c.id;ui.replyDraft="";renderSide();setTimeout(()=>$("#replyIn")?.focus(),20);return}
+  if(e.target.closest("[data-rcancel]")){ui.replyTo=null;renderSide();return}
+  if(e.target.closest("[data-rsend]")){sendReply(c);return}
+  if(e.target.closest("[data-resolve]")){c.resolved=!c.resolved;save();renderSide();renderDiscBtn();toast(c.resolved?"Fil marqué comme résolu":"Fil rouvert")}
+});
+$("#sideBody").addEventListener("input",e=>{if(e.target.id==="glossQ"){ui.glossQ=e.target.value;renderGlossList();return}if(e.target.id==="replyIn"){ui.replyDraft=e.target.value;mentionAuto(e.target)}});
+$("#sideBody").addEventListener("keydown",e=>{if(e.target.id==="replyIn"){if(mentionKey(e))return;if(e.key==="Enter"&&(e.ctrlKey||e.metaKey)){e.preventDefault();sendReply(state.comments.find(x=>x.id===ui.replyTo))}}});
+function sendReply(c){const t=ui.replyDraft.trim();if(!t)return;c.replies.push({author:"me",text:t,ts:Date.now()});ui.replyTo=null;ui.replyDraft="";$("#mpop").hidden=true;save();renderSide();toast("Réponse publiée");maybeKReply(t,c)}
+$("#ctx").addEventListener("click",e=>{if(e.target.id==="ctxClear"){ui.anchor=null;renderCtx()}});
+$("#composer").addEventListener("submit",e=>{e.preventDefault();const inp=$("#cmtInput");const t=inp.value.trim();if(!t){inp.focus();return}
+  const c={id:uid(),sid:state.current,anchor:ui.anchor,author:"me",text:t,ts:Date.now(),resolved:false,replies:[]};state.comments.push(c);inp.value="";ui.anchor=null;ui.filter="open";$("#mpop").hidden=true;save();renderSide();renderReader();renderBoard();renderDiscBtn();toast("Commentaire publié");maybeKReply(t,c)});
+$("#cmtInput").addEventListener("input",e=>mentionAuto(e.target));
+$("#cmtInput").addEventListener("keydown",e=>{if(mentionKey(e))return;if(e.key==="Enter"&&(e.ctrlKey||e.metaKey)){e.preventDefault();$("#composer").requestSubmit()}});
+
+/* Mentions @ */
+let mTarget=null,mIdx=0,mList=[];
+function mentionAuto(ta){const before=ta.value.slice(0,ta.selectionStart);const m=before.match(/@(\w*)$/);const pop=$("#mpop");
+  if(!m){pop.hidden=true;mTarget=null;return}mTarget=ta;mList=Object.values(MEMBERS).filter(p=>p.name.toLowerCase().startsWith(m[1].toLowerCase()));if(!mList.length){pop.hidden=true;return}mIdx=0;drawPop();
+  const r=ta.getBoundingClientRect(),dr=$("#drawer").getBoundingClientRect();pop.style.top="auto";pop.style.bottom=(dr.bottom-r.top+4)+"px";if(pop.parentElement!==$("#drawer"))$("#drawer").appendChild(pop);pop.hidden=false}
+function drawPop(){$("#mpop").innerHTML=mList.map((p,i)=>`<button type="button" data-mi="${i}" class="${i===mIdx?"act":""}"><span class="av" style="--c:${p.c}">${p.init}</span>${p.name}</button>`).join("")}
+function pickMention(i){const p=mList[i],ta=mTarget;if(!p||!ta)return;const pos=ta.selectionStart;const before=ta.value.slice(0,pos).replace(/@(\w*)$/,"@"+p.name+" ");ta.value=before+ta.value.slice(pos);ta.focus();ta.selectionStart=ta.selectionEnd=before.length;if(ta.id==="replyIn")ui.replyDraft=ta.value;$("#mpop").hidden=true;mTarget=null}
+function mentionKey(e){if($("#mpop").hidden||e.target!==mTarget)return false;if(e.key==="ArrowDown"||e.key==="ArrowUp"){e.preventDefault();mIdx=(mIdx+(e.key==="ArrowDown"?1:mList.length-1))%mList.length;drawPop();return true}if(e.key==="Enter"||e.key==="Tab"){e.preventDefault();pickMention(mIdx);return true}if(e.key==="Escape"){$("#mpop").hidden=true;return true}return false}
+$("#mpop").addEventListener("mousedown",e=>{e.preventDefault();const b=e.target.closest("[data-mi]");if(b)pickMention(+b.dataset.mi)});
+
+/* ---------- Présence simulée (démo) ---------- */
+function kMove(){if(document.hidden)return;const c=board().filter(e=>e.type==="verse"||e.type==="note");if(!c.length)return;const t=c[Math.floor(Math.random()*c.length)];const b=bbox(t);
+  $("#kcursor").style.transform=`translate(${b.x+b.w*(.3+Math.random()*.5)}px,${b.y+b.h*(.3+Math.random()*.5)}px)`;
+  ui.kRef=t.type==="verse"?t.ref:null;document.querySelectorAll(".verse").forEach(li=>li.classList.toggle("k-here",li.dataset.ref===ui.kRef))}
+function kComment(){if(state.demoDone||state.current!=="s-duha")return;state.demoDone=true;
+  const c={id:"c-demo",sid:"s-duha",anchor:{kind:"verse",ref:"93:11"},author:"k",text:"@Toi pour le 93:11, « proclamer le bienfait » : est-ce que ça inclut aussi le partager concrètement avec les autres ? Ça boucle avec les versets 9 et 10.",ts:Date.now(),resolved:false,replies:[]};
+  state.comments.push(c);save();if(isDrawer("discussion"))renderSide();renderReader();renderBoard();renderDiscBtn();
+  toast("Khadija t'a mentionné sur 93:11",{label:"Voir",fn:()=>{ui.filter="mentions";state.readMentions.push("c-demo:0");save();openDrawer("discussion");requestAnimationFrame(()=>{const th=$(`.thread[data-cid="c-demo"]`);th&&(th.classList.add("flash"),th.scrollIntoView({block:"nearest"}))})}})}
+function maybeKReply(t,c){if(!/@Khadija\b/.test(t))return;setTimeout(()=>{c.replies.push({author:"k",text:"Bien reçu @Toi, je regarde ça et je complète sur le tableau.",ts:Date.now()});save();if(c.sid===state.current&&isDrawer("discussion"))renderSide();renderDiscBtn();toast("Khadija a répondu",{label:"Voir",fn:()=>openDrawer("discussion")})},5000)}
+
+/* ---------- Séances, partage, options ---------- */
+function renderHeader(){$("#sessTitle").value=cur().title}
+$("#sessTitle").addEventListener("change",e=>{cur().title=e.target.value.trim()||"Séance sans titre";save();renderHeader()});
+$("#sessTitle").addEventListener("keydown",e=>{if(e.key==="Enter")e.target.blur();e.stopPropagation()});
+$("#sessBtn").setAttribute("data-menu-btn","");$("#moreBtn").setAttribute("data-menu-btn","");$("#readerMore").setAttribute("data-menu-btn","");
+$("#sessBtn").onclick=e=>{const df=new Intl.DateTimeFormat("fr",{day:"numeric",month:"long"});
+  popMenu(e.currentTarget,`<div class="mh2">Séances de l'espace</div>`+Object.values(state.sessions).sort((a,b)=>b.date-a.date).map(s=>`<button class="mi ${s.id===state.current?"cur":""}" data-k="s:${s.id}"><span>${esc(s.title)}</span><small>${df.format(s.date)} · ${SURAHS[s.surah].name}</small></button>`).join("")+`<hr><button class="mi" data-k="new"><span>+ Nouvelle séance</span><small>Un tableau vide</small></button>`,
+  k=>{if(k.startsWith("s:"))switchSession(k.slice(2));if(k==="new"){const id="s-"+uid();state.sessions[id]={id,title:"Nouvelle séance",surah:cur().surah,date:Date.now()};state.boards[id]=[];state.highlights[id]={};switchSession(id);$("#sessTitle").select();toast("Séance créée — donne-lui un titre")}},"left")};
+function switchSession(id){state.current=id;selId=null;editingId=null;ui.selVerse=null;ui.anchor=null;ui.replyTo=null;undoStack=[];redoStack=[];save();renderHeader();renderSurahSel();renderReader();if(document.body.classList.contains("drawer-open"))renderSide();renderPalette();updUndo();renderBoard();renderDiscBtn();requestAnimationFrame(fitView)}
+function modal(html){closeMenus();const s=document.createElement("div");s.className="scrim";s.innerHTML=`<div class="modal" role="dialog" aria-modal="true">${html}<div class="mfoot"><button class="btn primary" data-close>Fermer</button></div></div>`;s.onclick=e=>{if(e.target===s||e.target.closest("[data-close]"))s.remove()};document.body.appendChild(s);s.querySelector("[data-close]").focus();return s}
+$("#shareBtn").onclick=()=>{const s=modal(`<h3>Inviter dans l'espace</h3><p class="sub">Les membres voient le tableau, les surlignages, le wolof et la discussion en direct, et peuvent être mentionnés avec @.</p>
+  <div class="member"><span class="av" style="--c:var(--me)">T</span><div class="grow"><b>Toi</b><br><small>Propriétaire</small></div><small>En ligne</small></div>
+  <div class="member"><span class="av" style="--c:var(--k)">K</span><div class="grow"><b>Khadija</b><br><small>Peut modifier</small></div><small>En ligne</small></div>
+  <div class="copyrow"><input id="invLink" readonly value="majalis.app/rejoindre/ad-duha-7k2q" aria-label="Lien d'invitation"><button class="btn" id="copyInv">Copier le lien</button></div>
+  <p class="note-demo">Prototype : la présence de Khadija et ses commentaires sont simulés. La synchronisation en temps réel entre deux comptes arrive à l'étape suivante.</p>`);
+  s.querySelector("#copyInv").onclick=()=>{const i=s.querySelector("#invLink");const fb=()=>{i.select();toast("Sélectionné — copie avec Ctrl+C")};navigator.clipboard?navigator.clipboard.writeText(i.value).then(()=>toast("Lien copié"),fb):fb()}};
+function showKeys(){modal(`<h3>Raccourcis</h3><p class="sub">Chaque outil a aussi son bouton : les raccourcis ne sont qu'un bonus.</p><div class="keys">
+  ${TOOLS.filter(t=>!t.sep).map(t=>`<kbd class="k">${t.key}</kbd><span>${t.label}</span>`).join("")}
+  <kbd class="k">Espace + glisser</kbd><span>Se déplacer dans le tableau</span><kbd class="k">Ctrl + molette</kbd><span>Zoomer</span>
+  <kbd class="k">Suppr</kbd><span>Supprimer la sélection</span><kbd class="k">Ctrl + Z</kbd><span>Annuler</span><kbd class="k">Ctrl + Maj + Z</kbd><span>Rétablir</span>
+  <kbd class="k">Échap</kbd><span>Revenir à la sélection, ou fermer</span><kbd class="k">Double-clic</kbd><span>Écrire dans une note, ou en créer une</span></div>`)}
+$("#moreBtn").onclick=e=>popMenu(e.currentTarget,`<button class="mi" data-k="keys"><span>Raccourcis clavier</span></button><button class="mi" data-k="reset"><span>Réinitialiser la démo</span><small>Efface tes changements dans ce navigateur</small></button>`,
+  k=>{if(k==="keys")showKeys();if(k==="reset"){state=seed();save();closeDrawer();switchSession(state.current);toast("Démo réinitialisée")}},"right");
+document.querySelector(".mobnav").addEventListener("click",e=>{const b=e.target.closest("[data-pane]");if(b)setPane(b.dataset.pane)});
+
+/* ---------- Clavier ---------- */
+document.addEventListener("keydown",e=>{const tg=e.target;if(tg.closest&&(tg.closest("input,textarea,select,[contenteditable='true']")))return;
+  if(e.key==="Escape"){if($(".scrim,.menu")){closeMenus();return}if(document.body.classList.contains("drawer-open")&&!selId&&tool==="select"){closeDrawer();return}if(tool!=="select")setTool("select",true);else select(null);return}
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="z"){e.preventDefault();e.shiftKey?redo():undo();return}
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="y"){e.preventDefault();redo();return}
+  if(e.ctrlKey||e.metaKey||e.altKey)return;
+  if(e.key===" "){spaceDown=true;stage.classList.add("panning");e.preventDefault();return}
+  if((e.key==="Delete"||e.key==="Backspace")&&selId){e.preventDefault();removeEl(selId);return}
+  if(e.key==="Enter"&&selId){const t=el(selId);if(t&&(t.type==="note"||t.type==="text")){e.preventDefault();startEdit(selId)}return}
+  if(e.key==="?"){showKeys();return}
+  const t=TOOLS.find(x=>x.key&&x.key.toLowerCase()===e.key.toLowerCase());if(t)setTool(t.id)});
+document.addEventListener("keyup",e=>{if(e.key===" "){spaceDown=false;if(!drag)stage.classList.remove("panning")}});
+addEventListener("resize",()=>positionSelTools());
+
+/* ---------- Démarrage ---------- */
+setPane("board");
+renderHeader();renderSurahSel();renderReader();renderToolbar();setTool("select",true);renderDiscBtn();updUndo();renderBoard();
+requestAnimationFrame(()=>{renderBoard();fitView();kMove();flashHint("welcome",6000)});
+document.fonts&&document.fonts.ready.then(()=>{renderBoard()});
+setInterval(kMove,4500);setTimeout(kComment,15000);
+</script>

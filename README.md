@@ -1,36 +1,39 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Majalis
 
-## Getting Started
+Espace collaboratif pour l'étude et le tadabbur du Coran : lecture, tableau d'annotation, notes, mot à mot wolof et discussion en temps réel.
 
-First, run the development server:
+Stack : Next.js (App Router, TypeScript) · Supabase (auth, Postgres, Realtime) · Vercel.
+
+## Démarrer
 
 ```bash
+npm install
+cp .env.local.example .env.local   # puis remplir avec les clés Supabase
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Sans `.env.local`, la lecture fonctionne déjà ; la connexion et les espaces partagés demandent Supabase.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Base de données
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Le schéma est dans `supabase/migrations/`. Pour l'appliquer à ton projet Supabase :
 
-## Learn More
+```bash
+npx supabase login
+npx supabase link --project-ref <ref-du-projet>
+npx supabase db push
+```
 
-To learn more about Next.js, take a look at the following resources:
+(ou colle le fichier SQL dans l'éditeur SQL du tableau de bord Supabase).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Dans **Authentication → URL Configuration**, ajoute `http://localhost:3000/auth/callback` et l'URL Vercel `/auth/callback` aux Redirect URLs.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Texte du Coran
 
-## Deploy on Vercel
+L'application sert elle-même le texte : aucun appel d'API à l'exécution.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- `data/tanzil/` : texte uthmani et métadonnées du [Tanzil Project](https://tanzil.net) (CC BY 3.0, recopié sans modification ; la mention de source est affichée dans l'app).
+- `data/translations/*.raw.json` : traductions récupérées une fois depuis l'API publique de Quran.com (`npm run quran:fetch -- <id> <slug>`). Actuellement : Muhammad Hamidullah (id 31).
+- `npm run quran:build` génère `src/data/quran/` (index + un fichier par sourate) à partir de ces sources.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+La traduction Hamidullah est utilisée pour un usage personnel et non commercial ; vérifier sa licence avant toute diffusion publique.

@@ -1,33 +1,81 @@
+/* Jetons de design de Majalis (repris du prototype v2). Les polices viennent de next/font (layout.tsx). */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #f4f6f4;
+  --surface: #ffffff;
+  --surface-2: #eef2ef;
+  --line: #e1e7e3;
+  --ink: #15221e;
+  --muted: #5b6a64;
+  --faint: #8a9792;
+  --accent: #0d5c52;
+  --accent-ink: #ffffff;
+  --accent-soft: #dcebe6;
+  --grid: #d5ddd8;
+  --hl-theme: #e2eedb;
+  --hl-question: #dde9f5;
+  --hl-reflect: #f6ebcd;
+  --hl-link: #f5e0e5;
+  --c-ink: #1f2d29;
+  --c-sand: #b07a14;
+  --c-sage: #4a7a45;
+  --c-rose: #ad4259;
+  --c-sky: #2c6b9b;
+  --me: #0d5c52;
+  --k: #8f45ab;
+  --shadow: 0 1px 2px rgba(20, 40, 34, 0.05), 0 6px 20px rgba(20, 40, 34, 0.08);
+  --shadow-lg: 0 8px 40px rgba(20, 40, 34, 0.16);
+  --f-ui: var(--font-figtree), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-read: var(--font-garamond), Garamond, Georgia, serif;
+  --f-hand: var(--font-caveat), "Segoe Print", cursive;
+  --f-ar: var(--font-amiri-quran), "Geeza Pro", "Traditional Arabic", serif;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  :root:not([data-theme="light"]) {
+    --bg: #0f1513;
+    --surface: #161e1b;
+    --surface-2: #1c2622;
+    --line: #26312d;
+    --ink: #e5ece9;
+    --muted: #97a6a0;
+    --faint: #6f7d78;
+    --accent: #62bcac;
+    --accent-ink: #06201b;
+    --accent-soft: #1c3a34;
+    --grid: #24302b;
+    --hl-theme: #24341e;
+    --hl-question: #1b2e3e;
+    --hl-reflect: #36301c;
+    --hl-link: #382027;
+    --c-ink: #e5ece9;
+    --c-sand: #e1b45b;
+    --c-sage: #8cc485;
+    --c-rose: #e68aa0;
+    --c-sky: #80b6e2;
+    --me: #62bcac;
+    --k: #c88be2;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
+    --shadow-lg: 0 10px 44px rgba(0, 0, 0, 0.5);
+    color-scheme: dark;
   }
-}
-
-html,
-body {
-  max-width: 100vw;
-  overflow-x: hidden;
-}
-
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
 * {
   box-sizing: border-box;
-  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
   margin: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--f-ui);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
 }
 
 a {
@@ -35,8 +83,44 @@ a {
   text-decoration: none;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: 9px;
+  padding: 7px 14px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.btn:hover {
+  background: var(--surface-2);
+}
+.btn.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+.btn.primary:hover {
+  filter: brightness(1.07);
+}
+.btn:disabled {
+  opacity: 0.6;
+  cursor: default;
 }
