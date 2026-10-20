@@ -1,11 +1,11 @@
 import type { Metadata, Viewport } from "next";
-import { Amiri_Quran, Caveat, EB_Garamond, Figtree } from "next/font/google";
+import { Caveat, EB_Garamond, Figtree, Scheherazade_New } from "next/font/google";
 import "./globals.css";
 
 const figtree = Figtree({ subsets: ["latin", "latin-ext"], variable: "--font-figtree" });
 const garamond = EB_Garamond({ subsets: ["latin", "latin-ext"], variable: "--font-garamond" });
 const caveat = Caveat({ subsets: ["latin", "latin-ext"], variable: "--font-caveat" });
-const amiri = Amiri_Quran({ subsets: ["arabic"], weight: "400", variable: "--font-amiri-quran" });
+const scheherazade = Scheherazade_New({ subsets: ["arabic"], weight: ["400", "700"], variable: "--font-scheherazade" });
 
 export const metadata: Metadata = {
   title: { default: "Majalis", template: "%s · Majalis" },
@@ -22,7 +22,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="fr" className={`${figtree.variable} ${garamond.variable} ${caveat.variable} ${amiri.variable}`}>
+    <html lang="fr" className={`${figtree.variable} ${garamond.variable} ${caveat.variable} ${scheherazade.variable}`}>
       <body>{children}</body>
     </html>
   );

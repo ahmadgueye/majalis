@@ -67,9 +67,9 @@ La v2 contient déjà, en JavaScript pur, la logique à porter :
 - **Polices** (via `next/font`, variables posées sur `<html>`) :
   - Figtree pour l'interface ;
   - **EB Garamond pour les traductions** (français et wolof), à la demande du porteur ;
-  - Amiri Quran pour l'arabe ;
+  - **Scheherazade New pour l'arabe** (texte coranique et titres), à la demande du porteur ;
   - Caveat pour le style main levée.
-- Le logo « م » utilise une police arabe système, car Amiri Quran ne l'affichait pas dans la pastille.
+- Le logo « م » utilise une police arabe système, choix hérité d'Amiri Quran (l'ancienne police arabe), qui ne l'affichait pas dans la pastille.
 
 ### Style : Tailwind v4 et jetons
 

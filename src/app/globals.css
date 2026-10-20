@@ -30,7 +30,7 @@
   --f-ui: var(--font-figtree), system-ui, -apple-system, "Segoe UI", sans-serif;
   --f-read: var(--font-garamond), Garamond, Georgia, serif;
   --f-hand: var(--font-caveat), "Segoe Print", cursive;
-  --f-ar: var(--font-amiri-quran), "Geeza Pro", "Traditional Arabic", serif;
+  --f-ar: var(--font-scheherazade), "Geeza Pro", "Traditional Arabic", serif;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -98,7 +98,7 @@
   --font-read: var(--f-read);
   --font-hand: var(--f-hand);
   --font-ar: var(--f-ar);
-  /* Logo « م » : police arabe système (Amiri Quran ne l'affichait pas dans la pastille). */
+  /* Logo « م » : police arabe système (hérité d'Amiri Quran, qui ne l'affichait pas dans la pastille). */
   --font-mark: "Geeza Pro", "Noto Naskh Arabic", var(--f-ui);
 
   --shadow-card: var(--shadow);
