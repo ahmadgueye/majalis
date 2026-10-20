@@ -77,7 +77,7 @@ La v2 contient déjà, en JavaScript pur, la logique à porter :
 - **Les jetons restent la seule source** des couleurs et des polices. `@theme inline` les expose en classes : `bg-surface`, `text-muted`, `border-line`, `bg-hl-question`, `text-c-rose`, `font-ar`, `font-read`, `font-hand`, `font-mark`, `shadow-card`, `rounded-control`, `text-ar`, `text-tr`.
 - La palette et les polices par défaut de Tailwind sont **retirées** (`--color-*: initial`) : `bg-red-500` n'existe pas, c'est voulu.
 - **Règle** : jamais de couleur ni de police en dur dans un composant, ni de `style={{ … }}` pour de la mise en forme. Pour changer une couleur ou une police, on modifie la variable dans `:root` (et sa version sombre), rien d'autre.
-- Le mode sombre suit `prefers-color-scheme` par les variables : pas besoin de classes `dark:`.
+- Le mode sombre passe par les variables : pas besoin de classes `dark:`. Il suit `prefers-color-scheme`, sauf si la personne a choisi avec le bouton de thème (`ThemeToggle`, choix dans `localStorage` sous `majalis-theme`, posé en `data-theme` sur `<html>` par un script du layout avant l'affichage). Les valeurs sombres existent donc **deux fois** dans `globals.css` (bloc `@media` et bloc `[data-theme="dark"]`) : les garder identiques.
 - Le code qui dessine (SVG du tableau, trait main levée) lit les variables CSS (`var(--accent)`), jamais des valeurs copiées.
 - `.btn` et `.btn.primary` sont des classes de composant (`@layer components`) ; `px-safe` donne les marges latérales qui respectent les encoches.
 
@@ -101,6 +101,7 @@ src/lib/quran.ts             accès aux données (server-only), séparation de l
 src/app/lire/[surah]/        page Lecture, 114 pages générées en statique
 src/app/connexion/           formulaire de lien magique
 src/app/auth/callback/       échange du code contre une session
+src/app/auth/deconnexion/    ferme la session (POST), utilisé par le menu de l'avatar (UserMenu)
 supabase/migrations/         schéma SQL
 prototypes/                  prototypes HTML v1, v2 et maquette de l'accueil (référence UX)
 src/components/landing/      aperçu de séance de la page d'accueil
@@ -140,6 +141,7 @@ Branche `feat/fondations`, rien n'est encore poussé.
 - Connexion par lien e-mail **testée de bout en bout en local** (e-mail reçu dans Mailpit, session ouverte, profil créé par le déclencheur).
 - Schéma SQL avec RLS.
 - Style migré vers Tailwind v4, branché sur les jetons.
+- Bouton de thème clair/sombre (accueil et Lecture). Une fois connecté, l'en-tête de l'accueil montre un avatar (initiales) qui ouvre le nom, l'e-mail et « Se déconnecter ».
 - Le type-check, le lint et le build passent.
 
 **À faire, dans l'ordre conseillé**

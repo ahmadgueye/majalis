@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
 import { SessionPreview } from "@/components/landing/SessionPreview";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { UserMenu } from "@/components/UserMenu";
 import { DEFAULT_TRANSLATION, getSurah, words } from "@/lib/quran";
 import { createClient } from "@/lib/supabase/server";
 
@@ -48,6 +50,10 @@ const STEPS = [
 export default async function Home() {
   const supabase = await createClient();
   const user = supabase ? (await supabase.auth.getUser()).data.user : null;
+  const profile =
+    supabase && user
+      ? (await supabase.from("profiles").select("display_name").eq("id", user.id).maybeSingle()).data
+      : null;
 
   // Versets tirés des données locales (Tanzil, Hamidullah) : le texte n'est jamais recopié à la main.
   const [sad, muhammad] = await Promise.all([getSurah(38), getSurah(47)]);
@@ -71,10 +77,9 @@ export default async function Home() {
             <Link href="/lire/1" className="px-2.5 py-[7px] font-medium text-muted hover:text-ink max-sm:hidden">
               Lire le Coran
             </Link>
+            <ThemeToggle />
             {user ? (
-              <span className="max-w-[200px] truncate text-[13px] text-muted" title={user.email}>
-                {user.email}
-              </span>
+              <UserMenu name={profile?.display_name ?? ""} email={user.email ?? ""} />
             ) : (
               <Link className="btn" href="/connexion">
                 Se connecter
@@ -86,9 +91,6 @@ export default async function Home() {
 
       <main className="text-[15px] leading-[1.55]">
         <div className="px-safe mx-auto grid max-w-[1080px] justify-items-center gap-5 pt-14 pb-10 text-center max-sm:pt-9 max-sm:pb-7">
-          <p className="font-ar text-[30px] leading-[1.6] text-accent" lang="ar" dir="rtl">
-            {words(v29.ar).slice(4, 6).join(" ")}
-          </p>
           <h1 className="max-w-[14ch] font-read text-[clamp(40px,6.4vw,68px)] leading-[1.04] font-medium tracking-[-0.01em] text-balance">
             Méditer le Coran,{" "}
             <span className="-mx-[0.06em] rounded px-[0.12em] italic [background:linear-gradient(transparent_12%,var(--hl-theme)_12%,var(--hl-theme)_92%,transparent_92%)]">

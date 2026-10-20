@@ -33,6 +33,8 @@
   --f-ar: var(--font-scheherazade), "Geeza Pro", "Traditional Arabic", serif;
 }
 
+/* Sombre : selon le système (sans choix explicite) ou par le bouton de thème (data-theme sur <html>).
+   Les deux blocs doivent garder les mêmes valeurs. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #0f1513;
@@ -61,6 +63,34 @@
     --shadow-lg: 0 10px 44px rgba(0, 0, 0, 0.5);
     color-scheme: dark;
   }
+}
+
+:root[data-theme="dark"] {
+  --bg: #0f1513;
+  --surface: #161e1b;
+  --surface-2: #1c2622;
+  --line: #26312d;
+  --ink: #e5ece9;
+  --muted: #97a6a0;
+  --faint: #6f7d78;
+  --accent: #62bcac;
+  --accent-ink: #06201b;
+  --accent-soft: #1c3a34;
+  --grid: #24302b;
+  --hl-theme: #24341e;
+  --hl-question: #1b2e3e;
+  --hl-reflect: #36301c;
+  --hl-link: #382027;
+  --c-ink: #e5ece9;
+  --c-sand: #e1b45b;
+  --c-sage: #8cc485;
+  --c-rose: #e68aa0;
+  --c-sky: #80b6e2;
+  --me: #62bcac;
+  --k: #c88be2;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 10px 44px rgba(0, 0, 0, 0.5);
+  color-scheme: dark;
 }
 
 /* La palette et les polices par défaut de Tailwind sont retirées : seules les classes tirées des jetons
@@ -151,6 +181,21 @@
   button:not(:disabled),
   [role="button"]:not(:disabled) {
     cursor: pointer;
+  }
+
+  /* Défilement doux vers les ancres (#fonctions…). Next.js le coupe pendant les changements de page
+     grâce à data-scroll-behavior sur <html>. */
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+
+  /* Fondu au changement de thème (ThemeToggle, View Transitions). */
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 350ms;
+    animation-timing-function: ease-out;
   }
 
   :focus-visible {

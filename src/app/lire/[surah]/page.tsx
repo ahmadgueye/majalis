@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { DEFAULT_TRANSLATION, QURAN_NOTICE, getSurah, getSurahMeta, surahs } from "@/lib/quran";
 import { SurahPicker } from "@/components/reader/SurahPicker";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 type Props = { params: Promise<{ surah: string }> };
 
@@ -33,6 +34,7 @@ export default async function ReadPage({ params }: Props) {
         </Link>
         <SurahPicker current={n} surahs={surahs.map(({ n, tname, ar }) => ({ n, tname, ar }))} />
         <nav className="ml-auto flex gap-1.5" aria-label="Sourates voisines">
+          <ThemeToggle />
           {n > 1 && (
             <Link className="btn" href={`/lire/${n - 1}`} title="Sourate précédente">
               ‹ {n - 1}
