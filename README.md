@@ -4,19 +4,41 @@ Espace collaboratif pour l'étude et le tadabbur du Coran : lecture, tableau d'a
 
 Stack : Next.js (App Router, TypeScript) · Supabase (auth, Postgres, Realtime) · Vercel.
 
-## Démarrer
+## Démarrer en local
+
+Prérequis : Node 20+ et Docker Desktop lancé.
 
 ```bash
 npm install
-cp .env.local.example .env.local   # puis remplir avec les clés Supabase
-npm run dev
+npm run db:start                    # Supabase local dans Docker (le 1er lancement télécharge les images)
+cp .env.local.example .env.local    # les valeurs par défaut pointent déjà sur Supabase local
+npm run dev                         # http://localhost:3100
 ```
 
 Sans `.env.local`, la lecture fonctionne déjà ; la connexion et les espaces partagés demandent Supabase.
 
+| Service local | Adresse |
+|---|---|
+| API Supabase | http://127.0.0.1:54321 |
+| Studio (tableau de bord) | http://127.0.0.1:54323 |
+| Boîte mail de test (Mailpit) : les liens de connexion y arrivent | http://127.0.0.1:54324 |
+| PostgreSQL | `postgresql://postgres:postgres@127.0.0.1:54322/postgres` |
+
 ## Base de données
 
-Le schéma est dans `supabase/migrations/`. Pour l'appliquer à ton projet Supabase :
+Le schéma est dans `supabase/migrations/` ; la configuration locale dans `supabase/config.toml`.
+
+```bash
+npm run db:start    # démarre Supabase et applique les migrations
+npm run db:reset    # recrée la base locale depuis les migrations (efface les données)
+npm run db:types    # régénère src/lib/supabase/database.types.ts
+npm run db:status   # adresses et clés locales
+npm run db:stop     # arrête les conteneurs
+```
+
+Nouvelle migration : `npx supabase migration new <nom>`, écrire le SQL, puis `npm run db:reset`.
+
+### Plus tard : le projet Supabase en ligne
 
 ```bash
 npx supabase login
@@ -24,9 +46,7 @@ npx supabase link --project-ref <ref-du-projet>
 npx supabase db push
 ```
 
-(ou colle le fichier SQL dans l'éditeur SQL du tableau de bord Supabase).
-
-Dans **Authentication → URL Configuration**, ajoute `http://localhost:3000/auth/callback` et l'URL Vercel `/auth/callback` aux Redirect URLs.
+Dans **Authentication → URL Configuration**, ajouter l'URL Vercel suivie de `/auth/callback` aux Redirect URLs, et mettre l'URL et la clé publique du projet dans les variables d'environnement Vercel.
 
 ## Texte du Coran
 

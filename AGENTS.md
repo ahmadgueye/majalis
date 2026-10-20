@@ -76,6 +76,7 @@ La v2 contient déjà, en JavaScript pur, la logique à porter :
 - **Next.js 15** (App Router, TypeScript, Turbopack), `src/` comme racine, alias `@/*`.
 - **Supabase** : authentification par lien e-mail, PostgreSQL avec RLS, Realtime. Clients dans `src/lib/supabase/` (`client.ts`, `server.ts`, `env.ts`). Le middleware `src/middleware.ts` rafraîchit la session et ne s'applique pas aux pages `/lire/`.
 - **Sans `.env.local`**, `createClient()` renvoie `null` : la lecture fonctionne et la connexion affiche un message au lieu de planter.
+- **Développement en local** : Supabase tourne dans Docker via la CLI (`supabase` en devDependency, config dans `supabase/config.toml`). `npm run db:start` démarre les conteneurs et applique les migrations ; les e-mails de connexion arrivent dans Mailpit (http://127.0.0.1:54324). Edge runtime et analytics sont désactivés pour alléger. Les adresses et commandes sont dans le README.
 - **Hébergement** : Vercel. Prévoir l'app installable (PWA).
 
 ### Arborescence utile
@@ -111,23 +112,26 @@ prototypes/                  prototypes HTML v1 et v2 (référence UX)
 - `comments` (ancre en `jsonb`, `parent_id` pour les réponses, `resolved`) et `mentions`.
 - `wbw_translations` : mot à mot wolof **partagé à l'échelle de l'espace**. Colonnes : `words jsonb` (index du premier mot vers traduction), `joins smallint[]`, `free`.
 - RLS via `is_member(space_id)` et `can_edit(space_id)` (security definer). Publication Realtime active sur le tableau, les surlignages, les commentaires, les mentions et le mot à mot.
-- **La migration n'est pas encore appliquée** : le porteur doit remplir `.env.local`, lancer `npx supabase db push` et ajouter `/auth/callback` aux Redirect URLs.
+- **En local**, la migration s'applique au démarrage (`npm run db:start`) et a été vérifiée : 10 tables avec RLS, publication Realtime sur les 5 tables prévues. Types générés dans `src/lib/supabase/database.types.ts` (`npm run db:types` après chaque migration), utilisés par les clients.
+- **Pas encore de projet Supabase en ligne** : à créer plus tard (`supabase link` puis `db push`, Redirect URLs, variables Vercel).
+- **Port** : l'app tourne sur **http://localhost:3100** (`npm run dev`), car le 3000 est pris par un autre projet du porteur. `site_url` et les redirections de `supabase/config.toml` suivent ce port.
 
 ## État d'avancement (au 20/10/2026)
 
-Branche `feat/fondations`, commit `cc44da5`, rien n'est encore poussé.
+Branche `feat/fondations`, rien n'est encore poussé.
 
 **Fait**
 - Projet Next.js, polices et jetons de design.
 - Coran local : 114 sourates, 6236 versets, traduction Hamidullah.
 - Page Lecture statique, choix de la sourate, sourate précédente et suivante.
 - Page d'accueil minimale.
-- Connexion par lien e-mail (code prêt, pas testée faute de clés).
+- Supabase local dans Docker, migration appliquée, clients typés.
+- Connexion par lien e-mail **testée de bout en bout en local** (e-mail reçu dans Mailpit, session ouverte, profil créé par le déclencheur).
 - Schéma SQL avec RLS.
 - Le type-check, le lint et le build passent.
 
 **À faire, dans l'ordre conseillé**
-1. Configurer Supabase avec le porteur et tester la connexion de bout en bout.
+1. Créer le projet Supabase en ligne et le relier à Vercel (quand on voudra déployer).
 2. Espaces : créer, lister, inviter par lien, rejoindre. Séances : créer, renommer, changer.
 3. Mise en page de la v2 dans l'app : en-tête, lecture repliable, panneau à droite, actions sur un verset, surlignages.
 4. **Porter le tableau** de la v2 en React, avec persistance dans `board_elements`.
