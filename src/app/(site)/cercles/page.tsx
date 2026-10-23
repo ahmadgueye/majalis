@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
 import { Users } from "lucide-react";
-import { AppHeader } from "@/components/AppHeader";
 import { ErrorNotice } from "@/components/Notice";
 import { CircleCard } from "@/components/circles/CircleCard";
 import { NewCircleSheet } from "@/components/circles/CircleSheets";
 import { requireViewer } from "@/lib/auth";
 import { loadCircles } from "@/lib/circles-server";
 import { errorMessage } from "@/lib/messages";
-import { createSpace } from "./actions";
+import { createSpace } from "@/app/cercles/actions";
 
 export const metadata: Metadata = { title: "Mes cercles" };
 
@@ -21,7 +20,6 @@ export default async function CirclesPage({ searchParams }: Props) {
 
   return (
     <>
-      <AppHeader viewer={viewer} crumbs={[{ label: "Mes cercles" }]} />
       <main className="px-safe mx-auto grid max-w-[1080px] gap-6 pb-16">
         <div className="flex flex-wrap items-end justify-between gap-4 pt-9">
           <div className="grid gap-1.5">

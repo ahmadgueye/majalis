@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Caveat, Figtree, Scheherazade_New } from "next/font/google";
+import { readingScript } from "@/lib/reading";
 import { THEME_KEY } from "@/lib/theme";
 import "./globals.css";
 
@@ -33,6 +34,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <head>
         {/* Applique le thème choisi avant l'affichage, pour éviter un flash de l'autre thème. */}
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        {/* Même chose pour la façon de lire (arabe, traduction…), voir src/lib/reading.ts. */}
+        <script dangerouslySetInnerHTML={{ __html: readingScript }} />
       </head>
       <body>{children}</body>
     </html>

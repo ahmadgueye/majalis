@@ -7,6 +7,8 @@ import { fromRow, type BoardEl } from "@/lib/board";
 import { peopleById } from "@/lib/circles-server";
 import { isHighlightKind, type HighlightKind } from "@/lib/highlights";
 import { DEFAULT_TRANSLATION, QURAN_NOTICE, getSurah, surahs } from "@/lib/quran";
+import { wolofText } from "@/lib/wolof";
+import { publishedWolof } from "@/lib/wolof-server";
 
 type Props = { params: Promise<{ id: string; sid: string }>; searchParams: Promise<{ sourate?: string }> };
 
@@ -37,12 +39,22 @@ export default async function SessionPage({ params, searchParams }: Props) {
   const elements = (board ?? []).map(fromRow).filter((e): e is BoardEl => !!e);
   const verses: Record<string, VerseText> = {};
   const refs = [...new Set(elements.flatMap((e) => (e.type === "verse" ? [e.ref] : [])))];
-  const bySurah = await Promise.all([...new Set(refs.map((r) => Number(r.split(":")[0])))].map((n) => getSurah(n)));
+  const boardSurahs = [...new Set(refs.map((r) => Number(r.split(":")[0])))];
+  const [bySurah, wolof] = await Promise.all([
+    Promise.all(boardSurahs.map((n) => getSurah(n))),
+    publishedWolof([...new Set([surah.meta.n, ...boardSurahs])], db),
+  ]);
   for (const ref of refs) {
     const [n, v] = ref.split(":").map(Number);
     const s = bySurah.find((x) => x?.meta.n === n);
     const verse = s?.verses[v - 1];
-    if (s && verse) verses[ref] = { label: `${s.meta.tname} · ${ref}`, ar: verse.ar, fr: verse.tr[DEFAULT_TRANSLATION] };
+    if (s && verse)
+      verses[ref] = {
+        label: `${s.meta.tname} · ${ref}`,
+        ar: verse.ar,
+        fr: verse.tr[DEFAULT_TRANSLATION],
+        wo: wolofText(verse.ar, wolof[ref]),
+      };
   }
   const people = await peopleById(db, (members ?? []).map((m) => m.user_id));
   const role = members?.find((m) => m.user_id === viewer.user.id)?.role;
@@ -52,7 +64,7 @@ export default async function SessionPage({ params, searchParams }: Props) {
       space={space}
       session={{ id: session.id, title: session.title }}
       canEdit={role === "owner" || role === "editor"}
-      viewer={{ id: viewer.user.id, name: viewer.name, email: viewer.email }}
+      viewer={{ id: viewer.user.id, name: viewer.name, email: viewer.email, translator: viewer.translator }}
       people={Object.fromEntries([...people].map(([pid, p]) => [pid, p.name]))}
       board={elements}
       boardVerses={verses}
@@ -63,7 +75,12 @@ export default async function SessionPage({ params, searchParams }: Props) {
         tname: surah.meta.tname,
         type: surah.meta.type,
         basmala: surah.basmala,
-        verses: surah.verses.map((v) => ({ n: v.n, ar: v.ar, fr: v.tr[DEFAULT_TRANSLATION] })),
+        verses: surah.verses.map((v) => ({
+          n: v.n,
+          ar: v.ar,
+          fr: v.tr[DEFAULT_TRANSLATION],
+          wo: wolofText(v.ar, wolof[`${surah.meta.n}:${v.n}`]),
+        })),
       }}
       notice={QURAN_NOTICE.split(". License")[0]}
       initialHighlights={highlights}

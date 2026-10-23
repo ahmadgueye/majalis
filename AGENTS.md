@@ -8,7 +8,7 @@ Ce fichier donne tout le contexte nécessaire pour reprendre le projet. Lis-le e
 
 - **Utilisateurs** : d'abord le porteur du projet et son épouse, puis ses étudiants.
 - **Inspirations** : Qurannotate (bon design mais UX confuse, fonctions qui ne marchent pas), QuranSpace (espace partagé encore en bêta), Figma, tldraw, Excalidraw.
-- **Ce que fait l'app** : lecture du Coran, tableau d'annotation libre (cartes de versets, notes, flèches, cadres, crayon), surlignages, commentaires avec @mentions, traduction mot à mot en **wolof**, glossaire partagé, collaboration en temps réel.
+- **Ce que fait l'app** : lecture du Coran, tableau d'annotation libre (cartes de versets, notes, flèches, cadres, crayon), surlignages, commentaires avec @mentions, traduction mot à mot en **wolof** (faite par le porteur seul, lue par tous), glossaire, collaboration en temps réel.
 - **Le porteur du projet est développeur** et en fait son **mémoire de master 2 en génie logiciel** (voir plus bas).
 
 ## Règles à respecter
@@ -57,6 +57,8 @@ La v2 contient déjà, en JavaScript pur, la logique à porter :
   - barre d'insertion des lettres wolof ;
   - traduction libre du verset ;
   - glossaire avec recherche.
+
+  **Attention** : la regex de normalisation de la v2 (`norm`) est fausse. Écrite en lettres arabes, ses plages sont inversées par l'affichage bidirectionnel et elle efface aussi les lettres (tous les mots finissent par se ressembler). Utiliser `norm()` de `src/lib/wolof.ts`, écrite avec des `\u`.
 - **Affichage du wolof** : en mode Lecture et sur les cartes normales, le wolof s'affiche **comme une simple phrase** sous le français, dans la couleur d'accent. C'est la traduction libre si elle existe, sinon les mots mis bout à bout. Les cartes « mot à mot » gardent la présentation interlinéaire.
 - **Discussion** : fils ancrés sur un verset, un mot, un élément du tableau ou toute la séance ; @mentions avec autocomplétion ; filtres Ouverts, Mentions et Résolus ; résolution des fils.
 - La **présence de « Khadija »** dans le prototype est **simulée**. Dans l'app, elle doit venir de Supabase Realtime.
@@ -86,6 +88,13 @@ La v2 contient déjà, en JavaScript pur, la logique à porter :
   - `.tone-<teinte>`, qui pose `--tone` et `--tone-soft` pour la teinte d'un cercle (utilisées en `bg-(--tone)`, `text-(--tone)`).
 
   `px-safe` donne les marges latérales qui respectent les encoches.
+- **En-tête commun** (`SiteHeader`, demande du porteur : la navigation changeait d'une page à l'autre) : **le même partout**, 56 px, mêmes éléments aux mêmes places. À gauche le logo et « Majalis » (Mes cercles une fois connecté, sinon l'accueil) ; au centre la navigation (connecté : Mes cercles, Lire le Coran, Traduire pour les traducteurs ; visiteur : Fonctions, Lire le Coran), la page en cours mise en évidence, et un bouton « Menu » sur téléphone ; à droite le thème puis l'avatar ou « Se connecter ».
+  - **Il est posé une seule fois**, par `src/app/(site)/layout.tsx` (groupe de routes : toutes les pages sauf la séance). Il **reste en place quand on change de page** : seul le contenu change, l'en-tête n'est ni redessiné ni relu. Ne pas remettre d'en-tête dans une page.
+  - Il lit la personne connectée **dans le navigateur, une fois par visite** (événement `INITIAL_SESSION` de Supabase, puis seulement si la personne change), ce qui garde la page Lecture générée à l'avance. Le dernier compte vu est gardé dans `localStorage` (`majalis-compte`) pour afficher l'avatar tout de suite ; « Se déconnecter » l'efface. Les liens n'apparaissent qu'une fois qu'on sait qui lit. En développement, React monte tout deux fois : deux lectures au chargement, c'est normal.
+  - Ce qui est propre à une page va dans **sa barre** (`PageBar`, collée sous l'en-tête) : fil d'Ariane d'un cercle (`Breadcrumbs`), sourate et voisines (Lecture), sourate, glossaire, progression, lettres et Publier (Traduire).
+  - **Exception** : la séance (`src/app/cercles/[id]/seances/`, hors du groupe), espace de travail plein écran, garde une seule barre compacte de même hauteur, avec la même gauche (logo) et la même droite (thème, avatar). La page introuvable, hors du groupe aussi, pose `SiteHeader` elle-même.
+  - Les server actions restent dans `src/app/cercles/actions.ts` et `src/app/traduire/actions.ts` (importées par `@/app/...`).
+- **Chargement des pages** : un squelette (`loading.tsx`) qui reprend la forme de la page qui arrive, pour Mes cercles, la page d'un cercle, Traduire et la séance. Pas pour la page Lecture, générée à l'avance et instantanée. Composants dans `src/components/Skeleton.tsx` (`SkeletonPage`, `Bone`, `BarBones`), style `.skeleton` dans `globals.css` : blocs faits des jetons (`--faint` mêlé à `--surface-2`, donc clairs et sombres), reflet doux coupé si la personne demande moins d'animations, et **affichage après 150 ms** pour ne pas clignoter quand la page arrive vite. Les actions (Publier, Créer…) n'ont pas d'indicateur à part : le bouton dit ce qui se passe (« Publication… »).
 - **Icônes** : `lucide-react` (licence ISC), toujours à côté d'un libellé. Une icône seule doit avoir `aria-label` et `title`.
 
 ## Stack et architecture
@@ -93,7 +102,7 @@ La v2 contient déjà, en JavaScript pur, la logique à porter :
 - **Next.js 15** (App Router, TypeScript, Turbopack), `src/` comme racine, alias `@/*`.
 - **Supabase** : authentification par lien e-mail, PostgreSQL avec RLS, Realtime. Clients dans `src/lib/supabase/` (`client.ts`, `server.ts`, `env.ts`). Le middleware `src/middleware.ts` rafraîchit la session et ne s'applique pas aux pages `/lire/`.
 - **Sans `.env.local`**, `createClient()` renvoie `null` : la lecture fonctionne et la connexion affiche un message au lieu de planter.
-- **Développement en local** : Supabase tourne dans Docker via la CLI (`supabase` en devDependency, config dans `supabase/config.toml`). `npm run db:start` démarre les conteneurs et applique les migrations ; les e-mails de connexion arrivent dans Mailpit (http://127.0.0.1:54324). Edge runtime et analytics sont désactivés pour alléger. Les adresses et commandes sont dans le README.
+- **Développement en local** : Supabase tourne dans Docker via la CLI (`supabase` en devDependency, config dans `supabase/config.toml`). `npm run db:start` démarre les conteneurs et applique les migrations ; les e-mails de connexion arrivent dans Mailpit (http://127.0.0.1:54324). Edge runtime et analytics sont désactivés pour alléger. Les adresses et commandes sont dans le README. Si le conteneur Studio reste « unhealthy » au démarrage, lancer `npx supabase start -x studio`.
 - **Hébergement** : Vercel. Prévoir l'app installable (PWA).
 
 ### Arborescence utile
@@ -105,15 +114,21 @@ scripts/build-quran.mts      génère src/data/quran/ (npm run quran:build)
 scripts/fetch-translation.mts récupère une traduction (npm run quran:fetch -- <id> <slug>)
 src/data/quran/              surahs.json (index) + s/<n>.json (un fichier par sourate)
 src/lib/quran.ts             accès aux données (server-only), séparation de la basmala, words()
-src/app/lire/[surah]/        page Lecture, 114 pages générées en statique
-src/app/connexion/           formulaire de lien magique (?suite= : page où revenir après connexion)
-src/app/cercles/             Mes cercles, page d'un cercle, séances ; actions.ts = server actions
-src/app/rejoindre/[token]/   ouverture d'un lien d'invitation
+src/app/(site)/lire/[surah]/ page Lecture, 114 pages générées en statique
+src/app/(site)/connexion/    formulaire de lien magique (?suite= : page où revenir après connexion)
+src/app/(site)/cercles/      Mes cercles, page d'un cercle
+src/app/cercles/             actions.ts (server actions) et seances/ (la séance, hors du groupe)
+src/app/(site)/rejoindre/[token]/ ouverture d'un lien d'invitation
 src/lib/auth.ts              getViewer() / requireViewer(next)
 src/lib/circles.ts           teintes, motifs, rythme, libellés des rôles (client et serveur)
 src/lib/circles-server.ts    loadCircles(), URL signées des couvertures, noms des membres
 src/components/circles/      carte, couverture (motifs SVG), avatars, fenêtres, carte du Coran
 src/components/session/      SessionView : page de séance (lecture, tableau, panneau Repères)
+src/app/(site)/traduire/[surah]/ mot à mot wolof (traducteurs seulement) ; src/app/traduire/actions.ts = publishWolof
+src/components/wolof/        TranslateView : tuiles des mots, suggestions, fusions, lettres, glossaire, Publier
+src/lib/wolof.ts             découpage, normalisation, suggestions, texte wolof affiché (client et serveur)
+src/lib/wolof-server.ts      isTranslator(), publishedWolof() (lisible sans session)
+src/lib/reading.ts           façon de lire : modes, langues, script d'avant affichage, numéro de fin de verset
 src/components/board/        Board (caméra, outils, historique, enregistrement) et BoardItems (cartes, formes SVG)
 src/lib/board.ts             modèle du tableau, lecture/écriture des lignes, géométrie, tracés main levée
 src/lib/board-sync.ts        interface BoardSync et sa version Supabase (écritures en file, Realtime, écho ignoré)
@@ -124,6 +139,9 @@ src/app/auth/deconnexion/    ferme la session (POST), utilisé par le menu de l'
 supabase/migrations/         schéma SQL
 prototypes/                  prototypes HTML v1, v2 et maquette de l'accueil (référence UX)
 src/components/landing/      aperçu de séance de la page d'accueil
+src/components/SiteHeader.tsx en-tête commun et PageBar (Breadcrumbs : fil d'Ariane des cercles)
+src/components/Skeleton.tsx  squelettes de chargement (utilisés par les loading.tsx)
+src/app/(site)/               pages qui partagent l'en-tête (layout.tsx) : accueil, cercles, lire, traduire, connexion, rejoindre
 ```
 
 ### Données coraniques
@@ -141,8 +159,11 @@ src/components/landing/      aperçu de séance de la page d'accueil
 - `board_elements` : **un élément du tableau par ligne** (`type` + `data jsonb` + `z`).
 - `highlights` : par séance, un type par verset.
 - `comments` (ancre en `jsonb`, `parent_id` pour les réponses, `resolved`) et `mentions`.
-- `wbw_translations` : mot à mot wolof **partagé à l'échelle de l'espace**. Colonnes : `words jsonb` (index du premier mot vers traduction), `joins smallint[]`, `free`.
-- RLS via `is_member(space_id)` et `can_edit(space_id)` (security definer). Publication Realtime active sur le tableau, les surlignages, les commentaires, les mentions et le mot à mot.
+- RLS via `is_member(space_id)` et `can_edit(space_id)` (security definer). Publication Realtime active sur le tableau, les surlignages, les commentaires et les mentions.
+- `20261023000000_wolof.sql` : le **mot à mot wolof est une seule traduction pour toute l'app**, faite par le porteur (décision du 23/10/2026), et non plus une traduction par cercle (`wbw_translations` est supprimée). Colonnes : `words jsonb` (index du premier mot vers traduction), `joins smallint[]` (mots fusionnés avec le suivant), `free` (traduction libre). Les index sont ceux du texte affiché, basmala séparée.
+  - `translators` : qui peut traduire. **On ne devient traducteur qu'en SQL**, jamais depuis l'app : `insert into public.translators (user_id) select id from auth.users where email = '…';`. Fonction `is_translator()`.
+  - `wolof_drafts` : le brouillon, lisible et modifiable par les traducteurs seulement, enregistré tout seul pendant la frappe.
+  - `wolof` : la version publiée, **lisible par tous, même sans compte**. On n'y écrit que par `publish_wolof(refs)`, qui recopie les brouillons (un brouillon vide retire la publication).
 - `20261020000000_espaces.sql` ajoute :
   - `create_space(name)` : un insert direct suivi d'un select échoue, car le membre propriétaire est ajouté par un déclencheur après l'insert ;
   - `invite_info(token)` : ce qu'une personne invitée voit avant de rejoindre (nom du cercle, qui invite, rôle) ;
@@ -158,7 +179,7 @@ src/components/landing/      aperçu de séance de la page d'accueil
 - **Pas encore de projet Supabase en ligne** : à créer plus tard (`supabase link` puis `db push`, Redirect URLs, variables Vercel).
 - **Port** : l'app tourne sur **http://localhost:3100** (`npm run dev`), car le 3000 est pris par un autre projet du porteur. `site_url` et les redirections de `supabase/config.toml` suivent ce port.
 
-## État d'avancement (au 21/10/2026)
+## État d'avancement (au 23/10/2026)
 
 Branche `feat/fondations`, rien n'est encore poussé.
 
@@ -171,7 +192,7 @@ Branche `feat/fondations`, rien n'est encore poussé.
 - Connexion par lien e-mail **testée de bout en bout en local** (e-mail reçu dans Mailpit, session ouverte, profil créé par le déclencheur).
 - Schéma SQL avec RLS.
 - Style migré vers Tailwind v4, branché sur les jetons.
-- Bouton de thème clair/sombre (accueil et Lecture). Une fois connecté, l'en-tête de l'accueil montre un avatar (initiales) qui ouvre le nom, l'e-mail et « Se déconnecter ».
+- En-tête commun à tout le site (voir Design), avec le bouton de thème et, une fois connecté, l'avatar (initiales) qui ouvre le nom, l'e-mail, « Traduire en wolof » (traducteurs) et « Se déconnecter ».
 - **Cercles personnalisés** (maquette `cercles-v1`) :
   - cartes avec couverture (motif ou image), pastille, intention, rythme, dernière séance et avatars ;
   - fenêtre de création et de paramètres avec aperçu en direct : couverture, six teintes, verset du cercle, jour et heure ;
@@ -199,14 +220,22 @@ Branche `feat/fondations`, rien n'est encore poussé.
   **Enregistrement** : un élément par ligne de `board_elements` (`type`, `z`, reste dans `data`). Chaque changement terminé (fin d'un glisser, fin de l'écriture, suppression, annuler) est comparé à l'état déjà envoyé, et seuls les éléments touchés sont écrits. Les changements des autres membres arrivent par Realtime ; l'écho de ses propres écritures est reconnu et ignoré. **Annuler ne défait que ses propres changements**, jamais ceux des autres. Si la base refuse une écriture, le tableau se recharge. Les lecteurs (« Lecture seule ») voient le tableau et s'y déplacent, sans outils.
 
   Testé : création, déplacement, flèches liées et courbées, annuler et rétablir, rechargement, réception en direct (ajout, modification, suppression), téléphone et mode sombre. Le glisser-déposer depuis la lecture n'a pas pu être testé automatiquement.
+- **Façon de lire** (page Lecture et lecture des séances) : **Arabe** · **Arabe et traduction** · **Traduction**, et pour les traductions une liste « Langue » faite maison, au style des onglets (Français, Wolof, Français et wolof ; flèches, Entrée, Échap) (composant `ReadingModes`). En mode Arabe, la page Lecture montre le texte d'un seul tenant, comme un mushaf (fin de verset ۝ suivi du numéro en chiffres arabes) ; la lecture d'une séance garde un verset par ligne, pour pouvoir sélectionner, surligner et glisser. En mode Wolof, un verset pas encore publié montre le français en gris avec « Pas encore traduit en wolof ». Le choix est retenu dans `localStorage` (`majalis-lecture`) et posé sur `<html>` (`data-read`, `data-lang`) par un script du layout avant l'affichage ; les règles en fin de `globals.css` cachent les parties marquées `data-part` (`ar`, `fr`, `wo`, `wo-missing`, `lang-choice`). Les cartes du tableau ne changent pas.
+- **Mot à mot wolof** (`/traduire/<sourate>`, lien « Traduire en wolof » dans le menu du compte, pour les traducteurs seulement ; les autres obtiennent la page introuvable) :
+  - tuiles par mot avec la logique de la v2 : Tab, Entrée, suggestions (Tab accepte, Échap ignore), fusionner et séparer (clic sur le mot arabe), lettres wolof, traduction libre, glossaire avec recherche, progression ;
+  - sous les tuiles, la **phrase wolof du verset** (`free`) : tant qu'elle n'est pas retouchée, le champ montre les mots mis bout à bout et les suit (`free` reste vide) ; dès qu'on la retouche, la phrase écrite est enregistrée et remplace les mots. Les lecteurs lisent la phrase si elle existe, sinon les mots mis bout à bout ;
+  - le brouillon s'enregistre tout seul (600 ms après la frappe) ; chaque verset montre « Brouillon » ou « Publié », avec « Publier » (ou « Retirer la publication » si le brouillon est vidé), et l'en-tête propose de publier tous les versets modifiés ;
+  - **le wolof publié** s'affiche en une phrase, en couleur d'accent, sous le français : page Lecture (régénérée par `revalidatePath` à chaque publication), lecture de la séance, cartes de versets du tableau (et `/api/verset`).
+
+  Testé : saisie, suggestion acceptée, fusion, lettres, rechargement, publication d'un verset (le brouillon d'un autre reste invisible), glossaire, affichage dans la Lecture et la séance. Règles vérifiées en SQL : un visiteur lit seulement le publié ; un membre non traducteur ne lit pas les brouillons, n'écrit rien et ne peut pas publier.
 - **Règle suivie** : la rangée d'un verset montre « Ajouter au tableau », « Réflexion » et « Surligner ». « Commenter » et « Tafsir » y seront ajoutés **quand leur fonction existera** (aucun bouton inactif).
 - Pas encore : supprimer un cercle ou une séance, quitter un cercle.
 - Le type-check, le lint et le build passent.
 
 **À faire, dans l'ordre conseillé**
-1. Créer le projet Supabase en ligne et le relier à Vercel (quand on voudra déployer).
+1. Créer le projet Supabase en ligne et le relier à Vercel (quand on voudra déployer). Ajouter le compte du porteur dans `translators`.
 2. **Temps réel** : présence (curseurs), diffusion des déplacements pendant le glisser (aujourd'hui, les autres voient l'élément à la fin du geste), reconnexion.
-3. Mot à mot wolof, suggestions et glossaire, sur `wbw_translations` (et les cartes « mot à mot » du tableau).
+3. Suite du wolof : cartes « mot à mot » (interlinéaires) sur le tableau, glossaire consultable par tous, choix d'afficher ou non le wolof, propositions de correction des membres (avec « Commenter »).
 4. Discussion : commentaires, mentions, notifications dans l'app (« Commenter » sur un verset ou un élément du tableau).
 5. Tafsir (As-Sa'di, Al-Muyassar : à importer localement comme le texte).
 6. PWA, puis tests (Vitest, Playwright, tests des règles RLS) et CI GitHub Actions.

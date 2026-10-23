@@ -1,11 +1,15 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
-type Props = { name: string; email: string };
+/** Dernier compte vu par l'en-tête, pour afficher l'avatar tout de suite au chargement suivant (relu ensuite). */
+export const ACCOUNT_KEY = "majalis-compte";
 
-/** Avatar de la personne connectée ; un clic ouvre son nom, son e-mail et la déconnexion. */
-export function UserMenu({ name, email }: Props) {
+type Props = { name: string; email: string; translator?: boolean };
+
+/** Avatar de la personne connectée ; un clic ouvre son nom, son e-mail, la traduction (traducteurs) et la déconnexion. */
+export function UserMenu({ name, email, translator = false }: Props) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -47,7 +51,21 @@ export function UserMenu({ name, email }: Props) {
             {name && <span className="truncate font-semibold">{name}</span>}
             <span className="truncate text-[13px] text-muted">{email}</span>
           </div>
-          <form action="/auth/deconnexion" method="post">
+          {translator && (
+            <Link href="/traduire" role="menuitem" className="btn w-full justify-center" onClick={() => setOpen(false)}>
+              Traduire en wolof
+            </Link>
+          )}
+          <form
+            action="/auth/deconnexion"
+            method="post"
+            onSubmit={() => {
+              // Oublie le compte gardé par l'en-tête, pour ne pas le revoir un instant après.
+              try {
+                localStorage.removeItem(ACCOUNT_KEY);
+              } catch {}
+            }}
+          >
             <button type="submit" role="menuitem" className="btn w-full justify-center">
               Se déconnecter
             </button>

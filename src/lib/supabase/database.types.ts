@@ -221,25 +221,47 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
-                },"wbw_translations": {
+                },"translators": {
                   Row: {
-                    "free": string,"joins": (number)[],"ref": string,"space_id": string,"updated_at": string,"updated_by": string | null,"words": NonNullable<Json>
+                    "created_at": string,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "free"?: string,"joins"?: (number)[],"ref": string,"space_id": string,"updated_at"?: string,"updated_by"?: string | null,"words"?: NonNullable<Json>
+                    "created_at"?: string,"user_id": string
                   }
                   Update: {
-                    "free"?: string,"joins"?: (number)[],"ref"?: string,"space_id"?: string,"updated_at"?: string,"updated_by"?: string | null,"words"?: NonNullable<Json>
+                    "created_at"?: string,"user_id"?: string
                   }
                   Relationships: [
-                    {
-      foreignKeyName: "wbw_translations_space_id_fkey"
-      columns: ["space_id"]
-isOneToOne: false
-      referencedRelation: "spaces"
-      referencedColumns: ["id"]
-    }
+                    
+                  ]
+                },"wolof": {
+                  Row: {
+                    "free": string,"joins": (number)[],"published_at": string,"published_by": string | null,"ref": string,"surah": number,"words": NonNullable<Json>
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "free"?: string,"joins"?: (number)[],"published_at"?: string,"published_by"?: string | null,"ref": string,"surah": number,"words"?: NonNullable<Json>
+                  }
+                  Update: {
+                    "free"?: string,"joins"?: (number)[],"published_at"?: string,"published_by"?: string | null,"ref"?: string,"surah"?: number,"words"?: NonNullable<Json>
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"wolof_drafts": {
+                  Row: {
+                    "free": string,"joins": (number)[],"ref": string,"surah": number,"updated_at": string,"updated_by": string | null,"words": NonNullable<Json>
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "free"?: string,"joins"?: (number)[],"ref": string,"surah": number,"updated_at"?: string,"updated_by"?: string | null,"words"?: NonNullable<Json>
+                  }
+                  Update: {
+                    "free"?: string,"joins"?: (number)[],"ref"?: string,"surah"?: number,"updated_at"?: string,"updated_by"?: string | null,"words"?: NonNullable<Json>
+                  }
+                  Relationships: [
+                    
                   ]
                 }
           }
@@ -267,8 +289,14 @@ isOneToOne: false
 "is_owner":
 { Args: { "sid": string }; Returns: boolean
                            },
+"is_translator":
+{ Args: Record<PropertyKey, never>; Returns: boolean
+                           },
 "pin_note":
 { Args: { "note": string,"sid": string }; Returns: undefined
+                           },
+"publish_wolof":
+{ Args: { "refs": (string)[] }; Returns: number
                            }
           }
           Enums: {

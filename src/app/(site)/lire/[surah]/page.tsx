@@ -3,8 +3,10 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getSurah, getSurahMeta, surahs } from "@/lib/quran";
 import { SurahPicker } from "@/components/reader/SurahPicker";
+import { ReadingModes } from "@/components/reader/ReadingModes";
 import { SurahText } from "@/components/reader/SurahText";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { PageBar } from "@/components/SiteHeader";
+import { publishedWolof } from "@/lib/wolof-server";
 
 type Props = { params: Promise<{ surah: string }> };
 
@@ -21,20 +23,14 @@ export default async function ReadPage({ params }: Props) {
   const n = Number((await params).surah);
   const surah = await getSurah(n);
   if (!surah) notFound();
+  // Lu à la génération ; « Publier » sur /traduire régénère la page.
+  const wolof = await publishedWolof([n]);
 
   return (
     <div className="min-h-full bg-surface">
-      <header className="px-safe sticky top-0 z-5 flex h-14 items-center gap-2.5 border-b border-line bg-surface/92 backdrop-blur-sm">
-        <Link
-          href="/"
-          className="grid size-[30px] flex-none place-items-center rounded-lg bg-accent font-mark text-lg leading-none font-bold text-accent-ink"
-          aria-label="Majalis, accueil"
-        >
-          م
-        </Link>
+      <PageBar>
         <SurahPicker current={n} surahs={surahs.map(({ n, tname, ar }) => ({ n, tname, ar }))} />
         <nav className="ml-auto flex gap-1.5" aria-label="Sourates voisines">
-          <ThemeToggle />
           {n > 1 && (
             <Link className="btn" href={`/lire/${n - 1}`} title="Sourate précédente">
               ‹ {n - 1}
@@ -46,10 +42,11 @@ export default async function ReadPage({ params }: Props) {
             </Link>
           )}
         </nav>
-      </header>
+      </PageBar>
 
       <main className="px-safe mx-auto max-w-[720px] pt-2 pb-12">
-        <SurahText surah={surah} />
+        <ReadingModes className="pt-4" />
+        <SurahText surah={surah} wolof={wolof} />
       </main>
     </div>
   );

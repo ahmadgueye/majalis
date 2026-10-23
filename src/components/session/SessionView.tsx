@@ -16,6 +16,8 @@ import { Board, type BoardHandle, type SayAction, type VerseText } from "@/compo
 import { Logo } from "@/components/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { UserMenu } from "@/components/UserMenu";
+import { ReadingModes } from "@/components/reader/ReadingModes";
+import { VerseTranslations } from "@/components/reader/VerseTranslations";
 import { setSessionTitle } from "@/app/cercles/actions";
 import type { BoardEl } from "@/lib/board";
 import { supabaseBoardSync } from "@/lib/board-sync";
@@ -28,13 +30,13 @@ import {
 } from "@/lib/highlights";
 import { createClient } from "@/lib/supabase/client";
 
-export type SessionVerse = { n: number; ar: string; fr: string };
+export type SessionVerse = { n: number; ar: string; fr: string; wo: string };
 
 type Props = {
   space: { id: string; name: string };
   session: { id: string; title: string };
   canEdit: boolean;
-  viewer: { id: string; name: string; email: string };
+  viewer: { id: string; name: string; email: string; translator: boolean };
   people: Record<string, string>;
   board: BoardEl[];
   boardVerses: Record<string, VerseText>;
@@ -91,7 +93,7 @@ export function SessionView({
 
   /** Boutons « Ajouter au tableau » et « Réflexion » d'un verset de la lecture. */
   function toBoard(ref: string, v: SessionVerse, reflection: boolean) {
-    const verse = { label: `${text.tname} · ${ref}`, ar: v.ar, fr: v.fr };
+    const verse = { label: `${text.tname} · ${ref}`, ar: v.ar, fr: v.fr, wo: v.wo };
     setPane("board");
     setSelected(null);
     if (reflection) boardRef.current?.addReflection(ref, verse);
@@ -241,7 +243,8 @@ export function SessionView({
       </div>
 
       <div className="min-h-0 flex-1 overflow-auto">
-        <div className="px-4 pt-[22px] pb-1.5 text-center">
+        <ReadingModes className="px-3 pt-3" />
+        <div className="px-4 pt-[18px] pb-1.5 text-center">
           <div className="font-ar text-[30px] leading-[1.6]" lang="ar">
             سورة {text.ar}
           </div>
@@ -252,6 +255,7 @@ export function SessionView({
         </div>
         {text.basmala && (
           <p
+            data-part="ar"
             className="pb-2.5 text-center font-ar text-[21px] text-muted"
             lang="ar"
           >
@@ -284,7 +288,7 @@ export function SessionView({
                       e.dataTransfer.effectAllowed = "copy";
                       e.dataTransfer.setData(
                         "text/x-verse",
-                        JSON.stringify({ ref, label: `${text.tname} · ${ref}`, ar: v.ar, fr: v.fr }),
+                        JSON.stringify({ ref, label: `${text.tname} · ${ref}`, ar: v.ar, fr: v.fr, wo: v.wo }),
                       );
                     },
                     "aria-pressed": sel,
@@ -317,15 +321,14 @@ export function SessionView({
                     )}
                   </div>
                   <p
+                    data-part="ar"
                     className="mt-1 mb-0.5 text-right font-ar text-[25px] leading-[2]"
                     lang="ar"
                     dir="rtl"
                   >
                     {v.ar}
                   </p>
-                  <p className="font-read text-[16.5px] leading-normal">
-                    {v.fr}
-                  </p>
+                  <VerseTranslations fr={v.fr} wo={v.wo} size="text-[16.5px] leading-normal" />
                 </div>
 
                 {sel && (
@@ -428,7 +431,7 @@ export function SessionView({
 
   return (
     <div className="grid h-dvh grid-rows-[auto_minmax(0,1fr)_auto] md:grid-rows-[auto_minmax(0,1fr)]">
-      <header className="px-safe flex h-[52px] min-w-0 items-center gap-2.5 border-b border-line bg-surface">
+      <header className="px-safe flex h-14 min-w-0 items-center gap-2.5 border-b border-line bg-surface">
         <Link
           href={`/cercles/${space.id}`}
           aria-label={`Retour au cercle ${space.name}`}
@@ -464,7 +467,7 @@ export function SessionView({
             <span className="max-sm:sr-only">Repères</span>
           </button>
           <ThemeToggle />
-          <UserMenu name={viewer.name} email={viewer.email} />
+          <UserMenu name={viewer.name} email={viewer.email} translator={viewer.translator} />
         </div>
       </header>
 

@@ -1,10 +1,7 @@
 import Link from "next/link";
-import { Logo } from "@/components/Logo";
 import { SessionPreview } from "@/components/landing/SessionPreview";
-import { ThemeToggle } from "@/components/ThemeToggle";
-import { UserMenu } from "@/components/UserMenu";
 import { DEFAULT_TRANSLATION, getSurah, words } from "@/lib/quran";
-import { createClient } from "@/lib/supabase/server";
+import { getViewer } from "@/lib/auth";
 
 const FEATURES = [
   {
@@ -48,46 +45,17 @@ const STEPS = [
 ];
 
 export default async function Home() {
-  const supabase = await createClient();
-  const user = supabase ? (await supabase.auth.getUser()).data.user : null;
-  const profile =
-    supabase && user
-      ? (await supabase.from("profiles").select("display_name").eq("id", user.id).maybeSingle()).data
-      : null;
+  const viewer = await getViewer();
 
   // Versets tirés des données locales (Tanzil, Hamidullah) : le texte n'est jamais recopié à la main.
   const [sad, muhammad] = await Promise.all([getSurah(38), getSurah(47)]);
   const [v28, v29] = [sad!.verses[27], sad!.verses[28]];
   const v24 = muhammad!.verses[23];
 
-  const start = user ? { href: "/cercles", label: "Mes cercles" } : { href: "/connexion", label: "Créer mon cercle" };
+  const start = viewer ? { href: "/cercles", label: "Mes cercles" } : { href: "/connexion", label: "Créer mon cercle" };
 
   return (
     <>
-      <header className="sticky top-0 z-5 bg-bg/88 backdrop-blur-sm">
-        <div className="px-safe mx-auto flex h-16 max-w-[1080px] items-center gap-3">
-          <Link href="/" className="flex items-center gap-2.5 text-[17px] font-bold">
-            <Logo />
-            Majalis
-          </Link>
-          <nav aria-label="Navigation principale" className="ml-auto flex items-center gap-1.5">
-            <a href="#fonctions" className="px-2.5 py-[7px] font-medium text-muted hover:text-ink max-sm:hidden">
-              Fonctions
-            </a>
-            <Link href="/lire/1" className="px-2.5 py-[7px] font-medium text-muted hover:text-ink max-sm:hidden">
-              Lire le Coran
-            </Link>
-            <ThemeToggle />
-            {user ? (
-              <UserMenu name={profile?.display_name ?? ""} email={user.email ?? ""} />
-            ) : (
-              <Link className="btn" href="/connexion">
-                Se connecter
-              </Link>
-            )}
-          </nav>
-        </div>
-      </header>
 
       <main className="text-[15px] leading-[1.55]">
         <div className="px-safe mx-auto grid max-w-[1080px] justify-items-center gap-5 pt-14 pb-10 text-center max-sm:pt-9 max-sm:pb-7">

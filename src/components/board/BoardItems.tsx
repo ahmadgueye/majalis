@@ -18,7 +18,7 @@ import {
 import { personTone, toneClass } from "@/lib/circles";
 import { HIGHLIGHTS, type HighlightKind } from "@/lib/highlights";
 
-export type VerseText = { label: string; ar: string; fr: string };
+export type VerseText = { label: string; ar: string; fr: string; wo?: string };
 
 type Measure = (node: HTMLElement | null) => void;
 type EditProps = { editing: boolean; onEditEnd: (id: string, text: string) => void };
@@ -105,6 +105,11 @@ export const VerseCard = memo(function VerseCard({
             {text.ar}
           </p>
           <p className="font-read text-[15.5px] leading-[1.45]">{text.fr}</p>
+          {text.wo && (
+            <p className="mt-1 font-read text-[15.5px] leading-[1.45] text-accent" lang="wo">
+              {text.wo}
+            </p>
+          )}
         </>
       ) : (
         <p className="py-3 text-muted">Chargement du verset…</p>

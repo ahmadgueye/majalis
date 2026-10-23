@@ -373,8 +373,8 @@ export function Board({
       missing.map((ref) =>
         fetch(`/api/verset?ref=${ref}`)
           .then((r) => (r.ok ? r.json() : null))
-          .then((v: { ref: string; surah: string; ar: string; fr: string } | null) =>
-            v ? ([ref, { label: `${v.surah} · ${v.ref}`, ar: v.ar, fr: v.fr }] as const) : null,
+          .then((v: { ref: string; surah: string; ar: string; fr: string; wo: string } | null) =>
+            v ? ([ref, { label: `${v.surah} · ${v.ref}`, ar: v.ar, fr: v.fr, wo: v.wo }] as const) : null,
           )
           .catch(() => null),
       ),
@@ -810,7 +810,7 @@ export function Board({
     try {
       const v = JSON.parse(raw) as VerseText & { ref: string };
       const w = toWorld(e.clientX, e.clientY);
-      placeVerse(v.ref, { label: v.label, ar: v.ar, fr: v.fr }, { x: w.x, y: w.y + 40 }, false);
+      placeVerse(v.ref, { label: v.label, ar: v.ar, fr: v.fr, wo: v.wo }, { x: w.x, y: w.y + 40 }, false);
     } catch {
       /* contenu glissé d'ailleurs : ignoré */
     }

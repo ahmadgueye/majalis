@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BookOpen, CalendarDays, ChevronRight, LayoutGrid, Pin, Users } from "lucide-react";
-import { AppHeader } from "@/components/AppHeader";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { ErrorNotice } from "@/components/Notice";
 import { PersonAvatar, AvatarStack } from "@/components/circles/Avatars";
 import { RoleChip } from "@/components/circles/CircleCard";
@@ -15,7 +15,7 @@ import { ROLE_LABELS, formatRhythm, formatTime, initial, isPattern, isTone, next
 import { coverUrls, peopleById } from "@/lib/circles-server";
 import { errorMessage } from "@/lib/messages";
 import { DEFAULT_TRANSLATION, getSurah, getSurahMeta, surahs } from "@/lib/quran";
-import { changeRole, createInvite, createSession, deleteInvite, pinNote, removeMember, updateSpace } from "../actions";
+import { changeRole, createInvite, createSession, deleteInvite, pinNote, removeMember, updateSpace } from "@/app/cercles/actions";
 
 type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ erreur?: string }> };
 
@@ -78,7 +78,7 @@ export default async function CirclePage({ params, searchParams }: Props) {
 
   return (
     <>
-      <AppHeader viewer={viewer} crumbs={[{ label: "Mes cercles", href: "/cercles" }, { label: space.name }]} />
+      <Breadcrumbs crumbs={[{ label: "Mes cercles", href: "/cercles" }, { label: space.name }]} />
       <main className={`${toneClass(tone)} px-safe mx-auto max-w-[1080px] pb-16`}>
         {/* Bandeau */}
         <section className="pt-5">

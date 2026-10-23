@@ -327,6 +327,43 @@
     }
   }
 
+  /* Squelettes de chargement (loading.tsx) : blocs gris du thème, reflet doux qui passe.
+     .skeleton-page n'apparaît qu'après 150 ms, pour ne pas clignoter quand la page arrive vite. */
+  .skeleton {
+    --bone: color-mix(in srgb, var(--faint) 24%, var(--surface-2));
+    background: var(--bone);
+    border-radius: 8px;
+  }
+  .skeleton-page {
+    animation: skeleton-show 0s linear 0.15s both;
+  }
+  @keyframes skeleton-show {
+    from {
+      visibility: hidden;
+    }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .skeleton {
+      background: linear-gradient(
+          100deg,
+          transparent 30%,
+          color-mix(in srgb, var(--surface) 55%, transparent) 50%,
+          transparent 70%
+        )
+        var(--bone);
+      background-size: 220% 100%;
+      animation: skeleton-shine 1.4s ease-in-out infinite;
+    }
+  }
+  @keyframes skeleton-shine {
+    from {
+      background-position: 120% 0;
+    }
+    to {
+      background-position: -100% 0;
+    }
+  }
+
   .field-input {
     width: 100%;
     border: 1px solid var(--line);
@@ -355,4 +392,20 @@
     content: attr(data-ph);
     color: var(--muted);
   }
+}
+
+/* Façon de lire (src/lib/reading.ts). Hors couche : ces règles l'emportent sur les utilitaires.
+   data-read : ar | both | tr (défaut both) ; data-lang : fr | wo | both (défaut both).
+   Parties marquées : ar, fr, wo, wo-missing (français en attendant le wolof), lang-choice. */
+html[data-read="ar"] .read-list,
+html:not([data-read="ar"]) .read-mushaf,
+html[data-read="tr"] [data-part="ar"],
+html[data-read="ar"] [data-part="fr"],
+html[data-read="ar"] [data-part="wo"],
+html[data-read="ar"] [data-part="wo-missing"],
+html[data-read="ar"] [data-part="lang-choice"],
+html[data-lang="wo"] [data-part="fr"],
+html[data-lang="fr"] [data-part="wo"],
+html:not([data-lang="wo"]) [data-part="wo-missing"] {
+  display: none;
 }
