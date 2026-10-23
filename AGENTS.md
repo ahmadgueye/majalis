@@ -66,7 +66,7 @@ La v2 contient déjà, en JavaScript pur, la logique à porter :
 - Les jetons (couleurs claires et sombres) sont dans `src/app/globals.css`, repris de la v2.
 - **Polices** (via `next/font`, variables posées sur `<html>`) :
   - Figtree pour l'interface ;
-  - **EB Garamond pour les traductions** (français et wolof), à la demande du porteur ;
+  - **Figtree aussi pour les traductions** (français et wolof), à la demande du porteur, qui a écarté EB Garamond. La classe `font-read` reste, pour pouvoir changer la police des traductions à un seul endroit (`--f-read`) ;
   - **Scheherazade New pour l'arabe** (texte coranique et titres), à la demande du porteur ;
   - Caveat pour le style main levée.
 - Le logo « م » utilise une police arabe système, choix hérité d'Amiri Quran (l'ancienne police arabe), qui ne l'affichait pas dans la pastille.
@@ -78,7 +78,7 @@ La v2 contient déjà, en JavaScript pur, la logique à porter :
 - La palette et les polices par défaut de Tailwind sont **retirées** (`--color-*: initial`) : `bg-red-500` n'existe pas, c'est voulu.
 - **Règle** : jamais de couleur ni de police en dur dans un composant, ni de `style={{ … }}` pour de la mise en forme. Pour changer une couleur ou une police, on modifie la variable dans `:root` (et sa version sombre), rien d'autre.
 - Le mode sombre passe par les variables : pas besoin de classes `dark:`. Il suit `prefers-color-scheme`, sauf si la personne a choisi avec le bouton de thème (`ThemeToggle`, choix dans `localStorage` sous `majalis-theme`, posé en `data-theme` sur `<html>` par un script du layout avant l'affichage). Les valeurs sombres existent donc **deux fois** dans `globals.css` (bloc `@media` et bloc `[data-theme="dark"]`) : les garder identiques.
-- Le code qui dessine (SVG du tableau, trait main levée) lit les variables CSS (`var(--accent)`), jamais des valeurs copiées.
+- Le code qui dessine (SVG du tableau, trait main levée) passe par les classes des jetons (`stroke-c-sage`, `fill-surface`), jamais des valeurs copiées. Les fonds des notes ont leurs jetons (`--note-ink`, `--note-sand`…, classes `bg-note-*`). Les seuls styles en ligne du tableau sont géométriques (position, largeur, caméra).
 - Classes de composant (`@layer components`) :
   - `.btn`, `.btn.primary`, `.btn.ghost` ;
   - `.field-input` pour les champs ;
@@ -114,6 +114,9 @@ src/lib/circles.ts           teintes, motifs, rythme, libellés des rôles (clie
 src/lib/circles-server.ts    loadCircles(), URL signées des couvertures, noms des membres
 src/components/circles/      carte, couverture (motifs SVG), avatars, fenêtres, carte du Coran
 src/components/session/      SessionView : page de séance (lecture, tableau, panneau Repères)
+src/components/board/        Board (caméra, outils, historique, enregistrement) et BoardItems (cartes, formes SVG)
+src/lib/board.ts             modèle du tableau, lecture/écriture des lignes, géométrie, tracés main levée
+src/lib/board-sync.ts        interface BoardSync et sa version Supabase (écritures en file, Realtime, écho ignoré)
 src/lib/highlights.ts        les quatre surlignages et leur sens
 src/app/api/verset/          un verset depuis les données locales (aperçu dans la fenêtre du cercle)
 src/app/auth/callback/       échange du code contre une session
@@ -155,7 +158,7 @@ src/components/landing/      aperçu de séance de la page d'accueil
 - **Pas encore de projet Supabase en ligne** : à créer plus tard (`supabase link` puis `db push`, Redirect URLs, variables Vercel).
 - **Port** : l'app tourne sur **http://localhost:3100** (`npm run dev`), car le 3000 est pris par un autre projet du porteur. `site_url` et les redirections de `supabase/config.toml` suivent ce port.
 
-## État d'avancement (au 20/10/2026)
+## État d'avancement (au 21/10/2026)
 
 Branche `feat/fondations`, rien n'est encore poussé.
 
@@ -179,24 +182,34 @@ Branche `feat/fondations`, rien n'est encore poussé.
 - **Cercles et séances** (`/cercles`) : créer et renommer un cercle, liste des membres (le responsable change les rôles et retire des membres), liens d'invitation (rôle au choix, 14 jours, copier, supprimer), page `/rejoindre/<jeton>`. Séances : créer (titre, sourate), renommer, ouvrir ; une séance affiche pour l'instant le texte de sa sourate. **Testé de bout en bout avec deux comptes** et règles RLS vérifiées en SQL (un lecteur ne peut ni créer, ni renommer, ni inviter, ni changer son rôle ; un inconnu ne voit rien).
 - **Page de séance** (mise en page de la v2) :
   - en-tête avec titre modifiable sur place (éditeurs) ;
-  - lecture à gauche, repliable (« Masquer la lecture » / « Afficher la lecture »), avec choix de la sourate (`?sourate=`) ;
-  - zone du tableau (pour l'instant un message qui l'annonce) ;
+  - lecture à gauche, repliable (« Masquer la lecture » / « Afficher la lecture »), avec choix de la sourate (`?sourate=`). Sur ordinateur, c'est un **panneau fixe posé sur le tableau** : le tableau garde toute la largeur et **la vue ne bouge pas** quand on ouvre ou ferme la lecture. La barre d'outils ne bouge pas non plus. Seuls « Tout voir » et le centrage d'un verset ajouté tiennent compte de la partie cachée (prop `inset` de `Board`) ;
+  - le tableau (voir plus bas) ;
   - panneau à droite « Repères de couleurs » (légende, versets surlignés, clic pour y aller) ;
   - sur téléphone, onglets Lecture / Tableau.
 
   Un éditeur sélectionne un verset : la rangée d'actions ne montre que **Surligner**, et les couleurs n'apparaissent qu'au clic. Les surlignages sont écrits dans `highlights` par le client navigateur (RLS) et **reçus en direct** par les autres membres (Supabase Realtime, `postgres_changes`). Testé : ajout, retrait, réception en direct, lecture seule.
-- **Règle suivie** : les actions « Ajouter au tableau », « Réflexion », « Commenter » et « Tafsir » de la v2 seront ajoutées à la rangée **quand leur fonction existera** (aucun bouton inactif).
+- **Tableau** (porté de la v2, `src/components/board/`) :
+  - caméra : glisser le fond ou outil Main, molette, Ctrl + molette pour zoomer, « Tout voir », 100 % ; la vue s'ajuste à l'ouverture ;
+  - outils en bas : Sélection, Main, Crayon, Cadre, Flèche, Note, Texte (raccourcis V H P R A N T) ; palette de cinq couleurs et style Net / Main levée, visibles seulement quand on dessine ou qu'un élément est sélectionné ;
+  - flèches liées aux éléments (elles les suivent), courbées par la poignée du milieu, « Redresser » ;
+  - barre d'actions sur l'élément sélectionné : Voir le texte, Réflexion (verset), Écrire (note, titre), Redresser, Dupliquer, Supprimer (avec « Annuler » dans le message) ;
+  - redimensionnement, double-clic sur le fond pour une note, Suppr, Entrée pour écrire, Échap ;
+  - versets ajoutés par « Ajouter au tableau » ou « Réflexion » dans la lecture, ou glissés depuis la lecture ; la bordure de la carte prend la couleur du surlignage.
+
+  **Enregistrement** : un élément par ligne de `board_elements` (`type`, `z`, reste dans `data`). Chaque changement terminé (fin d'un glisser, fin de l'écriture, suppression, annuler) est comparé à l'état déjà envoyé, et seuls les éléments touchés sont écrits. Les changements des autres membres arrivent par Realtime ; l'écho de ses propres écritures est reconnu et ignoré. **Annuler ne défait que ses propres changements**, jamais ceux des autres. Si la base refuse une écriture, le tableau se recharge. Les lecteurs (« Lecture seule ») voient le tableau et s'y déplacent, sans outils.
+
+  Testé : création, déplacement, flèches liées et courbées, annuler et rétablir, rechargement, réception en direct (ajout, modification, suppression), téléphone et mode sombre. Le glisser-déposer depuis la lecture n'a pas pu être testé automatiquement.
+- **Règle suivie** : la rangée d'un verset montre « Ajouter au tableau », « Réflexion » et « Surligner ». « Commenter » et « Tafsir » y seront ajoutés **quand leur fonction existera** (aucun bouton inactif).
 - Pas encore : supprimer un cercle ou une séance, quitter un cercle.
 - Le type-check, le lint et le build passent.
 
 **À faire, dans l'ordre conseillé**
 1. Créer le projet Supabase en ligne et le relier à Vercel (quand on voudra déployer).
-2. **Porter le tableau** de la v2 en React, avec persistance dans `board_elements`.
-3. **Temps réel** : présence (curseurs), diffusion des changements du tableau, reconnexion.
-4. Mot à mot wolof, suggestions et glossaire, sur `wbw_translations`.
-5. Discussion : commentaires, mentions, notifications dans l'app.
-6. Tafsir (As-Sa'di, Al-Muyassar : à importer localement comme le texte).
-7. PWA, puis tests (Vitest, Playwright, tests des règles RLS) et CI GitHub Actions.
+2. **Temps réel** : présence (curseurs), diffusion des déplacements pendant le glisser (aujourd'hui, les autres voient l'élément à la fin du geste), reconnexion.
+3. Mot à mot wolof, suggestions et glossaire, sur `wbw_translations` (et les cartes « mot à mot » du tableau).
+4. Discussion : commentaires, mentions, notifications dans l'app (« Commenter » sur un verset ou un élément du tableau).
+5. Tafsir (As-Sa'di, Al-Muyassar : à importer localement comme le texte).
+6. PWA, puis tests (Vitest, Playwright, tests des règles RLS) et CI GitHub Actions.
 
 <!-- ## Le mémoire de master 2
 

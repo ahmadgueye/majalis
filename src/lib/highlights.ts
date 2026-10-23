@@ -1,10 +1,10 @@
 // Les quatre surlignages et leur sens fixe (principe d'UX n° 6). Utilisable côté client et serveur.
 
 export const HIGHLIGHTS = {
-  theme: { label: "Thème", desc: "Idée centrale ou sujet du passage.", bg: "bg-hl-theme", dot: "bg-c-sage" },
-  question: { label: "Question", desc: "Ce qu'on veut approfondir ou se demander.", bg: "bg-hl-question", dot: "bg-c-sky" },
-  reflect: { label: "À méditer", desc: "Un verset qui touche, à relire et à garder.", bg: "bg-hl-reflect", dot: "bg-c-sand" },
-  link: { label: "Lien", desc: "Un verset qui fait écho à un autre.", bg: "bg-hl-link", dot: "bg-c-rose" },
+  theme: { label: "Thème", desc: "Idée centrale ou sujet du passage.", bg: "bg-hl-theme", dot: "bg-c-sage", bar: "border-t-c-sage" },
+  question: { label: "Question", desc: "Ce qu'on veut approfondir ou se demander.", bg: "bg-hl-question", dot: "bg-c-sky", bar: "border-t-c-sky" },
+  reflect: { label: "À méditer", desc: "Un verset qui touche, à relire et à garder.", bg: "bg-hl-reflect", dot: "bg-c-sand", bar: "border-t-c-sand" },
+  link: { label: "Lien", desc: "Un verset qui fait écho à un autre.", bg: "bg-hl-link", dot: "bg-c-rose", bar: "border-t-c-rose" },
 } as const;
 
 export type HighlightKind = keyof typeof HIGHLIGHTS;

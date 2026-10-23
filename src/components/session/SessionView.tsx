@@ -2,18 +2,23 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ChevronsLeft,
   ChevronsRight,
   Highlighter,
+  NotebookPen,
   Palette,
+  SquarePlus,
   X,
 } from "lucide-react";
+import { Board, type BoardHandle, type SayAction, type VerseText } from "@/components/board/Board";
 import { Logo } from "@/components/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { UserMenu } from "@/components/UserMenu";
 import { setSessionTitle } from "@/app/cercles/actions";
+import type { BoardEl } from "@/lib/board";
+import { supabaseBoardSync } from "@/lib/board-sync";
 import {
   HIGHLIGHTS,
   HIGHLIGHT_KINDS,
@@ -29,7 +34,10 @@ type Props = {
   space: { id: string; name: string };
   session: { id: string; title: string };
   canEdit: boolean;
-  viewer: { name: string; email: string };
+  viewer: { id: string; name: string; email: string };
+  people: Record<string, string>;
+  board: BoardEl[];
+  boardVerses: Record<string, VerseText>;
   surahs: { n: number; tname: string; ar: string }[];
   text: {
     n: number;
@@ -49,6 +57,9 @@ export function SessionView({
   session,
   canEdit,
   viewer,
+  people,
+  board,
+  boardVerses,
   surahs,
   text,
   notice,
@@ -61,14 +72,44 @@ export function SessionView({
   const [selected, setSelected] = useState<string | null>(null);
   const [picking, setPicking] = useState(false);
   const [highlights, setHighlights] = useState(initialHighlights);
-  const [toast, setToast] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ msg: string; action?: SayAction } | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const supabase = useRef(createClient()).current;
+  const boardRef = useRef<BoardHandle>(null);
+  const readerRef = useRef<HTMLElement>(null);
+  const [readerInset, setReaderInset] = useState(0);
+  const sync = useMemo(
+    () => supabase && supabaseBoardSync(supabase, { session: session.id, space: space.id, me: viewer.id }),
+    [supabase, session.id, space.id, viewer.id],
+  );
 
-  const say = useCallback((msg: string) => {
-    setToast(msg);
+  const say = useCallback((msg: string, action?: SayAction) => {
+    setToast({ msg, action });
     clearTimeout(toastTimer.current);
-    toastTimer.current = setTimeout(() => setToast(null), 2600);
+    toastTimer.current = setTimeout(() => setToast(null), action ? 6000 : 2600);
+  }, []);
+
+  /** Boutons « Ajouter au tableau » et « Réflexion » d'un verset de la lecture. */
+  function toBoard(ref: string, v: SessionVerse, reflection: boolean) {
+    const verse = { label: `${text.tname} · ${ref}`, ar: v.ar, fr: v.fr };
+    setPane("board");
+    setSelected(null);
+    if (reflection) boardRef.current?.addReflection(ref, verse);
+    else boardRef.current?.addVerse(ref, verse);
+  }
+
+  // Largeur du tableau cachée par la lecture (ordinateur seulement ; sur téléphone, une zone à la fois).
+  useEffect(() => {
+    const node = readerRef.current!;
+    const wide = window.matchMedia("(min-width: 768px)");
+    const measure = () => setReaderInset(wide.matches ? node.offsetWidth : 0);
+    const ro = new ResizeObserver(measure);
+    ro.observe(node);
+    wide.addEventListener("change", measure);
+    return () => {
+      ro.disconnect();
+      wide.removeEventListener("change", measure);
+    };
   }, []);
 
   // Surlignages des autres membres, en direct (Supabase Realtime).
@@ -169,8 +210,9 @@ export function SessionView({
 
   const reader = (
     <section
+      ref={readerRef}
       aria-label="Lecture"
-      className={`${pane === "reader" ? "flex" : "hidden"} min-h-0 min-w-0 flex-col border-line bg-surface md:border-r ${
+      className={`${pane === "reader" ? "flex" : "hidden"} min-h-0 min-w-0 flex-col border-line bg-surface md:absolute md:inset-y-0 md:left-0 md:z-10 md:w-[340px] md:border-r md:shadow-pop xl:w-[400px] ${
         readerOpen ? "md:flex" : "md:hidden"
       }`}
     >
@@ -237,6 +279,14 @@ export function SessionView({
                   {...(canEdit && {
                     role: "button",
                     tabIndex: 0,
+                    draggable: true,
+                    onDragStart: (e: React.DragEvent) => {
+                      e.dataTransfer.effectAllowed = "copy";
+                      e.dataTransfer.setData(
+                        "text/x-verse",
+                        JSON.stringify({ ref, label: `${text.tname} · ${ref}`, ar: v.ar, fr: v.fr }),
+                      );
+                    },
                     "aria-pressed": sel,
                     onClick: () => {
                       setSelected(sel ? null : ref);
@@ -281,6 +331,22 @@ export function SessionView({
                 {sel && (
                   <div className="mt-2.5 grid gap-1.5">
                     <div className="flex flex-wrap gap-1">
+                      <button
+                        type="button"
+                        onClick={() => toBoard(ref, v, false)}
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-surface px-2.5 py-1.5 text-[12.5px] font-semibold shadow-[inset_0_0_0_1px_var(--line)] hover:bg-surface-2"
+                      >
+                        <SquarePlus aria-hidden className="size-3.5 text-muted" />
+                        Ajouter au tableau
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => toBoard(ref, v, true)}
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-surface px-2.5 py-1.5 text-[12.5px] font-semibold shadow-[inset_0_0_0_1px_var(--line)] hover:bg-surface-2"
+                      >
+                        <NotebookPen aria-hidden className="size-3.5 text-muted" />
+                        Réflexion
+                      </button>
                       <button
                         type="button"
                         aria-expanded={picking}
@@ -402,37 +468,37 @@ export function SessionView({
         </div>
       </header>
 
-      <main
-        className={`relative grid min-h-0 grid-cols-1 overflow-hidden ${
-          readerOpen
-            ? "md:grid-cols-[340px_minmax(0,1fr)] xl:grid-cols-[400px_minmax(0,1fr)]"
-            : ""
-        }`}
-      >
+      {/* Sur ordinateur, la lecture est un panneau fixe posé sur le tableau, qui garde toute la largeur. */}
+      <main className="relative grid min-h-0 grid-cols-1 overflow-hidden">
         {reader}
 
-        <section
-          aria-label="Tableau"
-          className={`${pane === "board" ? "grid" : "hidden"} relative min-w-0 place-items-center bg-bg bg-[radial-gradient(var(--grid)_1.1px,transparent_1.2px)] bg-size-[22px_22px] p-6 md:grid`}
-        >
-          {!readerOpen && (
-            <button
-              type="button"
-              onClick={() => setReaderOpen(true)}
-              className="btn absolute top-3 left-3 hidden shadow-card md:inline-flex"
-            >
-              <ChevronsRight aria-hidden />
-              Afficher la lecture
-            </button>
-          )}
-          <div className="max-w-[340px] text-center text-muted">
-            <b className="mb-1 block text-base text-ink">
-              Le tableau de la séance
-            </b>
-            Il arrive à la prochaine étape : tu pourras y poser des versets, des
-            notes et des flèches avec ton cercle.
-          </div>
-        </section>
+        <div className={`${pane === "board" ? "block" : "hidden"} min-h-0 min-w-0 md:block`}>
+          <Board
+            ref={boardRef}
+            sync={sync}
+            canEdit={canEdit}
+            me={{ id: viewer.id }}
+            people={people}
+            initial={board}
+            initialVerses={boardVerses}
+            highlights={highlights}
+            onShowVerse={goToVerse}
+            say={say}
+            inset={readerInset}
+          >
+            {!readerOpen && (
+              <button
+                type="button"
+                data-board-ui
+                onClick={() => setReaderOpen(true)}
+                className="btn absolute top-3.5 left-3.5 z-10 hidden shadow-card md:inline-flex"
+              >
+                <ChevronsRight aria-hidden />
+                Afficher la lecture
+              </button>
+            )}
+          </Board>
+        </div>
 
         <aside
           aria-label="Repères de couleurs"
@@ -520,11 +586,23 @@ export function SessionView({
       <div
         role="status"
         aria-live="polite"
-        className={`pointer-events-none fixed top-16 left-1/2 z-30 -translate-x-1/2 rounded-[10px] bg-ink px-3.5 py-2 font-medium text-bg shadow-card ${
+        className={`pointer-events-none fixed top-16 left-1/2 z-30 flex -translate-x-1/2 items-center gap-3 rounded-[10px] bg-ink px-3.5 py-2 font-medium text-bg shadow-card ${
           toast ? "" : "hidden"
         }`}
       >
-        {toast}
+        {toast?.msg}
+        {toast?.action && (
+          <button
+            type="button"
+            onClick={() => {
+              toast.action?.run();
+              setToast(null);
+            }}
+            className="pointer-events-auto rounded-md px-1.5 py-0.5 font-bold text-accent-soft underline-offset-2 hover:underline"
+          >
+            {toast.action.label}
+          </button>
+        )}
       </div>
     </div>
   );

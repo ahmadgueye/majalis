@@ -1,10 +1,9 @@
 import type { Metadata, Viewport } from "next";
-import { Caveat, EB_Garamond, Figtree, Scheherazade_New } from "next/font/google";
+import { Caveat, Figtree, Scheherazade_New } from "next/font/google";
 import { THEME_KEY } from "@/lib/theme";
 import "./globals.css";
 
-const figtree = Figtree({ subsets: ["latin", "latin-ext"], variable: "--font-figtree" });
-const garamond = EB_Garamond({ subsets: ["latin", "latin-ext"], variable: "--font-garamond" });
+const figtree = Figtree({ subsets: ["latin", "latin-ext"], style: ["normal", "italic"], variable: "--font-figtree" });
 const caveat = Caveat({ subsets: ["latin", "latin-ext"], variable: "--font-caveat" });
 const scheherazade = Scheherazade_New({ subsets: ["arabic"], weight: ["400", "700"], variable: "--font-scheherazade" });
 
@@ -27,7 +26,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html
       lang="fr"
-      className={`${figtree.variable} ${garamond.variable} ${caveat.variable} ${scheherazade.variable}`}
+      className={`${figtree.variable} ${caveat.variable} ${scheherazade.variable}`}
       data-scroll-behavior="smooth"
       suppressHydrationWarning
     >

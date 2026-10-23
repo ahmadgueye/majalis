@@ -25,10 +25,15 @@
   --c-sky: #2c6b9b;
   --me: #0d5c52;
   --k: #8f45ab;
+  --note-ink: #ffffff;
+  --note-sand: #fbf0d2;
+  --note-sage: #e3efdb;
+  --note-rose: #f8e1e6;
+  --note-sky: #dde9f5;
   --shadow: 0 1px 2px rgba(20, 40, 34, 0.05), 0 6px 20px rgba(20, 40, 34, 0.08);
   --shadow-lg: 0 8px 40px rgba(20, 40, 34, 0.16);
   --f-ui: var(--font-figtree), system-ui, -apple-system, "Segoe UI", sans-serif;
-  --f-read: var(--font-garamond), Garamond, Georgia, serif;
+  --f-read: var(--f-ui); /* traductions (français, wolof) : même police que l'interface */
   --f-hand: var(--font-caveat), "Segoe Print", cursive;
   --f-ar: var(--font-scheherazade), "Geeza Pro", "Traditional Arabic", serif;
 }
@@ -59,6 +64,11 @@
     --c-sky: #80b6e2;
     --me: #62bcac;
     --k: #c88be2;
+    --note-ink: #1c2622;
+    --note-sand: #373020;
+    --note-sage: #233322;
+    --note-rose: #382229;
+    --note-sky: #1e2e3c;
     --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
     --shadow-lg: 0 10px 44px rgba(0, 0, 0, 0.5);
     color-scheme: dark;
@@ -88,6 +98,11 @@
   --c-sky: #80b6e2;
   --me: #62bcac;
   --k: #c88be2;
+  --note-ink: #1c2622;
+  --note-sand: #373020;
+  --note-sage: #233322;
+  --note-rose: #382229;
+  --note-sky: #1e2e3c;
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
   --shadow-lg: 0 10px 44px rgba(0, 0, 0, 0.5);
   color-scheme: dark;
@@ -123,6 +138,11 @@
   --color-c-sky: var(--c-sky);
   --color-me: var(--me);
   --color-k: var(--k);
+  --color-note-ink: var(--note-ink);
+  --color-note-sand: var(--note-sand);
+  --color-note-sage: var(--note-sage);
+  --color-note-rose: var(--note-rose);
+  --color-note-sky: var(--note-sky);
 
   --font-ui: var(--f-ui);
   --font-read: var(--f-read);
@@ -317,5 +337,22 @@
   }
   .field-input::placeholder {
     color: var(--faint);
+  }
+
+  /* Tableau : zones de clic invisibles des traits (cadres, flèches, crayon), qui suivent leur contour. */
+  .board-hit {
+    fill: none;
+    stroke: transparent;
+    pointer-events: stroke;
+  }
+  .board-stage[data-tool="select"] [data-id] {
+    cursor: move;
+  }
+  .board-stage[data-tool="arrow"] [data-id] {
+    cursor: crosshair;
+  }
+  .board-editable:empty::before {
+    content: attr(data-ph);
+    color: var(--muted);
   }
 }
