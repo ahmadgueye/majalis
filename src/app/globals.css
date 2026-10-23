@@ -185,9 +185,12 @@
 }
 
 @layer base {
-  html,
-  body {
+  /* min-height pour body : avec height, l'en-tête collant (sticky) partait avec le texte après un écran. */
+  html {
     height: 100%;
+  }
+  body {
+    min-height: 100%;
   }
 
   body {
@@ -324,6 +327,38 @@
     from {
       opacity: 0;
       transform: translateY(8px) scale(0.98);
+    }
+  }
+
+  /* Panneau latéral (liste des sourates sur téléphone) : <dialog> collé à gauche, toute la hauteur. */
+  dialog.drawer {
+    width: min(380px, calc(100% - 40px));
+    height: 100dvh;
+    max-height: 100dvh;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-right: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink);
+    box-shadow: var(--shadow-lg);
+  }
+  dialog.drawer[open] {
+    display: flex;
+    flex-direction: column;
+  }
+  dialog.drawer::backdrop {
+    background: color-mix(in srgb, var(--ink) 40%, transparent);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    dialog.drawer[open] {
+      animation: drawer-in 0.2s ease-out;
+    }
+  }
+  @keyframes drawer-in {
+    from {
+      transform: translateX(-24px);
+      opacity: 0;
     }
   }
 

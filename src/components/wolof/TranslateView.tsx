@@ -57,7 +57,12 @@ const SAVE_LABEL: Record<Save, string> = {
 type Act = {
   setWord(ref: string, i: number, value: string): void;
   setFree(ref: string, value: string): void;
-  merge(ref: string, t: Tile, next: Tile): void;
+  /** Fusionne des tuiles qui se suivent (deux mots, ou tout un groupe : une expression). */
+  merge(ref: string, group: Tile[]): void;
+  /** Choix d'un groupe : départ depuis le menu d'un mot, puis clic sur le dernier mot. */
+  startGroup(ref: string, k: number): void;
+  pickGroup(k: number): void;
+  cancelGroup(): void;
   split(ref: string, t: Tile): void;
   ignore(key: string): void;
   commit(): void;
@@ -85,6 +90,8 @@ export function TranslateView({
   const [ignored, setIgnored] = useState<Set<string>>(() => new Set());
   const [save, setSave] = useState<Save>("idle");
   const [menu, setMenu] = useState<{ ref: string; i: number } | null>(null);
+  // Groupe de mots en cours de choix : indices de tuiles (début fixé, fin au dernier mot cliqué).
+  const [group, setGroup] = useState<{ ref: string; from: number; to: number } | null>(null);
   const [glossary, setGlossary] = useState<string | null>(null);
   const [publishing, setPublishing] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
@@ -95,10 +102,11 @@ export function TranslateView({
   const lastInput = useRef<Field | null>(null);
   const dirty = useRef(false);
 
-  const say = useCallback((msg: string) => {
+  // Les messages d'échec restent plus longtemps, le temps de les lire.
+  const say = useCallback((msg: string, ms = 2600) => {
     setToast(msg);
     clearTimeout(toastTimer.current);
-    toastTimer.current = setTimeout(() => setToast(null), 2600);
+    toastTimer.current = setTimeout(() => setToast(null), ms);
   }, []);
 
   const all = useMemo(
@@ -185,9 +193,24 @@ export function TranslateView({
     async (refs: string[]) => {
       if (!refs.length) return;
       setPublishing(true);
-      const ok = (await flush()) && (await publishWolof(n, refs));
-      setPublishing(false);
-      if (!ok) return say("La publication a échoué. Réessaie.");
+      let ok = false;
+      let offline = false;
+      try {
+        ok = (await flush()) && (await publishWolof(n, refs));
+      } catch {
+        // Serveur injoignable (arrêté, coupure réseau) : l'action serveur lève « Failed to fetch ».
+        // Les brouillons, eux, vont directement à Supabase : rien n'est perdu.
+        offline = true;
+      } finally {
+        // Toujours rendre le bouton, sinon il reste bloqué sur « Publication… ».
+        setPublishing(false);
+      }
+      if (offline)
+        return say(
+          "Le serveur ne répond pas : publication impossible. Ton brouillon est bien enregistré, réessaie plus tard.",
+          7000,
+        );
+      if (!ok) return say("La publication a échoué. Réessaie.", 5000);
       const removed = refs.filter((r) =>
         isEmpty(latest.current[r] ?? EMPTY),
       ).length;
@@ -216,22 +239,34 @@ export function TranslateView({
       setWord: (ref, i, value) =>
         update(ref, (v) => ({ ...v, words: { ...v.words, [i]: value } })),
       setFree: (ref, value) => update(ref, (v) => ({ ...v, free: value })),
-      merge(ref, t, next) {
+      merge(ref, group) {
+        if (group.length < 2) return;
+        const first = group[0];
+        const last = group[group.length - 1];
         update(ref, (v) => {
           const joins = [...v.joins];
-          for (let x = t.i; x < next.j; x++)
+          for (let x = first.i; x < last.j; x++)
             if (!joins.includes(x)) joins.push(x);
+          // Les traductions déjà écrites sont gardées, mises bout à bout.
           const words = { ...v.words };
-          words[t.i] = [words[t.i], words[next.i]]
+          words[first.i] = group
+            .map((t) => words[t.i])
             .filter((x) => x?.trim())
             .join(" ");
-          delete words[next.i];
+          for (const t of group.slice(1)) delete words[t.i];
           return { ...v, joins, words };
         });
         setCorpus(latest.current);
         setMenu(null);
-        say("Mots fusionnés");
+        setGroup(null);
+        say(group.length > 2 ? `${group.length} mots fusionnés` : "Mots fusionnés");
       },
+      startGroup(ref, k) {
+        setMenu(null);
+        setGroup({ ref, from: k, to: k });
+      },
+      pickGroup: (k) => setGroup((g) => g && { ...g, to: k }),
+      cancelGroup: () => setGroup(null),
       split(ref, t) {
         update(ref, (v) => ({
           ...v,
@@ -284,6 +319,14 @@ export function TranslateView({
       document.removeEventListener("keydown", onKey);
     };
   }, [menu]);
+
+  // Échap abandonne le choix d'un groupe.
+  useEffect(() => {
+    if (!group) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setGroup(null);
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [group]);
 
   // Prévenir avant de quitter la page si un brouillon n'est pas encore enregistré.
   useEffect(() => {
@@ -419,7 +462,7 @@ export function TranslateView({
           <b className="text-ink">Entrée</b> verset suivant · suggestion en vert
           : <b className="text-ink">Tab</b> pour l&apos;accepter,{" "}
           <b className="text-ink">Échap</b> pour l&apos;ignorer. Clique un mot
-          arabe pour le fusionner avec le suivant. Sous les mots, la phrase
+          arabe pour le fusionner avec le suivant, ou avec tout un groupe (une expression). Sous les mots, la phrase
           wolof du verset reprend les mots mis bout à bout : retouche-la pour la
           rendre fluide. Tes brouillons ne sont visibles que par toi :{" "}
           <b className="text-ink">Publier</b> les montre à tous, dans la lecture
@@ -438,6 +481,7 @@ export function TranslateView({
                 index={index}
                 ignored={ignored}
                 menu={menu?.ref === ref ? menu.i : null}
+                group={group?.ref === ref ? group : null}
                 publishing={publishing}
                 act={act}
               />
@@ -478,6 +522,7 @@ const VerseRow = memo(function VerseRow({
   index,
   ignored,
   menu,
+  group,
   publishing,
   act,
 }: {
@@ -488,10 +533,14 @@ const VerseRow = memo(function VerseRow({
   index: KnownIndex;
   ignored: Set<string>;
   menu: number | null;
+  group: { from: number; to: number } | null;
   publishing: boolean;
   act: Act;
 }) {
   const ts = tiles(verse.ar, draft.joins);
+  const lo = group ? Math.min(group.from, group.to) : -1;
+  const hi = group ? Math.max(group.from, group.to) : -1;
+  const groupWords = group ? ts.slice(lo, hi + 1).reduce((n, t) => n + t.j - t.i + 1, 0) : 0;
   const done = ts.filter((t) => (draft.words[t.i] ?? "").trim()).length;
   // Proposition pour la phrase du verset : ce que les lecteurs verraient sans elle.
   const joined = wolofText(verse.ar, { ...draft, free: "" });
@@ -534,6 +583,31 @@ const VerseRow = memo(function VerseRow({
           act={act}
         />
       </div>
+      {group && (
+        <div
+          role="group"
+          aria-label="Groupe de mots à fusionner"
+          className="mt-1 flex flex-wrap items-center gap-2 rounded-lg bg-surface-2 px-3 py-2 text-[13px]"
+        >
+          <span className="flex-1 text-muted">
+            {hi > lo ? (
+              <>
+                <b className="text-ink">{groupWords} mots</b> choisis. Clique un autre mot pour changer la fin du groupe.
+              </>
+            ) : (
+              "Clique le dernier mot de l'expression (avant ou après celui-ci)."
+            )}
+          </span>
+          <button type="button" className="btn ghost" onClick={act.cancelGroup}>
+            Annuler
+          </button>
+          {hi > lo && (
+            <button type="button" className="btn primary" onClick={() => act.merge(ref, ts.slice(lo, hi + 1))}>
+              Fusionner les {groupWords} mots
+            </button>
+          )}
+        </div>
+      )}
       <div className="my-2 flex flex-wrap gap-x-1.5 gap-y-2.5" dir="rtl">
         {ts.map((t, k) => {
           const value = draft.words[t.i] ?? "";
@@ -551,12 +625,19 @@ const VerseRow = memo(function VerseRow({
                 data-word-menu
                 lang="ar"
                 dir="rtl"
-                aria-haspopup="menu"
-                aria-expanded={menu === t.i}
-                aria-label={`Options du mot ${t.ar}`}
-                title="Options du mot"
-                onClick={() => act.openMenu(ref, menu === t.i ? null : t.i)}
-                className={`rounded-lg px-2 font-ar text-[23px] leading-[1.75] hover:bg-surface-2 ${t.j > t.i ? "bg-accent-soft" : ""}`}
+                aria-haspopup={group ? undefined : "menu"}
+                aria-expanded={group ? undefined : menu === t.i}
+                aria-pressed={group ? k >= lo && k <= hi : undefined}
+                aria-label={group ? `Groupe jusqu'au mot ${t.ar}` : `Options du mot ${t.ar}`}
+                title={group ? "Dernier mot du groupe" : "Options du mot"}
+                onClick={() => (group ? act.pickGroup(k) : act.openMenu(ref, menu === t.i ? null : t.i))}
+                className={`rounded-lg px-2 font-ar text-[23px] leading-[1.75] hover:bg-surface-2 ${
+                  group && k >= lo && k <= hi
+                    ? "bg-accent-soft ring-2 ring-accent"
+                    : t.j > t.i
+                      ? "bg-accent-soft"
+                      : ""
+                }`}
               >
                 {t.ar}
               </button>
@@ -606,7 +687,14 @@ const VerseRow = memo(function VerseRow({
                     <MenuItem
                       label="Fusionner avec le mot suivant"
                       desc="Pour une expression qui se traduit d'un bloc"
-                      onClick={() => act.merge(ref, t, ts[k + 1])}
+                      onClick={() => act.merge(ref, [t, ts[k + 1]])}
+                    />
+                  )}
+                  {ts.length > 2 && (
+                    <MenuItem
+                      label="Fusionner un groupe de mots"
+                      desc="Pour une expression : clique ensuite son dernier mot"
+                      onClick={() => act.startGroup(ref, k)}
                     />
                   )}
                   {t.j > t.i && (

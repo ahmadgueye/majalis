@@ -10,9 +10,12 @@ type Surah = NonNullable<Awaited<ReturnType<typeof getSurah>>>;
 export function SurahText({
   surah,
   wolof = {},
+  after,
 }: {
   surah: Surah;
   wolof?: Record<string, WolofVerse>;
+  /** Placé sous les versets, avant la mention des sources (sourates voisines). */
+  after?: React.ReactNode;
 }) {
   const { meta, basmala, verses } = surah;
   return (
@@ -42,7 +45,7 @@ export function SurahText({
         dir="rtl"
       >
         {verses.map((v) => (
-          <span key={v.n}>
+          <span key={v.n} data-verse={v.n} className="scroll-mt-[136px]">
             {v.ar}{" "}
             <span className="whitespace-nowrap text-accent" aria-label={`fin du verset ${v.n}`}>
               {verseEnd(v.n)}
@@ -56,7 +59,8 @@ export function SurahText({
           return (
             <li
               key={v.n}
-              className="scroll-mt-[72px] rounded-xl px-4 py-3.5 hover:bg-surface-2"
+              data-verse={v.n}
+              className="scroll-mt-[136px] rounded-xl px-4 py-3.5 hover:bg-surface-2"
               id={`v${v.n}`}
             >
               <span className="text-[11.5px] font-semibold text-faint tabular-nums">
@@ -75,6 +79,7 @@ export function SurahText({
           );
         })}
       </ol>
+      {after}
       <footer className="mt-7 border-t border-line pt-3.5 text-xs leading-normal text-faint">
         Texte arabe : {QURAN_NOTICE.split(". License")[0]} (
         <a

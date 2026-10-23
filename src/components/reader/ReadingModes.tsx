@@ -17,11 +17,18 @@ export function ReadingModes({ className = "" }: { className?: string }) {
   const [mode, setMode] = useState<ReadMode>("both");
   const [lang, setLang] = useState<ReadLang>("both");
 
-  // Le script du layout a déjà posé le choix enregistré sur <html> : on le relit.
+  // Le script du layout a déjà posé le choix enregistré sur <html> : on le relit, et on suit
+  // les changements faits ailleurs (la Lecture a un choix dans la barre et un dans la page).
   useEffect(() => {
-    const d = document.documentElement.dataset;
-    if (isReadMode(d.read)) setMode(d.read);
-    if (isReadLang(d.lang)) setLang(d.lang);
+    const read = () => {
+      const d = document.documentElement.dataset;
+      if (isReadMode(d.read)) setMode(d.read);
+      if (isReadLang(d.lang)) setLang(d.lang);
+    };
+    read();
+    const watch = new MutationObserver(read);
+    watch.observe(document.documentElement, { attributes: true, attributeFilter: ["data-read", "data-lang"] });
+    return () => watch.disconnect();
   }, []);
 
   function apply(next: { mode: ReadMode; lang: ReadLang }) {

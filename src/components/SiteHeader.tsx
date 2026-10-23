@@ -13,7 +13,7 @@ export type HeaderViewer = { name: string; email: string; translator: boolean };
 
 /**
  * En-tête commun à tout le site, posé une seule fois par le layout de (site) : il reste en place
- * quand on change de page. Mêmes éléments aux mêmes places. Gauche : logo (Mes cercles une fois
+ * quand on change de page. Pleine largeur (logo au bord gauche, compte au bord droit), comme la séance. Mêmes éléments aux mêmes places. Gauche : logo (Mes cercles une fois
  * connecté, sinon l'accueil). Centre : navigation. Droite : thème et compte.
  * Ce qui est propre à une page va dans sa barre (PageBar). La séance a son en-tête compact.
  */
@@ -75,7 +75,7 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-20 border-b border-line bg-surface/92 backdrop-blur-sm">
-      <div className="px-safe mx-auto flex h-14 max-w-[1080px] items-center gap-3">
+      <div className="px-safe flex h-14 items-center gap-3">
         <Link
           href={viewer ? "/cercles" : "/"}
           className="flex flex-none items-center gap-2.5 text-[17px] font-bold"
@@ -169,11 +169,14 @@ function NavLink({
   );
 }
 
-/** Barre propre à une page, sous l'en-tête commun : fil d'Ariane, sourate, outils de la page. */
-export function PageBar({ children }: { children: React.ReactNode }) {
+/** Barre propre à une page, sous l'en-tête commun : fil d'Ariane, sourate, outils de la page.
+ *  Alignée sur le contenu centré (1080 px), ou sur toute la largeur (`wide`, page Lecture). */
+export function PageBar({ children, wide = false }: { children: React.ReactNode; wide?: boolean }) {
   return (
     <div className="sticky top-14 z-10 border-b border-line bg-surface/92 backdrop-blur-sm">
-      <div className="px-safe mx-auto flex min-h-12 max-w-[1080px] flex-wrap items-center gap-x-3 gap-y-2 py-2">
+      <div
+        className={`px-safe flex min-h-12 flex-wrap items-center gap-x-3 gap-y-2 py-2 ${wide ? "" : "mx-auto max-w-[1080px]"}`}
+      >
         {children}
       </div>
     </div>
