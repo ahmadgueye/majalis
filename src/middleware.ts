@@ -4,6 +4,15 @@ import { hasSupabase, supabaseKey, supabaseUrl } from "@/lib/supabase/env";
 
 /** Rafraîchit la session Supabase à chaque requête (cookies httpOnly). */
 export async function middleware(request: NextRequest) {
+  // Lien de connexion renvoyé sur l'accueil (Supabase retombe sur la Site URL quand l'adresse
+  // demandée n'est pas autorisée) : on le passe à /auth/callback au lieu de le perdre.
+  const { pathname, searchParams } = request.nextUrl;
+  if (pathname === "/" && searchParams.has("code")) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/auth/callback";
+    return NextResponse.redirect(url);
+  }
+
   let response = NextResponse.next({ request });
   if (!hasSupabase) return response;
 
