@@ -9,6 +9,9 @@ export async function GET(request: NextRequest) {
   const next = searchParams.get("next");
   const safeNext = next && next.startsWith("/") && !next.startsWith("//") ? next : HOME;
 
+  // Refus côté Supabase ou Google (inscriptions fermées, connexion annulée) : pas de code, une erreur.
+  if (searchParams.has("error")) return NextResponse.redirect(`${origin}/connexion?erreur=acces`);
+
   const supabase = await createClient();
   if (code && supabase) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
