@@ -3,7 +3,8 @@
 -- et chaque séance a son tableau, ses surlignages et sa discussion.
 -- Le mot à mot wolof et le glossaire sont partagés à l'échelle de l'espace.
 
-create extension if not exists pgcrypto;
+-- Sur Supabase en ligne, pgcrypto vit dans le schéma extensions (hors du search_path des migrations).
+create extension if not exists pgcrypto with schema extensions;
 
 -- Profils ---------------------------------------------------------------
 create table public.profiles (
@@ -42,7 +43,7 @@ create table public.space_members (
 create index on public.space_members (user_id);
 
 create table public.space_invites (
-  token text primary key default encode(gen_random_bytes(12), 'hex'),
+  token text primary key default encode(extensions.gen_random_bytes(12), 'hex'),
   space_id uuid not null references public.spaces (id) on delete cascade,
   role text not null default 'editor' check (role in ('editor', 'viewer')),
   created_by uuid not null references auth.users (id) on delete cascade default auth.uid(),
