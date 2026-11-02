@@ -1,5 +1,7 @@
 # Mise en ligne (usage personnel : Lecture, Traduire, Mes notes)
 
+> État au 02/11/2026 : en ligne sur https://majalis.bayanun.com (projet Supabase `majalis`, `ytaqsethdedaeiszbayx`). Connexion Google faite avec le projet Google Cloud « deenshare ». Reste l'étape 4 (Google Drive).
+
 En ligne, les cercles et les séances sont coupés (`NEXT_PUBLIC_CERCLES=off`) et le site n'est pas indexé par les moteurs de recherche. Tout est gratuit : Supabase (offre Free), Vercel (offre Hobby), Google Drive.
 
 ## 1. Pousser le code sur GitHub
@@ -23,8 +25,9 @@ Le dépôt doit être sur GitHub (privé, de préférence) pour que Vercel le d�
    ```sql
    insert into public.translators (user_id) select id from auth.users where email = 'ton@adresse';
    ```
-5. **Authentication → Sign In / Providers → désactive « Allow new users to sign up »** : plus personne ne peut créer de compte. Ton compte, lui, continue de se connecter.
-6. **Project Settings → API Keys** : note l'URL du projet, la *Publishable key* et la *Secret key* (cette dernière ne va que dans Vercel).
+5. **Connexion Google** (conseillée : l'e-mail intégré n'envoie que 2 e-mails par heure) : dans Google Cloud, **Credentials → OAuth client ID**, type *Web application*, redirection `https://<ref>.supabase.co/auth/v1/callback` ; puis Supabase → **Authentication → Sign In / Providers → Google** : ID client et code secret. Si l'écran de consentement est en mode *Testing*, ajoute ton adresse dans les *Test users*.
+6. (Facultatif) **Authentication → Sign In / Providers → section « User Signups » → désactive « Allow new users to sign up »** : plus personne ne peut créer de compte. Ton compte continue de se connecter. Attention, la ligne « Enable email signups » du fournisseur Email ne ferme que les inscriptions par e-mail.
+7. **Project Settings → API Keys** : note l'URL du projet, la *Publishable key* et la *Secret key* (cette dernière ne va que dans Vercel).
 
 > E-mails : le service d'e-mail intégré de Supabase est limité (quelques e-mails par heure), largement assez pour une personne.
 

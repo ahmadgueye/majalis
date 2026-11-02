@@ -100,7 +100,7 @@ La v2 contient déjà, en JavaScript pur, la logique à porter :
 ## Stack et architecture
 
 - **Next.js 15** (App Router, TypeScript, Turbopack), `src/` comme racine, alias `@/*`.
-- **Supabase** : authentification par lien e-mail, PostgreSQL avec RLS, Realtime. Clients dans `src/lib/supabase/` (`client.ts`, `server.ts`, `env.ts`). Le middleware `src/middleware.ts` rafraîchit la session et ne s'applique pas aux pages `/lire/`.
+- **Supabase** : authentification par **Google** (« Continuer avec Google ») ou par lien e-mail, PostgreSQL avec RLS, Realtime. Le service d'e-mail intégré de Supabase n'envoie que **2 e-mails par heure** : d'où Google, sans limite. Un lien de connexion qui retombe sur l'accueil (`/?code=`) est renvoyé vers `/auth/callback` par le middleware ; un refus (`?error=`) mène à `/connexion?erreur=acces`. Clients dans `src/lib/supabase/` (`client.ts`, `server.ts`, `env.ts`). Le middleware `src/middleware.ts` rafraîchit la session et ne s'applique pas aux pages `/lire/`.
 - **Sans `.env.local`**, `createClient()` renvoie `null` : la lecture fonctionne et la connexion affiche un message au lieu de planter.
 - **Développement en local** : Supabase tourne dans Docker via la CLI (`supabase` en devDependency, config dans `supabase/config.toml`). `npm run db:start` démarre les conteneurs et applique les migrations ; les e-mails de connexion arrivent dans Mailpit (http://127.0.0.1:54324). Edge runtime et analytics sont désactivés pour alléger. Les adresses et commandes sont dans le README. Si le conteneur Studio reste « unhealthy » au démarrage, lancer `npx supabase start -x studio`.
 - **Hébergement** : Vercel. Prévoir l'app installable (PWA). Guide pas à pas : `docs/mise-en-ligne.md`.
@@ -189,12 +189,12 @@ src/app/(site)/               pages qui partagent l'en-tête (layout.tsx) : accu
   - le **bucket privé `couvertures`** (`<space_id>/<fichier>`, 2 Mo au plus) : lecture par les membres via des URL signées, écriture par le responsable. Le navigateur réduit l'image (1600 px, WebP) avant la server action (`bodySizeLimit` à 3 Mo dans `next.config.ts`). L'ancienne image est supprimée quand on la remplace ou qu'on revient à un motif.
 - Un non-membre qui ouvre l'adresse d'un cercle obtient la page introuvable (`not-found.tsx`) : RLS ne lui renvoie rien.
 - **En local**, la migration s'applique au démarrage (`npm run db:start`) et a été vérifiée : 10 tables avec RLS, publication Realtime sur les 5 tables prévues. Types générés dans `src/lib/supabase/database.types.ts` (`npm run db:types` après chaque migration), utilisés par les clients.
-- **Pas encore de projet Supabase en ligne** : à créer plus tard (`supabase link` puis `db push`, Redirect URLs, variables Vercel).
+- **En ligne** (depuis le 02/11/2026) : projet Supabase `majalis` (`ytaqsethdedaeiszbayx`, `eu-west-1`), relié par `supabase link` ; migrations envoyées par `npx supabase db push`. Sur Supabase en ligne, **les fonctions de pgcrypto sont dans le schéma `extensions`** : les appeler `extensions.gen_random_bytes(…)` (l'appel nu passe en local mais échoue en ligne). Connexion Google : identifiant OAuth « Web » dans le projet Google Cloud **deenshare** du porteur (limite de projets atteinte), redirection `https://ytaqsethdedaeiszbayx.supabase.co/auth/v1/callback`.
 - **Port** : l'app tourne sur **http://localhost:3100** (`npm run dev`), car le 3000 est pris par un autre projet du porteur. `site_url` et les redirections de `supabase/config.toml` suivent ce port.
 
 ## État d'avancement (au 02/11/2026)
 
-Branche `feat/fondations`, poussée sur GitHub (ahmadgueye/majalis). Ne jamais mettre de clé, même locale, dans le dépôt : GitHub bloque le push (protection des secrets).
+**En ligne sur https://majalis.bayanun.com** (Vercel, branche `main`, fusionnée depuis `feat/fondations`). Branche `feat/fondations`, poussée sur GitHub (ahmadgueye/majalis). Ne jamais mettre de clé, même locale, dans le dépôt : GitHub bloque le push (protection des secrets).
 
 **Fait**
 - Projet Next.js, polices et jetons de design.
@@ -254,7 +254,7 @@ Branche `feat/fondations`, poussée sur GitHub (ahmadgueye/majalis). Ne jamais m
 - Le type-check, le lint et le build passent.
 
 **À faire, dans l'ordre conseillé**
-1. **Mise en ligne personnelle** en cours : suivre `docs/mise-en-ligne.md` (projet Supabase, Vercel, variables, Google Drive), ajouter le compte du porteur dans `translators`, fermer les inscriptions.
+1. **Mise en ligne personnelle** : faite (Supabase, Vercel, domaine, connexion Google, compte du porteur traducteur). Reste la **sauvegarde vers Google Drive** (`docs/mise-en-ligne.md`, étape 4 : identifiant « Desktop app » dans le projet deenshare, `npm run drive:token`, variables `GOOGLE_*` dans Vercel). Les inscriptions restent **ouvertes**, par choix du porteur (site non annoncé ; RLS protège son travail) : les fermer si le site devient connu.
 2. **Temps réel** : présence (curseurs), diffusion des déplacements pendant le glisser (aujourd'hui, les autres voient l'élément à la fin du geste), reconnexion.
 3. Suite du wolof : cartes « mot à mot » (interlinéaires) sur le tableau, glossaire consultable par tous, choix d'afficher ou non le wolof, propositions de correction des membres (avec « Commenter »).
 4. Discussion : commentaires, mentions, notifications dans l'app (« Commenter » sur un verset ou un élément du tableau).
