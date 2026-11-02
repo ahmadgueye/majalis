@@ -10,7 +10,8 @@ import {
   useRef,
   useState,
 } from "react";
-import { BookOpenText, Search, X } from "lucide-react";
+import { BookOpenText, LayoutGrid, Search, X } from "lucide-react";
+import { VerseNote } from "@/components/notes/VerseNote";
 import { SurahPicker } from "@/components/reader/SurahPicker";
 import { PageBar } from "@/components/SiteHeader";
 import { publishWolof } from "@/app/traduire/actions";
@@ -40,6 +41,8 @@ type Props = {
   initialDrafts: Record<string, WolofVerse>;
   initialPublished: Record<string, WolofVerse>;
   elsewhere: Known[];
+  /** Notes personnelles de la sourate, par verset. */
+  notes: Record<string, string>;
 };
 
 type Field = HTMLInputElement | HTMLTextAreaElement;
@@ -80,6 +83,7 @@ export function TranslateView({
   initialDrafts,
   initialPublished,
   elsewhere,
+  notes,
 }: Props) {
   const n = text.n;
   const supabase = useRef(createClient()).current;
@@ -379,6 +383,10 @@ export function TranslateView({
       <PageBar>
         <SurahPicker current={n} surahs={surahs} base="/traduire" />
         <div className="ml-auto flex flex-none items-center gap-1.5">
+          <Link href="/traduire" className="btn ghost">
+            <LayoutGrid aria-hidden className="size-4" />
+            Toutes les sourates
+          </Link>
           <Link href={`/lire/${n}`} className="btn ghost hidden md:inline-flex">
             <BookOpenText aria-hidden className="size-4" />
             Voir la lecture
@@ -482,6 +490,7 @@ export function TranslateView({
                 ignored={ignored}
                 menu={menu?.ref === ref ? menu.i : null}
                 group={group?.ref === ref ? group : null}
+                note={notes[ref] ?? ""}
                 publishing={publishing}
                 act={act}
               />
@@ -523,6 +532,7 @@ const VerseRow = memo(function VerseRow({
   ignored,
   menu,
   group,
+  note,
   publishing,
   act,
 }: {
@@ -534,6 +544,7 @@ const VerseRow = memo(function VerseRow({
   ignored: Set<string>;
   menu: number | null;
   group: { from: number; to: number } | null;
+  note: string;
   publishing: boolean;
   act: Act;
 }) {
@@ -749,6 +760,7 @@ const VerseRow = memo(function VerseRow({
       <p className="mt-1.5 font-read text-[13.5px] leading-normal text-muted">
         {verse.fr}
       </p>
+      <VerseNote verseRef={ref} initial={note} />
     </li>
   );
 });

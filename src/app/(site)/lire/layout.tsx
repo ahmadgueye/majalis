@@ -1,5 +1,6 @@
 import { surahs } from "@/lib/quran";
 import { PageBar } from "@/components/SiteHeader";
+import { ReadingNotes } from "@/components/notes/ReadingNotes";
 import { ReadingModes } from "@/components/reader/ReadingModes";
 import { SurahDrawer, SurahNav, type NavSurah } from "@/components/reader/SurahNav";
 
@@ -25,7 +26,7 @@ export default function ReadLayout({ children }: { children: React.ReactNode }) 
         </aside>
         <div className="px-safe min-w-0">
           <ReadingModes className="pt-4 lg:hidden" />
-          {children}
+          <ReadingNotes>{children}</ReadingNotes>
         </div>
       </div>
     </div>

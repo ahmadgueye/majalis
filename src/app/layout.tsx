@@ -14,6 +14,8 @@ export const metadata: Metadata = {
   title: { default: "Majalis", template: "%s · Majalis" },
   description: "Espace collaboratif de tadabbur : lecture, tableau, notes et mot à mot.",
   applicationName: "Majalis",
+  // Site personnel, non annoncé : les moteurs de recherche ne l'indexent pas.
+  robots: { index: false, follow: false },
 };
 
 export const viewport: Viewport = {

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { HOME } from "@/lib/features";
 import { redirect } from "next/navigation";
 import { getViewer } from "@/lib/auth";
 import { LoginForm } from "./LoginForm";
@@ -10,7 +11,7 @@ type Props = { searchParams: Promise<{ erreur?: string; suite?: string }> };
 export default async function LoginPage({ searchParams }: Props) {
   const { erreur, suite } = await searchParams;
   // Page où revenir après la connexion (lien d'invitation, page protégée) ; chemin interne seulement.
-  const next = suite && suite.startsWith("/") && !suite.startsWith("//") ? suite : "/cercles";
+  const next = suite && suite.startsWith("/") && !suite.startsWith("//") ? suite : HOME;
   if (await getViewer()) redirect(next);
   return (
     <>

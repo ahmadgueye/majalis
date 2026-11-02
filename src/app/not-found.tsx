@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
 import { SiteHeader } from "@/components/SiteHeader";
+import { HOME, HOME_LABEL } from "@/lib/features";
 
 /** Page introuvable : aussi ce que voit une personne qui n'est pas membre d'un cercle. */
 export default function NotFound() {
@@ -16,8 +17,8 @@ export default function NotFound() {
             cercle, demande un lien d&apos;invitation à un de ses membres.
           </p>
           <div className="flex flex-wrap justify-center gap-2">
-            <Link className="btn primary" href="/cercles">
-              Mes cercles
+            <Link className="btn primary" href={HOME}>
+              {HOME_LABEL}
             </Link>
             <Link className="btn" href="/">
               Accueil

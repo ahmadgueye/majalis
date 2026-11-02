@@ -9,6 +9,7 @@
     "lint": "eslint",
     "quran:build": "tsx scripts/build-quran.mts",
     "quran:fetch": "tsx scripts/fetch-translation.mts",
+    "drive:token": "tsx scripts/google-drive-token.mts",
     "db:start": "supabase start",
     "db:stop": "supabase stop",
     "db:reset": "supabase db reset",

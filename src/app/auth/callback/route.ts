@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { HOME } from "@/lib/features";
 import { createClient } from "@/lib/supabase/server";
 
 /** Retour du lien magique : échange le code contre une session puis redirige. */
@@ -6,7 +7,7 @@ export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
   const next = searchParams.get("next");
-  const safeNext = next && next.startsWith("/") && !next.startsWith("//") ? next : "/cercles";
+  const safeNext = next && next.startsWith("/") && !next.startsWith("//") ? next : HOME;
 
   const supabase = await createClient();
   if (code && supabase) {

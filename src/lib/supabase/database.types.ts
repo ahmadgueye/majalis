@@ -133,6 +133,20 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"notes": {
+                  Row: {
+                    "body": string,"created_at": string,"ref": string,"surah": number,"updated_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "body": string,"created_at"?: string,"ref": string,"surah": number,"updated_at"?: string,"user_id"?: string
+                  }
+                  Update: {
+                    "body"?: string,"created_at"?: string,"ref"?: string,"surah"?: number,"updated_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
                 },"profiles": {
                   Row: {
                     "color": string,"created_at": string,"display_name": string,"id": string

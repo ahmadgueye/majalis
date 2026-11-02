@@ -103,7 +103,10 @@ La v2 contient déjà, en JavaScript pur, la logique à porter :
 - **Supabase** : authentification par lien e-mail, PostgreSQL avec RLS, Realtime. Clients dans `src/lib/supabase/` (`client.ts`, `server.ts`, `env.ts`). Le middleware `src/middleware.ts` rafraîchit la session et ne s'applique pas aux pages `/lire/`.
 - **Sans `.env.local`**, `createClient()` renvoie `null` : la lecture fonctionne et la connexion affiche un message au lieu de planter.
 - **Développement en local** : Supabase tourne dans Docker via la CLI (`supabase` en devDependency, config dans `supabase/config.toml`). `npm run db:start` démarre les conteneurs et applique les migrations ; les e-mails de connexion arrivent dans Mailpit (http://127.0.0.1:54324). Edge runtime et analytics sont désactivés pour alléger. Les adresses et commandes sont dans le README. Si le conteneur Studio reste « unhealthy » au démarrage, lancer `npx supabase start -x studio`.
-- **Hébergement** : Vercel. Prévoir l'app installable (PWA).
+- **Hébergement** : Vercel. Prévoir l'app installable (PWA). Guide pas à pas : `docs/mise-en-ligne.md`.
+- **Mise en ligne personnelle (décision du 02/11/2026)** : le porteur met d'abord en ligne, pour lui seul, la Lecture, Traduire et ses notes. Les cercles et les séances, pas finis, sont **coupés en ligne** par `NEXT_PUBLIC_CERCLES=off` (`src/lib/features.ts` : liens retirés, pages introuvables, l'accueil mène à la Lecture, on arrive sur Traduire une fois connecté) ; en local, tout reste visible. Le site n'est pas annoncé et ne s'indexe pas (`robots: noindex`). Les inscriptions sont fermées dans Supabase une fois le compte du porteur créé.
+- **Supabase renvoie 1000 lignes au plus par requête** : pour lire une table entière (brouillons, notes…), passer par `fetchAll` (`src/lib/supabase/fetch-all.ts`), requête triée.
+- **Sauvegarde quotidienne** (`vercel.json` → `/api/cron/sauvegarde`, protégée par `CRON_SECRET`) : lit toute la base avec `SUPABASE_SECRET_KEY` (ce passage empêche la pause du projet gratuit après 7 jours), puis dépose le JSON (`buildExport`, `src/lib/export.ts`) dans le dossier « Majalis — sauvegardes » du Google Drive du porteur (`src/lib/google-drive.ts`, API REST, accès `drive.file`, 60 sauvegardes gardées). Jeton Google obtenu une fois par `npm run drive:token`. Le bouton « Exporter mes traductions et notes » (`/api/export`) donne le même fichier.
 
 ### Arborescence utile
 
@@ -129,6 +132,14 @@ src/app/(site)/traduire/[surah]/ mot à mot wolof (traducteurs seulement) ; src/
 src/components/wolof/        TranslateView : tuiles des mots, suggestions, fusions, lettres, glossaire, Publier
 src/lib/wolof.ts             découpage, normalisation, suggestions, texte wolof affiché (client et serveur)
 src/lib/wolof-server.ts      isTranslator(), publishedWolof() (lisible sans session)
+src/app/(site)/traduire/page.tsx accueil de Traduire (TranslateHome) : avancement, reprise, recherche, export
+src/app/(site)/notes/        Mes notes (NotesList) ; src/components/notes/ : VerseNote, ReadingNotes (notes dans la Lecture)
+src/lib/notes.ts             saveNote(), ordre des versets
+src/lib/features.ts          parties coupées en ligne (NEXT_PUBLIC_CERCLES=off)
+src/lib/export.ts            sauvegarde JSON (export et tâche quotidienne) ; src/lib/google-drive.ts : dépôt dans Drive
+src/app/api/export/, src/app/api/cron/sauvegarde/ export à télécharger, tâche quotidienne
+scripts/google-drive-token.mts jeton Google Drive, une fois (npm run drive:token)
+docs/mise-en-ligne.md        guide de mise en ligne (Supabase, Vercel, Drive)
 src/lib/reading.ts           façon de lire : modes, langues, script d'avant affichage, numéro de fin de verset
 src/components/board/        Board (caméra, outils, historique, enregistrement) et BoardItems (cartes, formes SVG)
 src/lib/board.ts             modèle du tableau, lecture/écriture des lignes, géométrie, tracés main levée
@@ -165,6 +176,7 @@ src/app/(site)/               pages qui partagent l'en-tête (layout.tsx) : accu
   - `translators` : qui peut traduire. **On ne devient traducteur qu'en SQL**, jamais depuis l'app : `insert into public.translators (user_id) select id from auth.users where email = '…';`. Fonction `is_translator()`.
   - `wolof_drafts` : le brouillon, lisible et modifiable par les traducteurs seulement, enregistré tout seul pendant la frappe.
   - `wolof` : la version publiée, **lisible par tous, même sans compte**. On n'y écrit que par `publish_wolof(refs)`, qui recopie les brouillons (un brouillon vide retire la publication).
+- `20261102000000_notes.sql` : **notes personnelles**, une par verset et par personne (`user_id`, `ref`, `surah`, `body`), lues et écrites par leur auteur seul (RLS vérifiée : un autre compte n'en voit aucune et ne peut pas en écrire au nom d'un autre). Une note vidée est supprimée.
 - `20261020000000_espaces.sql` ajoute :
   - `create_space(name)` : un insert direct suivi d'un select échoue, car le membre propriétaire est ajouté par un déclencheur après l'insert ;
   - `invite_info(token)` : ce qu'une personne invitée voit avant de rejoindre (nom du cercle, qui invite, rôle) ;
@@ -180,7 +192,7 @@ src/app/(site)/               pages qui partagent l'en-tête (layout.tsx) : accu
 - **Pas encore de projet Supabase en ligne** : à créer plus tard (`supabase link` puis `db push`, Redirect URLs, variables Vercel).
 - **Port** : l'app tourne sur **http://localhost:3100** (`npm run dev`), car le 3000 est pris par un autre projet du porteur. `site_url` et les redirections de `supabase/config.toml` suivent ce port.
 
-## État d'avancement (au 23/10/2026)
+## État d'avancement (au 02/11/2026)
 
 Branche `feat/fondations`, rien n'est encore poussé.
 
@@ -235,12 +247,14 @@ Branche `feat/fondations`, rien n'est encore poussé.
   - **le wolof publié** s'affiche en une phrase, en couleur d'accent, sous le français : page Lecture (régénérée par `revalidatePath` à chaque publication), lecture de la séance, cartes de versets du tableau (et `/api/verset`).
 
   Testé : saisie, suggestion acceptée, fusion, lettres, rechargement, publication d'un verset (le brouillon d'un autre reste invisible), glossaire, affichage dans la Lecture et la séance. Règles vérifiées en SQL : un visiteur lit seulement le publié ; un membre non traducteur ne lit pas les brouillons, n'écrit rien et ne peut pas publier.
+- **Traduire, accueil** (`/traduire`) : avancement global et par sourate (mots traduits, mots fusionnés comptés une fois ; versets publiés ; notes), « Reprendre au verset … » (dernier verset modifié), **recherche dans les traductions** (sans tenir compte des accents), filtre Toutes / Commencées, « Exporter mes traductions et notes ». Chaque sourate de Traduire a « Toutes les sourates ».
+- **Notes personnelles** (`VerseNote`) : « Ajouter une note » sous chaque verset, dans Traduire et dans la Lecture (une fois connecté ; la Lecture étant générée à l'avance, les notes y sont lues dans le navigateur, sourate par sourate). Enregistrées toutes seules (700 ms), « Visible par toi seul ». Page **Mes notes** (`/notes`, lien de l'en-tête) : chaque note sous son verset, modifiable sur place, recherche, export. Testé : écriture, relecture dans la Lecture et Mes notes, règles RLS, export.
 - **Règle suivie** : la rangée d'un verset montre « Ajouter au tableau », « Réflexion » et « Surligner ». « Commenter » et « Tafsir » y seront ajoutés **quand leur fonction existera** (aucun bouton inactif).
 - Pas encore : supprimer un cercle ou une séance, quitter un cercle.
 - Le type-check, le lint et le build passent.
 
 **À faire, dans l'ordre conseillé**
-1. Créer le projet Supabase en ligne et le relier à Vercel (quand on voudra déployer). Ajouter le compte du porteur dans `translators`.
+1. **Mise en ligne personnelle** en cours : suivre `docs/mise-en-ligne.md` (projet Supabase, Vercel, variables, Google Drive), ajouter le compte du porteur dans `translators`, fermer les inscriptions.
 2. **Temps réel** : présence (curseurs), diffusion des déplacements pendant le glisser (aujourd'hui, les autres voient l'élément à la fin du geste), reconnexion.
 3. Suite du wolof : cartes « mot à mot » (interlinéaires) sur le tableau, glossaire consultable par tous, choix d'afficher ou non le wolof, propositions de correction des membres (avec « Commenter »).
 4. Discussion : commentaires, mentions, notifications dans l'app (« Commenter » sur un verset ou un élément du tableau).

@@ -2,6 +2,8 @@ import Link from "next/link";
 import { SessionPreview } from "@/components/landing/SessionPreview";
 import { DEFAULT_TRANSLATION, getSurah, words } from "@/lib/quran";
 import { getViewer } from "@/lib/auth";
+import { CIRCLES } from "@/lib/features";
+import { redirect } from "next/navigation";
 
 const FEATURES = [
   {
@@ -45,6 +47,8 @@ const STEPS = [
 ];
 
 export default async function Home() {
+  // Cercles coupés en ligne : l'accueil, qui les présente, mène à la Lecture.
+  if (!CIRCLES) redirect("/lire/1");
   const viewer = await getViewer();
 
   // Versets tirés des données locales (Tanzil, Hamidullah) : le texte n'est jamais recopié à la main.

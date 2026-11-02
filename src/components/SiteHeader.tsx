@@ -7,6 +7,7 @@ import { Menu, X } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { ACCOUNT_KEY, UserMenu } from "@/components/UserMenu";
+import { CIRCLES, HOME } from "@/lib/features";
 import { createClient } from "@/lib/supabase/client";
 
 export type HeaderViewer = { name: string; email: string; translator: boolean };
@@ -16,6 +17,7 @@ export type HeaderViewer = { name: string; email: string; translator: boolean };
  * quand on change de page. Pleine largeur (logo au bord gauche, compte au bord droit), comme la séance. Mêmes éléments aux mêmes places. Gauche : logo (Mes cercles une fois
  * connecté, sinon l'accueil). Centre : navigation. Droite : thème et compte.
  * Ce qui est propre à une page va dans sa barre (PageBar). La séance a son en-tête compact.
+ * Les cercles peuvent être coupés en ligne (src/lib/features.ts) : leurs liens disparaissent.
  */
 export function SiteHeader() {
   const viewer = useViewer();
@@ -29,33 +31,16 @@ export function SiteHeader() {
       ? []
       : viewer
         ? [
-            {
-              href: "/cercles",
-              label: "Mes cercles",
-              on: path.startsWith("/cercles"),
-            },
-            {
-              href: "/lire/1",
-              label: "Lire le Coran",
-              on: path.startsWith("/lire"),
-            },
+            ...(CIRCLES ? [{ href: "/cercles", label: "Mes cercles", on: path.startsWith("/cercles") }] : []),
+            { href: "/lire/1", label: "Lire le Coran", on: path.startsWith("/lire") },
             ...(viewer.translator
-              ? [
-                  {
-                    href: "/traduire",
-                    label: "Traduire",
-                    on: path.startsWith("/traduire"),
-                  },
-                ]
+              ? [{ href: "/traduire", label: "Traduire", on: path.startsWith("/traduire") }]
               : []),
+            { href: "/notes", label: "Mes notes", on: path.startsWith("/notes") },
           ]
         : [
-            { href: "/#fonctions", label: "Fonctions", on: false },
-            {
-              href: "/lire/1",
-              label: "Lire le Coran",
-              on: path.startsWith("/lire"),
-            },
+            ...(CIRCLES ? [{ href: "/#fonctions", label: "Fonctions", on: false }] : []),
+            { href: "/lire/1", label: "Lire le Coran", on: path.startsWith("/lire") },
           ];
 
   useEffect(() => setMenu(false), [path]);
@@ -77,7 +62,7 @@ export function SiteHeader() {
     <header className="sticky top-0 z-20 border-b border-line bg-surface/92 backdrop-blur-sm">
       <div className="px-safe flex h-14 items-center gap-3">
         <Link
-          href={viewer ? "/cercles" : "/"}
+          href={viewer ? HOME : CIRCLES ? "/" : "/lire/1"}
           className="flex flex-none items-center gap-2.5 text-[17px] font-bold"
         >
           <Logo />
