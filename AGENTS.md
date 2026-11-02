@@ -194,7 +194,7 @@ src/app/(site)/               pages qui partagent l'en-tête (layout.tsx) : accu
 
 ## État d'avancement (au 02/11/2026)
 
-Branche `feat/fondations`, rien n'est encore poussé.
+Branche `feat/fondations`, poussée sur GitHub (ahmadgueye/majalis). Ne jamais mettre de clé, même locale, dans le dépôt : GitHub bloque le push (protection des secrets).
 
 **Fait**
 - Projet Next.js, polices et jetons de design.
