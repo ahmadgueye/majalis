@@ -1,0 +1,826 @@
+<title>Majalis, cercles</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Figtree:wght@400;500;600;700&family=Scheherazade+New:wght@400;700&display=swap">
+<style>
+/* Maquette des cercles : liste, création (fenêtre avec aperçu), page d'un cercle.
+   Jetons repris de src/app/globals.css ; chaque cercle a une teinte (--tone) tirée des couleurs de l'app. */
+:root {
+  --bg: #f4f6f4; --surface: #ffffff; --surface-2: #eef2ef; --line: #e1e7e3;
+  --ink: #15221e; --muted: #5b6a64; --faint: #8a9792;
+  --accent: #0d5c52; --accent-ink: #ffffff; --accent-soft: #dcebe6; --grid: #d5ddd8;
+  --hl-theme: #e2eedb; --hl-question: #dde9f5; --hl-reflect: #f6ebcd; --hl-link: #f5e0e5;
+  --c-sand: #b07a14; --c-sage: #4a7a45; --c-rose: #ad4259; --c-sky: #2c6b9b; --k: #8f45ab;
+  --shadow: 0 1px 2px rgba(20, 40, 34, 0.05), 0 6px 20px rgba(20, 40, 34, 0.08);
+  --shadow-lg: 0 8px 40px rgba(20, 40, 34, 0.16);
+  --f-ui: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-read: "EB Garamond", Garamond, Georgia, serif;
+  --f-hand: "Caveat", "Segoe Print", cursive;
+  --f-ar: "Scheherazade New", "Geeza Pro", "Traditional Arabic", serif;
+  --f-mark: "Geeza Pro", "Noto Naskh Arabic", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1513; --surface: #161e1b; --surface-2: #1c2622; --line: #26312d;
+    --ink: #e5ece9; --muted: #97a6a0; --faint: #6f7d78;
+    --accent: #62bcac; --accent-ink: #06201b; --accent-soft: #1c3a34; --grid: #24302b;
+    --hl-theme: #24341e; --hl-question: #1b2e3e; --hl-reflect: #36301c; --hl-link: #382027;
+    --c-sand: #e1b45b; --c-sage: #8cc485; --c-rose: #e68aa0; --c-sky: #80b6e2; --k: #c88be2;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
+    --shadow-lg: 0 10px 44px rgba(0, 0, 0, 0.5);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1513; --surface: #161e1b; --surface-2: #1c2622; --line: #26312d;
+  --ink: #e5ece9; --muted: #97a6a0; --faint: #6f7d78;
+  --accent: #62bcac; --accent-ink: #06201b; --accent-soft: #1c3a34; --grid: #24302b;
+  --hl-theme: #24341e; --hl-question: #1b2e3e; --hl-reflect: #36301c; --hl-link: #382027;
+  --c-sand: #e1b45b; --c-sage: #8cc485; --c-rose: #e68aa0; --c-sky: #80b6e2; --k: #c88be2;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 10px 44px rgba(0, 0, 0, 0.5);
+  color-scheme: dark;
+}
+
+/* Teintes des cercles */
+.tone-teal { --tone: var(--accent); --tone-soft: var(--accent-soft); }
+.tone-sage { --tone: var(--c-sage); --tone-soft: var(--hl-theme); }
+.tone-sky { --tone: var(--c-sky); --tone-soft: var(--hl-question); }
+.tone-sand { --tone: var(--c-sand); --tone-soft: var(--hl-reflect); }
+.tone-rose { --tone: var(--c-rose); --tone-soft: var(--hl-link); }
+.tone-plum { --tone: var(--k); --tone-soft: color-mix(in srgb, var(--k) 16%, var(--surface)); }
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 14.5px/1.5 var(--f-ui); -webkit-font-smoothing: antialiased; }
+a { color: inherit; text-decoration: none; }
+h1, h2, h3, p, ul, ol, figure { margin: 0; padding: 0; }
+ul, ol { list-style: none; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.ico { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+.wrap { max-width: 1080px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  border: 1px solid var(--line); background: var(--surface); border-radius: 9px;
+  padding: 8px 14px; font-weight: 600; white-space: nowrap;
+}
+.btn:hover { background: var(--surface-2); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.primary:hover { filter: brightness(1.07); }
+.btn.ghost { border-color: transparent; background: transparent; color: var(--muted); }
+.btn.ghost:hover { background: var(--surface-2); color: var(--ink); }
+
+/* Barre de la maquette (hors app) */
+.proto { background: var(--ink); color: var(--bg); font-size: 12.5px; }
+.proto .wrap { display: flex; align-items: center; gap: 10px; min-height: 38px; flex-wrap: wrap; padding-block: 4px; }
+.proto b { font-weight: 700; letter-spacing: .04em; text-transform: uppercase; font-size: 11px; opacity: .7; }
+.proto button { background: transparent; border: 1px solid color-mix(in srgb, var(--bg) 30%, transparent); color: var(--bg); border-radius: 999px; padding: 3px 11px; font-size: 12.5px; }
+.proto button[aria-pressed="true"] { background: var(--bg); color: var(--ink); }
+
+/* En-tête de l'app */
+.top { position: sticky; top: 0; z-index: 5; background: color-mix(in srgb, var(--surface) 92%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+.top .wrap { display: flex; align-items: center; gap: 12px; height: 56px; }
+.mark { width: 32px; height: 32px; border-radius: 9px; flex: none; display: grid; place-items: center; background: var(--accent); color: var(--accent-ink); font: 700 19px/1 var(--f-mark); }
+.crumbs { display: flex; align-items: center; gap: 6px; min-width: 0; flex: 1; font-size: 14px; }
+.crumbs a { color: var(--muted); }
+.crumbs a:hover { color: var(--ink); }
+.crumbs span[aria-current] { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.crumbs .sep { color: var(--faint); }
+.me { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: var(--accent-ink); font-weight: 700; font-size: 13px; border: 0; }
+.theme { display: flex; gap: 2px; padding: 2px; border: 1px solid var(--line); background: var(--surface-2); border-radius: 999px; }
+.theme button { width: 28px; height: 28px; border-radius: 50%; border: 0; background: transparent; color: var(--muted); display: grid; place-items: center; }
+.theme button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
+
+/* Couvertures et pastilles */
+.cover { position: relative; background: var(--tone-soft); color: var(--tone); overflow: hidden; }
+.cover svg.pat { position: absolute; inset: 0; width: 100%; height: 100%; opacity: .5; }
+.cover img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.badge {
+  display: grid; place-items: center; flex: none;
+  background: var(--tone); color: var(--surface);
+  font: 700 22px/1 var(--f-ui); border: 3px solid var(--surface);
+}
+
+.avatars { display: flex; }
+.av { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; font-weight: 700; color: var(--surface); border: 2px solid var(--surface); margin-left: -7px; }
+.av:first-child { margin-left: 0; }
+.av.more { background: var(--surface-2); color: var(--muted); }
+.chip { font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 999px; background: var(--surface-2); color: var(--muted); white-space: nowrap; }
+.chip.owner { background: var(--accent-soft); color: var(--accent); }
+
+/* ---- Mes cercles ---- */
+.page-head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 16px; padding-block: 36px 24px; }
+.page-head h1 { font: 500 36px/1.1 var(--f-read); }
+.page-head p { color: var(--muted); max-width: 52ch; margin-top: 6px; }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: 18px; padding-bottom: 56px; }
+.card { display: grid; grid-template-rows: auto 1fr; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; text-align: left; padding: 0; transition: box-shadow .2s, transform .2s; }
+.card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
+@media (prefers-reduced-motion: reduce) { .card, .card:hover { transition: none; transform: none; } }
+.card .cover { height: 92px; }
+.card .body { position: relative; display: grid; gap: 10px; padding: 34px 18px 16px; align-content: start; }
+.card .badge { position: absolute; top: -26px; left: 16px; width: 52px; height: 52px; border-radius: 14px; }
+.card .role { position: absolute; top: 10px; right: 14px; }
+.card h2 { font-size: 17px; font-weight: 700; }
+.card .intent { color: var(--muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 3em; }
+.meta { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
+.meta div { display: flex; align-items: center; gap: 7px; min-width: 0; }
+.meta div span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.card .foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-top: 4px; }
+
+/* ---- Page d'un cercle ---- */
+.hero { padding-top: 20px; }
+.hero .cover { height: 190px; border-radius: 18px; }
+.hero-row { position: relative; display: flex; flex-wrap: wrap; align-items: flex-end; gap: 14px 20px; padding: 0 8px; margin-top: -40px; }
+.hero-row .badge { width: 84px; height: 84px; border-radius: 22px; font-size: 34px; border-width: 4px; }
+.hero-txt { flex: 1; min-width: min(100%, 260px); display: grid; gap: 4px; padding-top: 44px; }
+.hero-txt h1 { font: 500 34px/1.1 var(--f-read); text-wrap: balance; }
+.hero-txt p { color: var(--muted); max-width: 60ch; }
+.hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.facts { display: flex; flex-wrap: wrap; gap: 8px 18px; padding: 14px 8px 0; font-size: 13.5px; color: var(--muted); }
+.facts div { display: flex; align-items: center; gap: 7px; }
+.facts b { color: var(--ink); font-weight: 600; }
+
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 330px); gap: 28px; padding-block: 28px 56px; align-items: start; }
+.col { display: grid; gap: 22px; min-width: 0; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 18px; display: grid; gap: 12px; }
+.panel-head { display: flex; align-items: center; gap: 8px; }
+.panel-head h2 { font-size: 15.5px; font-weight: 700; flex: 1; }
+.panel-head .ico { color: var(--faint); }
+.count { font-size: 12.5px; color: var(--faint); font-variant-numeric: tabular-nums; }
+
+.verse { background: var(--tone-soft); border: 0; position: relative; overflow: hidden; }
+.verse .ar { font: 400 27px/1.9 var(--f-ar); text-align: right; color: var(--ink); }
+.verse .fr { font: italic 400 17px/1.45 var(--f-read); }
+.verse .ref { font-size: 12.5px; font-weight: 600; color: var(--tone); }
+
+.next { display: flex; align-items: center; gap: 14px; }
+.next .day { width: 56px; flex: none; text-align: center; border-radius: 12px; background: var(--tone-soft); color: var(--tone); padding: 6px 0; line-height: 1.1; }
+.next .day b { display: block; font-size: 22px; }
+.next .day span { font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+.next .txt { flex: 1; min-width: 0; }
+.next .txt strong { display: block; }
+.next .txt span { color: var(--muted); font-size: 13px; }
+
+.sessions { display: grid; gap: 8px; }
+.sess { display: flex; align-items: center; gap: 14px; padding: 10px 12px 10px 10px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); }
+.sess:hover { background: var(--surface-2); }
+.sess .tile { width: 58px; height: 58px; flex: none; border-radius: 12px; display: grid; place-items: center; background: var(--tone-soft); color: var(--tone); font: 700 22px/1 var(--f-ar); }
+.sess .txt { flex: 1; min-width: 0; display: grid; gap: 1px; }
+.sess .txt strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sess .txt span { color: var(--muted); font-size: 13px; }
+.sess .ico { color: var(--faint); }
+
+.empty { display: grid; justify-items: center; gap: 10px; text-align: center; padding: 26px 12px; color: var(--muted); }
+.empty .ring { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; background: var(--tone-soft); color: var(--tone); }
+.empty .ring .ico { width: 22px; height: 22px; }
+
+.note { font: 500 23px/1.2 var(--f-hand); color: var(--c-sage); padding: 14px 16px; border-radius: 12px; background: var(--hl-theme); transform: rotate(-.8deg); }
+.note-by { font-size: 12.5px; color: var(--muted); }
+
+.qmap { display: grid; grid-template-columns: repeat(19, minmax(0, 1fr)); gap: 3px; }
+.qmap i { aspect-ratio: 1; border-radius: 3px; background: var(--surface-2); border: 1px solid var(--line); max-width: 100%; }
+.qmap i.on { background: var(--tone); border-color: var(--tone); }
+.qmap i:hover { outline: 2px solid var(--tone); outline-offset: 1px; }
+.qmap-legend { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--muted); }
+#qmap-tip { font-size: 12.5px; min-height: 1.5em; color: var(--ink); }
+
+.members { display: grid; gap: 10px; }
+.members li { display: flex; align-items: center; gap: 10px; }
+.members li .av { margin: 0; width: 32px; height: 32px; }
+.members li span { flex: 1; min-width: 0; font-weight: 600; }
+.members li em { font-style: normal; font-weight: 400; color: var(--muted); }
+
+/* ---- Fenêtres ---- */
+dialog { border: 1px solid var(--line); border-radius: 20px; padding: 0; background: var(--surface); color: var(--ink); box-shadow: var(--shadow-lg); width: min(860px, calc(100% - 24px)); max-height: calc(100% - 24px); }
+dialog.small { width: min(480px, calc(100% - 24px)); }
+dialog::backdrop { background: color-mix(in srgb, var(--ink) 40%, transparent); backdrop-filter: blur(2px); }
+dialog[open] { animation: pop .22s ease-out; }
+@keyframes pop { from { opacity: 0; transform: translateY(8px) scale(.98); } }
+@media (prefers-reduced-motion: reduce) { dialog[open] { animation: none; } }
+.dlg-head { display: flex; align-items: center; gap: 10px; padding: 18px 20px 4px; }
+.dlg-head h2 { flex: 1; font: 500 25px/1.15 var(--f-read); }
+.icon-btn { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; border: 0; background: transparent; color: var(--muted); }
+.icon-btn:hover { background: var(--surface-2); color: var(--ink); }
+.dlg-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 300px); gap: 24px; padding: 14px 20px 20px; }
+dialog.small .dlg-body { grid-template-columns: minmax(0, 1fr); }
+.fields { display: grid; gap: 18px; min-width: 0; }
+.field { display: grid; gap: 6px; min-width: 0; }
+.field > label, .field > .lbl { font-size: 13px; font-weight: 600; }
+.field .opt { font-weight: 400; color: var(--faint); }
+.field .hint { font-size: 12.5px; color: var(--faint); }
+.input { width: 100%; border: 1px solid var(--line); background: var(--surface); border-radius: 9px; padding: 9px 12px; }
+textarea.input { resize: vertical; min-height: 64px; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; }
+.row > * { flex: 1 1 140px; min-width: 0; }
+
+.covers { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.cover-opt { position: relative; height: 54px; border-radius: 10px; border: 2px solid transparent; padding: 0; overflow: hidden; background: none; }
+.cover-opt .cover { position: absolute; inset: 0; }
+.cover-opt[aria-pressed="true"] { border-color: var(--ink); }
+.cover-opt.upload { display: grid; place-items: center; gap: 2px; border: 1.5px dashed var(--grid); color: var(--muted); font-size: 12px; font-weight: 600; background: var(--surface); }
+.cover-opt.upload:hover { color: var(--ink); border-color: var(--muted); }
+.cover-opt.upload span { display: flex; align-items: center; gap: 5px; }
+
+.swatches { display: flex; flex-wrap: wrap; gap: 8px; }
+.sw { width: 32px; height: 32px; border-radius: 50%; border: 0; background: var(--tone); box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px transparent; display: grid; place-items: center; color: var(--surface); }
+.sw[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--ink); }
+.sw .ico { opacity: 0; }
+.sw[aria-pressed="true"] .ico { opacity: 1; }
+
+.quick { display: flex; flex-wrap: wrap; gap: 6px; }
+.quick button { font-size: 12.5px; border: 1px solid var(--line); background: var(--surface-2); border-radius: 999px; padding: 3px 10px; }
+.quick button:hover { border-color: var(--muted); }
+.vprev { border-radius: 10px; background: var(--surface-2); padding: 10px 12px; display: grid; gap: 4px; }
+.vprev .ar { font: 400 21px/1.8 var(--f-ar); text-align: right; }
+.vprev .fr { font: italic 400 15px/1.4 var(--f-read); color: var(--muted); }
+
+.preview { display: grid; gap: 10px; align-content: start; position: sticky; top: 0; }
+.preview .lbl { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--faint); }
+.preview .card:hover { transform: none; box-shadow: none; }
+.dlg-foot { display: flex; justify-content: flex-end; gap: 8px; padding: 14px 20px 18px; border-top: 1px solid var(--line); }
+
+.seg { display: inline-flex; padding: 3px; gap: 3px; border-radius: 10px; background: var(--surface-2); border: 1px solid var(--line); }
+.seg button { border: 0; background: transparent; border-radius: 7px; padding: 6px 12px; font-weight: 600; color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
+.linkbox { display: flex; gap: 8px; }
+.linkbox input { flex: 1; min-width: 0; background: var(--surface-2); font-size: 13px; }
+.links { display: grid; gap: 6px; }
+.links li { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); padding: 8px 10px; border-radius: 9px; background: var(--surface-2); }
+.links li span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 9px 16px; border-radius: 10px; font-weight: 600; font-size: 13.5px; box-shadow: var(--shadow-lg); display: flex; gap: 8px; align-items: center; z-index: 20; }
+
+@media (max-width: 860px) {
+  .layout { grid-template-columns: minmax(0, 1fr); }
+  .dlg-body { grid-template-columns: minmax(0, 1fr); }
+  .preview { position: static; }
+}
+@media (max-width: 560px) {
+  .hero .cover { height: 130px; border-radius: 14px; }
+  .hero-row { margin-top: -32px; padding: 0 4px; }
+  .hero-row .badge { width: 68px; height: 68px; font-size: 28px; border-radius: 18px; }
+  .hero-txt { padding-top: 0; }
+  .hero-txt h1 { font-size: 29px; }
+  .crumbs a.hide-sm, .crumbs .sep.hide-sm { display: none; }
+  .covers { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+</style>
+
+<div class="proto" role="region" aria-label="Navigation de la maquette">
+  <div class="wrap">
+    <b>Maquette</b>
+    <button type="button" data-screen="list" aria-pressed="true">Mes cercles</button>
+    <button type="button" data-screen="detail" aria-pressed="false">Page d'un cercle</button>
+    <button type="button" id="proto-create">Fenêtre de création</button>
+  </div>
+</div>
+
+<header class="top">
+  <div class="wrap">
+    <a href="#" class="mark" aria-label="Mes cercles" data-go="list">م</a>
+    <nav class="crumbs" aria-label="Fil d'Ariane" id="crumbs"></nav>
+    <div class="theme" role="group" aria-label="Thème">
+      <button type="button" data-theme-set="light" aria-label="Thème clair" title="Thème clair"><svg class="ico" data-i="sun"></svg></button>
+      <button type="button" data-theme-set="dark" aria-label="Thème sombre" title="Thème sombre"><svg class="ico" data-i="moon"></svg></button>
+    </div>
+    <button type="button" class="me" aria-label="Mon compte" title="Mon compte">A</button>
+  </div>
+</header>
+
+<main id="screen-list" class="wrap">
+  <div class="page-head">
+    <div>
+      <h1>Mes cercles</h1>
+      <p>Les cercles où tu étudies. Chacun a ses séances, son tableau et son mot à mot wolof.</p>
+    </div>
+    <button type="button" class="btn primary" data-open-create><svg class="ico" data-i="plus"></svg>Nouveau cercle</button>
+  </div>
+  <div class="cards" id="cards"></div>
+</main>
+
+<main id="screen-detail" hidden></main>
+
+<!-- Création et paramètres d'un cercle -->
+<dialog id="dlg-create" aria-labelledby="create-title">
+  <form method="dialog" id="create-form">
+    <div class="dlg-head">
+      <h2 id="create-title">Nouveau cercle</h2>
+      <button type="button" class="icon-btn" data-close aria-label="Fermer" title="Fermer"><svg class="ico" data-i="x"></svg></button>
+    </div>
+    <div class="dlg-body">
+      <div class="fields">
+        <div class="field">
+          <label for="f-name">Nom du cercle</label>
+          <input id="f-name" class="input" maxlength="60" required placeholder="Par exemple : Cercle du mardi">
+        </div>
+        <div class="field">
+          <label for="f-intent">Intention <span class="opt">(facultatif)</span></label>
+          <textarea id="f-intent" class="input" maxlength="160" placeholder="Pourquoi vous vous réunissez, en une ou deux phrases."></textarea>
+        </div>
+        <div class="field">
+          <span class="lbl" id="lbl-cover">Couverture</span>
+          <div class="covers" role="group" aria-labelledby="lbl-cover" id="cover-opts"></div>
+          <input type="file" id="f-file" accept="image/*" class="sr" tabindex="-1">
+        </div>
+        <div class="field">
+          <span class="lbl" id="lbl-tone">Couleur</span>
+          <div class="swatches" role="group" aria-labelledby="lbl-tone" id="tone-opts"></div>
+        </div>
+        <div class="field">
+          <label for="f-verse">Verset du cercle <span class="opt">(facultatif)</span></label>
+          <input id="f-verse" class="input" inputmode="numeric" placeholder="Sourate:verset, par exemple 38:29" autocomplete="off">
+          <div class="quick" id="verse-quick" aria-label="Exemples de versets"></div>
+          <div class="vprev" id="verse-prev" hidden></div>
+          <span class="hint" id="verse-hint">Le verset s'affiche en tête de la page du cercle.</span>
+        </div>
+        <div class="field">
+          <span class="lbl">Rythme <span class="opt">(facultatif)</span></span>
+          <div class="row">
+            <select id="f-day" class="input" aria-label="Jour des rencontres">
+              <option value="">Pas de jour fixe</option>
+              <option>lundi</option><option>mardi</option><option>mercredi</option><option>jeudi</option>
+              <option>vendredi</option><option>samedi</option><option>dimanche</option>
+            </select>
+            <input id="f-time" type="time" class="input" aria-label="Heure des rencontres" value="20:30">
+          </div>
+        </div>
+      </div>
+      <aside class="preview" aria-label="Aperçu de la carte du cercle">
+        <span class="lbl">Aperçu</span>
+        <div id="create-preview"></div>
+      </aside>
+    </div>
+    <div class="dlg-foot">
+      <button type="button" class="btn ghost" data-close>Annuler</button>
+      <button type="submit" class="btn primary" id="create-submit"><svg class="ico" data-i="check"></svg><span>Créer le cercle</span></button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Inviter -->
+<dialog id="dlg-invite" class="small" aria-labelledby="invite-title">
+  <div class="dlg-head">
+    <h2 id="invite-title">Inviter dans le cercle</h2>
+    <button type="button" class="icon-btn" data-close aria-label="Fermer" title="Fermer"><svg class="ico" data-i="x"></svg></button>
+  </div>
+  <div class="dlg-body">
+    <div class="fields">
+      <div class="field">
+        <span class="lbl">Les personnes invitées pourront</span>
+        <div class="seg" role="group" aria-label="Rôle des personnes invitées" id="invite-role">
+          <button type="button" data-role="editor" aria-pressed="true">Modifier</button>
+          <button type="button" data-role="viewer" aria-pressed="false">Seulement lire</button>
+        </div>
+      </div>
+      <div class="field">
+        <label for="invite-link">Lien à envoyer</label>
+        <div class="linkbox">
+          <input id="invite-link" class="input" readonly>
+          <button type="button" class="btn primary" id="invite-copy"><svg class="ico" data-i="copy"></svg>Copier</button>
+        </div>
+        <span class="hint">Valable 14 jours. La personne se connecte avec son e-mail, puis rejoint le cercle.</span>
+      </div>
+      <div class="field">
+        <span class="lbl">Liens actifs</span>
+        <ul class="links" id="invite-links"></ul>
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<!-- Nouvelle séance -->
+<dialog id="dlg-session" class="small" aria-labelledby="session-title">
+  <form method="dialog" id="session-form">
+    <div class="dlg-head">
+      <h2 id="session-title">Nouvelle séance</h2>
+      <button type="button" class="icon-btn" data-close aria-label="Fermer" title="Fermer"><svg class="ico" data-i="x"></svg></button>
+    </div>
+    <div class="dlg-body">
+      <div class="fields">
+        <div class="field">
+          <label for="s-surah">Sourate</label>
+          <select id="s-surah" class="input"></select>
+        </div>
+        <div class="field">
+          <label for="s-title">Titre <span class="opt">(facultatif)</span></label>
+          <input id="s-title" class="input" maxlength="80" placeholder="Par exemple : versets 1 à 10">
+        </div>
+      </div>
+    </div>
+    <div class="dlg-foot">
+      <button type="button" class="btn ghost" data-close>Annuler</button>
+      <button type="submit" class="btn primary"><svg class="ico" data-i="plus"></svg>Créer la séance</button>
+    </div>
+  </form>
+</dialog>
+
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+// ---------- Données (exemples) ----------
+const SURAHS = [["Al-Faatiha","الفاتحة"],["Al-Baqara","البقرة"],["Aal-i-Imraan","آل عمران"],["An-Nisaa","النساء"],["Al-Maaida","المائدة"],["Al-An'aam","الأنعام"],["Al-A'raaf","الأعراف"],["Al-Anfaal","الأنفال"],["At-Tawba","التوبة"],["Yunus","يونس"],["Hud","هود"],["Yusuf","يوسف"],["Ar-Ra'd","الرعد"],["Ibrahim","ابراهيم"],["Al-Hijr","الحجر"],["An-Nahl","النحل"],["Al-Israa","الإسراء"],["Al-Kahf","الكهف"],["Maryam","مريم"],["Taa-Haa","طه"],["Al-Anbiyaa","الأنبياء"],["Al-Hajj","الحج"],["Al-Muminoon","المؤمنون"],["An-Noor","النور"],["Al-Furqaan","الفرقان"],["Ash-Shu'araa","الشعراء"],["An-Naml","النمل"],["Al-Qasas","القصص"],["Al-Ankaboot","العنكبوت"],["Ar-Room","الروم"],["Luqman","لقمان"],["As-Sajda","السجدة"],["Al-Ahzaab","الأحزاب"],["Saba","سبإ"],["Faatir","فاطر"],["Yaseen","يس"],["As-Saaffaat","الصافات"],["Saad","ص"],["Az-Zumar","الزمر"],["Al-Ghaafir","غافر"],["Fussilat","فصلت"],["Ash-Shura","الشورى"],["Az-Zukhruf","الزخرف"],["Ad-Dukhaan","الدخان"],["Al-Jaathiya","الجاثية"],["Al-Ahqaf","الأحقاف"],["Muhammad","محمد"],["Al-Fath","الفتح"],["Al-Hujuraat","الحجرات"],["Qaaf","ق"],["Adh-Dhaariyat","الذاريات"],["At-Tur","الطور"],["An-Najm","النجم"],["Al-Qamar","القمر"],["Ar-Rahmaan","الرحمن"],["Al-Waaqia","الواقعة"],["Al-Hadid","الحديد"],["Al-Mujaadila","المجادلة"],["Al-Hashr","الحشر"],["Al-Mumtahana","الممتحنة"],["As-Saff","الصف"],["Al-Jumu'a","الجمعة"],["Al-Munaafiqoon","المنافقون"],["At-Taghaabun","التغابن"],["At-Talaaq","الطلاق"],["At-Tahrim","التحريم"],["Al-Mulk","الملك"],["Al-Qalam","القلم"],["Al-Haaqqa","الحاقة"],["Al-Ma'aarij","المعارج"],["Nooh","نوح"],["Al-Jinn","الجن"],["Al-Muzzammil","المزمل"],["Al-Muddaththir","المدثر"],["Al-Qiyaama","القيامة"],["Al-Insaan","الانسان"],["Al-Mursalaat","المرسلات"],["An-Naba","النبإ"],["An-Naazi'aat","النازعات"],["Abasa","عبس"],["At-Takwir","التكوير"],["Al-Infitaar","الإنفطار"],["Al-Mutaffifin","المطففين"],["Al-Inshiqaaq","الإنشقاق"],["Al-Burooj","البروج"],["At-Taariq","الطارق"],["Al-A'laa","الأعلى"],["Al-Ghaashiya","الغاشية"],["Al-Fajr","الفجر"],["Al-Balad","البلد"],["Ash-Shams","الشمس"],["Al-Lail","الليل"],["Ad-Dhuhaa","الضحى"],["Ash-Sharh","الشرح"],["At-Tin","التين"],["Al-Alaq","العلق"],["Al-Qadr","القدر"],["Al-Bayyina","البينة"],["Az-Zalzala","الزلزلة"],["Al-Aadiyaat","العاديات"],["Al-Qaari'a","القارعة"],["At-Takaathur","التكاثر"],["Al-Asr","العصر"],["Al-Humaza","الهمزة"],["Al-Fil","الفيل"],["Quraish","قريش"],["Al-Maa'un","الماعون"],["Al-Kawthar","الكوثر"],["Al-Kaafiroon","الكافرون"],["An-Nasr","النصر"],["Al-Masad","المسد"],["Al-Ikhlaas","الإخلاص"],["Al-Falaq","الفلق"],["An-Naas","الناس"]];
+
+// Versets tirés des données locales de l'app (Tanzil, Hamidullah), sans modification.
+const VERSES = {
+  "38:29": { ar: "كِتَٰبٌ أَنزَلْنَٰهُ إِلَيْكَ مُبَٰرَكٌ لِّيَدَّبَّرُوٓا۟ ءَايَٰتِهِۦ وَلِيَتَذَكَّرَ أُو۟لُوا۟ ٱلْأَلْبَٰبِ", fr: "[Voici] un Livre béni que Nous avons fait descendre vers toi, afin qu’ils méditent sur ses versets et que les doués d’intelligence réfléchissent !" },
+  "47:24": { ar: "أَفَلَا يَتَدَبَّرُونَ ٱلْقُرْءَانَ أَمْ عَلَىٰ قُلُوبٍ أَقْفَالُهَآ", fr: "Ne méditent-ils pas sur le Coran ? Ou y a-t-il des cadenas sur leurs cœurs ?" },
+  "20:114": { ar: "فَتَعَٰلَى ٱللَّهُ ٱلْمَلِكُ ٱلْحَقُّ وَلَا تَعْجَلْ بِٱلْقُرْءَانِ مِن قَبْلِ أَن يُقْضَىٰٓ إِلَيْكَ وَحْيُهُۥ وَقُل رَّبِّ زِدْنِى عِلْمًا", fr: "Que soit exalté Allah, le Vrai Souverain ! Ne te hâte pas [de réciter] le Coran avant que ne te soit achevée sa révélation . Et dis: “Mon Seigneur! Accroît mon savoir ! ”" },
+};
+
+const TONES = [
+  ["teal", "Vert d'eau"], ["sage", "Sauge"], ["sky", "Ciel"], ["sand", "Sable"], ["rose", "Rose"], ["plum", "Prune"],
+];
+const PATTERNS = [["etoile", "Étoile à huit branches"], ["arcs", "Arcs"], ["vagues", "Dunes"], ["losanges", "Losanges"], ["points", "Points"]];
+
+const PEOPLE = {
+  A: { name: "Toi", tone: "teal" }, K: { name: "Khadija", tone: "plum" }, M: { name: "Moussa", tone: "sky" },
+  F: { name: "Fatou", tone: "sand" }, O: { name: "Ousmane", tone: "sage" }, R: { name: "Rokhaya", tone: "rose" },
+};
+const ROLE = { owner: "Responsable", editor: "Peut modifier", viewer: "Lecture seule" };
+
+const circles = [
+  {
+    id: "mardi", name: "Cercle du mardi", tone: "teal", cover: { pattern: "etoile" },
+    intent: "Méditer les sourates mecquoises ensemble, une sourate par mois.",
+    verse: "38:29", day: "mardi", time: "20:30", role: "owner",
+    members: [["A", "owner"], ["K", "editor"], ["M", "editor"], ["F", "viewer"], ["O", "viewer"]],
+    sessions: [
+      { s: 38, title: "Sâd, le Livre béni", date: "20 octobre 2026", ago: "il y a 2 jours" },
+      { s: 36, title: "Yâ-Sîn, le cœur du Coran", date: "13 octobre 2026", ago: "il y a 9 jours" },
+      { s: 67, title: "Al-Mulk, la royauté", date: "6 octobre 2026", ago: "il y a 16 jours" },
+      { s: 1, title: "Al-Fâtiha, pour commencer", date: "29 septembre 2026", ago: "il y a 3 semaines" },
+    ],
+    studied: [1, 36, 38, 67, 103, 112, 113, 114],
+    pinned: { text: "Le Livre est descendu pour être médité, pas seulement récité.", by: "Khadija", on: "38:29" },
+    next: { d: "27", m: "oct.", label: "Mardi 27 octobre · 20 h 30" },
+  },
+  {
+    id: "famille", name: "Famille, le vendredi", tone: "sand", cover: { pattern: "vagues" },
+    intent: "Lire et comprendre le Juz' 'Amma avec les enfants, après le dîner.",
+    verse: "20:114", day: "vendredi", time: "21:00", role: "editor",
+    members: [["R", "owner"], ["A", "editor"], ["O", "editor"]],
+    sessions: [{ s: 112, title: "Al-Ikhlâs, l'unicité", date: "17 octobre 2026", ago: "il y a 5 jours" }],
+    studied: [112, 113, 114, 1],
+    pinned: null,
+    next: { d: "23", m: "oct.", label: "Vendredi 23 octobre · 21 h" },
+  },
+  {
+    id: "etudiants", name: "Étudiants du jeudi", tone: "sky", cover: { pattern: "arcs" },
+    intent: "Tafsir d'Al-Baqara, verset par verset, avec As-Sa'di.",
+    verse: "47:24", day: "jeudi", time: "18:00", role: "viewer",
+    members: [["M", "owner"], ["A", "viewer"], ["F", "editor"], ["K", "viewer"], ["O", "viewer"], ["R", "viewer"]],
+    sessions: [{ s: 2, title: "Al-Baqara, versets 1 à 5", date: "15 octobre 2026", ago: "il y a 1 semaine" }],
+    studied: [2],
+    pinned: null,
+    next: { d: "22", m: "oct.", label: "Jeudi 22 octobre · 18 h" },
+  },
+];
+
+// ---------- Icônes (tracés de style Lucide, toujours avec un libellé) ----------
+const ICONS = {
+  plus: '<path d="M5 12h14M12 5v14"/>',
+  x: '<path d="M18 6 6 18M6 6l12 12"/>',
+  check: '<path d="M20 6 9 17l-5-5"/>',
+  copy: '<rect x="8" y="8" width="14" height="14" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>',
+  users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
+  userPlus: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/>',
+  calendar: '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+  book: '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>',
+  sliders: '<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/>',
+  image: '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/>',
+  pin: '<path d="M12 17v5M9 10.8a2 2 0 0 1-1.1 1.8l-1.8.9A2 2 0 0 0 5 15.2v.8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.8a2 2 0 0 0-1.1-1.8l-1.8-.9a2 2 0 0 1-1.1-1.8V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/>',
+  chevron: '<path d="m9 18 6-6-6-6"/>',
+  clock: '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+  map: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>',
+  quote: '<path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/>',
+  link: '<path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/>',
+  upload: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>',
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  moon: '<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/>',
+};
+const icon = (n) => `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n]}</svg>`;
+function paintIcons(root = document) {
+  root.querySelectorAll("svg[data-i]").forEach((s) => {
+    s.setAttribute("viewBox", "0 0 24 24");
+    s.setAttribute("aria-hidden", "true");
+    s.innerHTML = ICONS[s.dataset.i];
+    s.removeAttribute("data-i");
+  });
+}
+
+// ---------- Motifs de couverture ----------
+let patId = 0;
+function pattern(name) {
+  const id = "p" + patId++;
+  const tiles = {
+    etoile: ['48', '<rect x="13" y="13" width="22" height="22"/><rect x="13" y="13" width="22" height="22" transform="rotate(45 24 24)"/><circle cx="24" cy="24" r="4"/>'],
+    arcs: ['40', '<path d="M0 40V22a20 20 0 0 1 40 0v18"/><path d="M10 40V26a10 10 0 0 1 20 0v14"/>'],
+    vagues: ['40', '<path d="M0 12q10-10 20 0t20 0M0 32q10-10 20 0t20 0"/>'],
+    losanges: ['32', '<path d="M16 2 30 16 16 30 2 16z"/><path d="M16 10 22 16 16 22 10 16z"/>'],
+    points: ['18', '<circle cx="9" cy="9" r="1.6" fill="currentColor" stroke="none"/>'],
+  };
+  const [s, body] = tiles[name] || tiles.etoile;
+  return `<svg class="pat" aria-hidden="true"><defs><pattern id="${id}" width="${s}" height="${s}" patternUnits="userSpaceOnUse"><g fill="none" stroke="currentColor" stroke-width="1.3">${body}</g></pattern></defs><rect width="100%" height="100%" fill="url(#${id})"/></svg>`;
+}
+const coverHTML = (c) => `<div class="cover tone-${c.tone}">${c.cover.image ? `<img src="${c.cover.image}" alt="">` : pattern(c.cover.pattern)}</div>`;
+const initial = (name) => (name.trim()[0] || "?").toUpperCase();
+const esc = (s) => String(s).replace(/[&<>"]/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[ch]);
+const rhythm = (c) => (c.day ? `Chaque ${c.day} · ${c.time.replace(":", " h ").replace(" h 00", " h")}` : "");
+
+function avatars(list, max = 4) {
+  const shown = list.slice(0, max).map(([p]) => `<span class="av tone-${PEOPLE[p].tone}" style="background:var(--tone)" title="${PEOPLE[p].name}">${p}</span>`).join("");
+  const more = list.length > max ? `<span class="av more">+${list.length - max}</span>` : "";
+  return `<span class="avatars" aria-label="${list.length} membres">${shown}${more}</span>`;
+}
+
+// ---------- Carte d'un cercle (liste et aperçu) ----------
+function cardHTML(c, asButton = true) {
+  const last = c.sessions[0];
+  const tag = asButton ? "a" : "div";
+  return `<${tag} ${asButton ? `href="#" data-open="${c.id}"` : ""} class="card tone-${c.tone}">
+    ${coverHTML(c)}
+    <div class="body">
+      <span class="badge" aria-hidden="true">${esc(initial(c.name || "?"))}</span>
+      <span class="chip role ${c.role === "owner" ? "owner" : ""}">${ROLE[c.role]}</span>
+      <h2>${esc(c.name || "Nom du cercle")}</h2>
+      <p class="intent">${esc(c.intent || "Ajoute une intention pour dire à quoi sert ce cercle.")}</p>
+      <div class="meta">
+        ${c.day ? `<div>${icon("calendar")}<span>${rhythm(c)}</span></div>` : ""}
+        <div>${icon("book")}<span>${last ? `${SURAHS[last.s - 1][0]} · ${last.ago}` : "Aucune séance pour l'instant"}</span></div>
+      </div>
+      <div class="foot">${avatars(c.members)}<span class="count">${c.studied.length} sourate${c.studied.length > 1 ? "s" : ""} étudiée${c.studied.length > 1 ? "s" : ""}</span></div>
+    </div>
+  </${tag}>`;
+}
+
+function renderList() {
+  document.getElementById("cards").innerHTML = circles.map((c) => cardHTML(c)).join("");
+}
+
+// ---------- Page d'un cercle ----------
+let current = circles[0];
+function renderDetail(c) {
+  current = c;
+  const v = VERSES[c.verse];
+  const owner = c.role === "owner";
+  const canEdit = c.role !== "viewer";
+  document.getElementById("screen-detail").innerHTML = `
+  <div class="wrap tone-${c.tone}">
+    <section class="hero">
+      ${coverHTML(c)}
+      <div class="hero-row">
+        <span class="badge" aria-hidden="true">${esc(initial(c.name))}</span>
+        <div class="hero-txt">
+          <h1>${esc(c.name)}</h1>
+          ${c.intent ? `<p>${esc(c.intent)}</p>` : ""}
+        </div>
+        <div class="hero-actions">
+          ${owner ? `<button type="button" class="btn ghost" data-settings>${icon("sliders")}Paramètres</button>` : ""}
+          ${canEdit ? `<button type="button" class="btn" data-invite>${icon("userPlus")}Inviter</button>
+          <button type="button" class="btn primary" data-new-session>${icon("plus")}Nouvelle séance</button>` : ""}
+        </div>
+      </div>
+      <div class="facts">
+        <div>${avatars(c.members, 5)}<span><b>${c.members.length}</b> membres</span></div>
+        ${c.day ? `<div>${icon("calendar")}<span>${rhythm(c)}</span></div>` : ""}
+        <div>${icon("map")}<span><b>${c.studied.length}</b> sourate${c.studied.length > 1 ? "s" : ""} sur 114</span></div>
+        <div><span class="chip ${owner ? "owner" : ""}">${ROLE[c.role]}</span></div>
+      </div>
+    </section>
+
+    <div class="layout">
+      <div class="col">
+        ${v ? `<figure class="panel verse">
+          <p class="ar" lang="ar" dir="rtl">${v.ar}</p>
+          <p class="fr">${v.fr}</p>
+          <span class="ref">Verset du cercle · ${SURAHS[+c.verse.split(":")[0] - 1][0]}, ${c.verse}</span>
+        </figure>` : ""}
+
+        ${c.next ? `<section class="panel" aria-label="Prochaine séance">
+          <div class="next">
+            <div class="day"><b>${c.next.d}</b><span>${c.next.m}</span></div>
+            <div class="txt"><strong>Prochaine rencontre</strong><span>${c.next.label}</span></div>
+          </div>
+        </section>` : ""}
+
+        <section class="panel" aria-labelledby="h-sessions">
+          <div class="panel-head">${icon("book")}<h2 id="h-sessions">Séances</h2><span class="count">${c.sessions.length}</span></div>
+          ${c.sessions.length ? `<ul class="sessions">${c.sessions.map((s) => `
+            <li><a href="#" class="sess">
+              <span class="tile" lang="ar">${SURAHS[s.s - 1][1]}</span>
+              <span class="txt"><strong>${esc(s.title)}</strong><span>${s.s}. ${SURAHS[s.s - 1][0]} · ${s.date}</span></span>
+              ${icon("chevron")}
+            </a></li>`).join("")}</ul>`
+          : `<div class="empty"><span class="ring">${icon("book")}</span><strong>Aucune séance pour l'instant</strong><span>Choisis une sourate pour ouvrir la première séance du cercle.</span>${canEdit ? `<button type="button" class="btn primary" data-new-session>${icon("plus")}Nouvelle séance</button>` : ""}</div>`}
+        </section>
+      </div>
+
+      <div class="col">
+        <section class="panel" aria-labelledby="h-pin">
+          <div class="panel-head">${icon("pin")}<h2 id="h-pin">Réflexion épinglée</h2></div>
+          ${c.pinned ? `<p class="note">${esc(c.pinned.text)}</p><span class="note-by">${c.pinned.by}, sur ${c.pinned.on}</span>`
+          : `<p class="note-by">Épingle une note du tableau pour la garder en tête du cercle.</p>`}
+        </section>
+
+        <section class="panel" aria-labelledby="h-map">
+          <div class="panel-head">${icon("map")}<h2 id="h-map">Carte du Coran</h2><span class="count">${c.studied.length} / 114</span></div>
+          <div class="qmap" role="img" aria-label="${c.studied.length} sourates étudiées sur 114">
+            ${SURAHS.map((s, i) => `<i class="${c.studied.includes(i + 1) ? "on" : ""}" data-n="${i + 1}" title="${i + 1}. ${s[0]}"></i>`).join("")}
+          </div>
+          <div id="qmap-tip">Survole une case pour voir la sourate.</div>
+          <div class="qmap-legend"><span>1. Al-Fâtiha</span><span>114. An-Nâs</span></div>
+        </section>
+
+        <section class="panel" aria-labelledby="h-members">
+          <div class="panel-head">${icon("users")}<h2 id="h-members">Membres</h2><span class="count">${c.members.length}</span></div>
+          <ul class="members">${c.members.map(([p, r]) => `<li><span class="av tone-${PEOPLE[p].tone}" style="background:var(--tone)">${p}</span><span>${PEOPLE[p].name}${p === "A" ? " <em>(toi)</em>" : ""}</span><span class="chip ${r === "owner" ? "owner" : ""}">${ROLE[r]}</span></li>`).join("")}</ul>
+          ${canEdit ? `<button type="button" class="btn" data-invite>${icon("userPlus")}Inviter quelqu'un</button>` : ""}
+        </section>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ---------- Écrans ----------
+function show(screen) {
+  document.getElementById("screen-list").hidden = screen !== "list";
+  document.getElementById("screen-detail").hidden = screen !== "detail";
+  document.querySelectorAll(".proto [data-screen]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.screen === screen)));
+  const crumbs = document.getElementById("crumbs");
+  crumbs.innerHTML = screen === "list"
+    ? `<span aria-current="page">Mes cercles</span>`
+    : `<a href="#" class="hide-sm" data-go="list">Mes cercles</a><span class="sep hide-sm" aria-hidden="true">/</span><span aria-current="page">${esc(current.name)}</span>`;
+  if (screen === "detail") renderDetail(current);
+  scrollTo({ top: 0 });
+}
+
+document.addEventListener("click", (e) => {
+  const t = e.target.closest("button, a");
+  if (!t) return;
+  if (t.dataset.screen) show(t.dataset.screen);
+  if (t.dataset.go) { e.preventDefault(); show(t.dataset.go); }
+  if (t.dataset.open) { e.preventDefault(); current =circles.find((c) => c.id === t.dataset.open); show("detail"); }
+  if (t.matches("[data-open-create], #proto-create")) openCreate();
+  if (t.matches("[data-settings]")) openCreate(current);
+  if (t.matches("[data-invite]")) openInvite();
+  if (t.matches("[data-new-session]")) openSession();
+  if (t.matches("[data-close]")) t.closest("dialog").close();
+  if (t.matches(".sess")) e.preventDefault();
+});
+document.addEventListener("mouseover", (e) => {
+  const cell = e.target.closest(".qmap i");
+  if (cell) {
+    const n = +cell.dataset.n;
+    document.getElementById("qmap-tip").textContent = `${n}. ${SURAHS[n - 1][0]} — ${current.studied.includes(n) ? "étudiée" : "pas encore étudiée"}`;
+  }
+});
+
+// ---------- Création / paramètres ----------
+const dlgCreate = document.getElementById("dlg-create");
+let draft = null, editing = null;
+function openCreate(circle) {
+  editing = circle || null;
+  draft = circle
+    ? { ...circle, cover: { ...circle.cover } }
+    : { id: "c" + Date.now(), name: "", tone: "sage", cover: { pattern: "etoile" }, intent: "", verse: "", day: "", time: "20:30", role: "owner", members: [["A", "owner"]], sessions: [], studied: [], pinned: null, next: null };
+  document.getElementById("create-title").textContent = circle ? "Paramètres du cercle" : "Nouveau cercle";
+  document.querySelector("#create-submit span").textContent = circle ? "Enregistrer" : "Créer le cercle";
+  document.getElementById("f-name").value = draft.name;
+  document.getElementById("f-intent").value = draft.intent;
+  document.getElementById("f-verse").value = draft.verse;
+  document.getElementById("f-day").value = draft.day;
+  document.getElementById("f-time").value = draft.time;
+  renderOptions();
+  updateVerse();
+  updatePreview();
+  dlgCreate.showModal();
+  document.getElementById("f-name").focus();
+}
+function renderOptions() {
+  document.getElementById("cover-opts").innerHTML =
+    PATTERNS.map(([p, label]) => `<button type="button" class="cover-opt" data-pattern="${p}" aria-pressed="${!draft.cover.image && draft.cover.pattern === p}" aria-label="${label}" title="${label}"><div class="cover tone-${draft.tone}">${pattern(p)}</div></button>`).join("") +
+    `<button type="button" class="cover-opt upload" data-upload aria-pressed="${!!draft.cover.image}">${draft.cover.image ? `<div class="cover"><img src="${draft.cover.image}" alt=""></div>` : `<span>${icon("upload")}Ton image</span>`}</button>`;
+  document.getElementById("tone-opts").innerHTML = TONES.map(([t, label]) =>
+    `<button type="button" class="sw tone-${t}" data-tone="${t}" aria-pressed="${draft.tone === t}" aria-label="${label}" title="${label}">${icon("check")}</button>`).join("");
+}
+function updatePreview() {
+  document.getElementById("create-preview").innerHTML = cardHTML(draft, false);
+}
+function updateVerse() {
+  const ref = document.getElementById("f-verse").value.trim();
+  const box = document.getElementById("verse-prev"), hint = document.getElementById("verse-hint");
+  const v = VERSES[ref];
+  box.hidden = !v;
+  if (v) box.innerHTML = `<p class="ar" lang="ar" dir="rtl">${v.ar}</p><p class="fr">${v.fr}</p>`;
+  hint.textContent = ref && !v ? "Dans la maquette, seuls les exemples s'affichent. Dans l'app, tout verset du Coran pourra être choisi." : "Le verset s'affiche en tête de la page du cercle.";
+  draft.verse = v ? ref : "";
+}
+document.getElementById("verse-quick").innerHTML = Object.keys(VERSES).map((r) => `<button type="button" data-verse="${r}">${r}</button>`).join("");
+dlgCreate.addEventListener("click", (e) => {
+  const b = e.target.closest("button");
+  if (!b) return;
+  if (b.dataset.pattern) { draft.cover = { pattern: b.dataset.pattern }; renderOptions(); updatePreview(); }
+  if (b.dataset.tone) { draft.tone = b.dataset.tone; renderOptions(); updatePreview(); }
+  if (b.dataset.verse) { document.getElementById("f-verse").value = b.dataset.verse; updateVerse(); }
+  if (b.matches("[data-upload]")) document.getElementById("f-file").click();
+});
+document.getElementById("f-file").addEventListener("change", (e) => {
+  const f = e.target.files[0];
+  if (!f) return;
+  const reader = new FileReader();
+  reader.onload = () => { draft.cover = { pattern: draft.cover.pattern, image: reader.result }; renderOptions(); updatePreview(); };
+  reader.readAsDataURL(f);
+});
+["f-name", "f-intent", "f-day", "f-time"].forEach((id) => document.getElementById(id).addEventListener("input", (e) => {
+  const key = { "f-name": "name", "f-intent": "intent", "f-day": "day", "f-time": "time" }[id];
+  draft[key] = e.target.value;
+  updatePreview();
+}));
+document.getElementById("f-verse").addEventListener("input", updateVerse);
+document.getElementById("create-form").addEventListener("submit", (e) => {
+  draft.name = document.getElementById("f-name").value.trim();
+  if (!draft.name) { e.preventDefault(); return; }
+  if (editing) Object.assign(editing, draft);
+  else circles.unshift(draft);
+  current = editing || draft;
+  renderList();
+  show("detail");
+  toast(editing ? "Paramètres enregistrés" : "Cercle créé");
+});
+
+// ---------- Inviter ----------
+const dlgInvite = document.getElementById("dlg-invite");
+const links = [{ role: "editor", until: "3 novembre" }];
+function randomToken() { return Array.from(crypto.getRandomValues(new Uint8Array(6)), (b) => b.toString(16).padStart(2, "0")).join(""); }
+function openInvite() {
+  document.getElementById("invite-link").value = `https://majalis.app/rejoindre/${randomToken()}`;
+  renderLinks();
+  dlgInvite.showModal();
+}
+function renderLinks() {
+  document.getElementById("invite-links").innerHTML = links.map((l, i) =>
+    `<li>${icon("link")}<span>${l.role === "editor" ? "Peut modifier" : "Lecture seule"} · jusqu'au ${l.until}</span><button type="button" class="btn ghost" data-del="${i}">Supprimer</button></li>`).join("");
+}
+document.getElementById("invite-role").addEventListener("click", (e) => {
+  const b = e.target.closest("button[data-role]");
+  if (!b) return;
+  document.querySelectorAll("#invite-role button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+  document.getElementById("invite-link").value = `https://majalis.app/rejoindre/${randomToken()}`;
+});
+document.getElementById("invite-copy").addEventListener("click", async () => {
+  const input = document.getElementById("invite-link");
+  try { await navigator.clipboard.writeText(input.value); toast("Lien copié"); }
+  catch { input.select(); toast("Sélectionne le lien pour le copier"); }
+  const role = document.querySelector('#invite-role [aria-pressed="true"]').dataset.role;
+  links.unshift({ role, until: "5 novembre" });
+  renderLinks();
+});
+document.getElementById("invite-links").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-del]");
+  if (b) { links.splice(+b.dataset.del, 1); renderLinks(); }
+});
+
+// ---------- Nouvelle séance ----------
+const dlgSession = document.getElementById("dlg-session");
+document.getElementById("s-surah").innerHTML = SURAHS.map((s, i) => `<option value="${i + 1}">${i + 1}. ${s[0]} — ${s[1]}</option>`).join("");
+function openSession() {
+  document.getElementById("s-title").value = "";
+  dlgSession.showModal();
+}
+document.getElementById("session-form").addEventListener("submit", () => {
+  const n = +document.getElementById("s-surah").value;
+  const title = document.getElementById("s-title").value.trim() || SURAHS[n - 1][0];
+  current.sessions.unshift({ s: n, title, date: "22 octobre 2026", ago: "aujourd'hui" });
+  if (!current.studied.includes(n)) current.studied.push(n);
+  renderList();
+  renderDetail(current);
+  toast("Séance créée, la sourate est cochée sur la carte");
+});
+
+// ---------- Thème et message ----------
+function setTheme(t) {
+  document.documentElement.dataset.theme = t;
+  document.querySelectorAll("[data-theme-set]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.themeSet === t)));
+}
+document.querySelectorAll("[data-theme-set]").forEach((b) => b.addEventListener("click", () => setTheme(b.dataset.themeSet)));
+setTheme(matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+document.documentElement.removeAttribute("data-theme");
+
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById("toast");
+  el.innerHTML = icon("check") + esc(msg);
+  el.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => (el.hidden = true), 2400);
+}
+
+paintIcons();
+renderList();
+show("list");
+</script>

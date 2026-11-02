@@ -1,0 +1,455 @@
+<title>Majalis, accueil</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Figtree:wght@400;500;600;700&family=Scheherazade+New:wght@400;700&display=swap">
+<style>
+/* Mise en page : une colonne centrée ; le héros annonce, l'aperçu montre l'app, puis l'usage et l'appel final.
+   Jetons repris de src/app/globals.css (identiques à l'app). */
+:root {
+  --bg: #f4f6f4;
+  --surface: #ffffff;
+  --surface-2: #eef2ef;
+  --line: #e1e7e3;
+  --ink: #15221e;
+  --muted: #5b6a64;
+  --faint: #8a9792;
+  --accent: #0d5c52;
+  --accent-ink: #ffffff;
+  --accent-soft: #dcebe6;
+  --grid: #d5ddd8;
+  --hl-theme: #e2eedb;
+  --hl-question: #dde9f5;
+  --hl-reflect: #f6ebcd;
+  --hl-link: #f5e0e5;
+  --c-sand: #b07a14;
+  --c-sage: #4a7a45;
+  --c-rose: #ad4259;
+  --c-sky: #2c6b9b;
+  --k: #8f45ab;
+  --shadow: 0 1px 2px rgba(20, 40, 34, 0.05), 0 6px 20px rgba(20, 40, 34, 0.08);
+  --shadow-lg: 0 8px 40px rgba(20, 40, 34, 0.16);
+  --f-ui: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-read: "EB Garamond", Garamond, Georgia, serif;
+  --f-hand: "Caveat", "Segoe Print", cursive;
+  --f-ar: "Scheherazade New", "Geeza Pro", "Traditional Arabic", serif;
+  --f-mark: "Geeza Pro", "Noto Naskh Arabic", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1513; --surface: #161e1b; --surface-2: #1c2622; --line: #26312d;
+    --ink: #e5ece9; --muted: #97a6a0; --faint: #6f7d78;
+    --accent: #62bcac; --accent-ink: #06201b; --accent-soft: #1c3a34; --grid: #24302b;
+    --hl-theme: #24341e; --hl-question: #1b2e3e; --hl-reflect: #36301c; --hl-link: #382027;
+    --c-sand: #e1b45b; --c-sage: #8cc485; --c-rose: #e68aa0; --c-sky: #80b6e2; --k: #c88be2;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
+    --shadow-lg: 0 10px 44px rgba(0, 0, 0, 0.5);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1513; --surface: #161e1b; --surface-2: #1c2622; --line: #26312d;
+  --ink: #e5ece9; --muted: #97a6a0; --faint: #6f7d78;
+  --accent: #62bcac; --accent-ink: #06201b; --accent-soft: #1c3a34; --grid: #24302b;
+  --hl-theme: #24341e; --hl-question: #1b2e3e; --hl-reflect: #36301c; --hl-link: #382027;
+  --c-sand: #e1b45b; --c-sage: #8cc485; --c-rose: #e68aa0; --c-sky: #80b6e2; --k: #c88be2;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 10px 44px rgba(0, 0, 0, 0.5);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font: 15px/1.55 var(--f-ui);
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; text-decoration: none; }
+p, h1, h2, h3, ol, ul, figure, blockquote { margin: 0; padding: 0; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+
+.wrap {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  border: 1px solid var(--line); background: var(--surface);
+  border-radius: 10px; padding: 10px 18px; font-weight: 600; white-space: nowrap;
+}
+.btn:hover { background: var(--surface-2); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.primary:hover { filter: brightness(1.07); }
+.btn.small { padding: 7px 14px; font-size: 14px; }
+
+/* En-tête */
+body::before {
+  content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px);
+  z-index: 10; background: var(--bg);
+}
+.top {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(8px);
+}
+.top .wrap { display: flex; align-items: center; gap: 12px; height: 64px; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 17px; }
+.mark {
+  width: 32px; height: 32px; border-radius: 9px; flex: none;
+  display: grid; place-items: center;
+  background: var(--accent); color: var(--accent-ink);
+  font: 700 19px/1 var(--f-mark);
+}
+.top nav { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+.top nav .link { padding: 7px 10px; color: var(--muted); font-weight: 500; font-size: 14px; }
+.top nav .link:hover { color: var(--ink); }
+
+/* Héros */
+.hero { padding-block: 56px 40px; text-align: center; display: grid; justify-items: center; gap: 20px; }
+.hero .ar {
+  font: 400 30px/1.6 var(--f-ar); color: var(--accent);
+}
+.hero h1 {
+  font: 500 clamp(40px, 6.4vw, 68px)/1.04 var(--f-read);
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+  max-width: 14ch;
+}
+.hl {
+  background: linear-gradient(transparent 12%, var(--hl-theme) 12%, var(--hl-theme) 92%, transparent 92%);
+  padding-inline: 0.12em; margin-inline: -0.06em;
+  border-radius: 4px;
+  font-style: italic;
+}
+.hero .lede { max-width: 58ch; color: var(--muted); font-size: 17px; text-wrap: pretty; }
+.ctas { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.hero .hint { font-size: 13px; color: var(--faint); }
+
+/* Aperçu de l'app */
+.preview { padding-block: 8px 72px; }
+.app {
+  border: 1px solid var(--line); border-radius: 16px; overflow: hidden;
+  background: var(--surface); box-shadow: var(--shadow-lg);
+}
+.app-bar {
+  display: flex; align-items: center; gap: 10px; height: 48px; padding-inline: 14px;
+  border-bottom: 1px solid var(--line); font-size: 13px;
+}
+.app-bar .mark { width: 24px; height: 24px; font-size: 14px; border-radius: 7px; }
+.app-bar .crumb { color: var(--muted); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.app-bar .crumb b { color: var(--ink); font-weight: 600; }
+.avatars { margin-left: auto; display: flex; flex: none; }
+.av {
+  width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center;
+  font-size: 11px; font-weight: 700; border: 2px solid var(--surface); margin-left: -6px;
+}
+.av.me { background: var(--accent); color: var(--accent-ink); }
+.av.k { background: var(--k); color: var(--surface); }
+.app-body { display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); min-height: 400px; }
+
+.reading { border-right: 1px solid var(--line); padding: 18px 16px; display: grid; gap: 6px; align-content: start; }
+.reading .sura { text-align: center; font: 400 22px/1.5 var(--f-ar); padding-bottom: 6px; }
+.v { border-radius: 10px; padding: 10px 12px; }
+.v .num { font-size: 11px; font-weight: 600; color: var(--faint); font-variant-numeric: tabular-nums; }
+.v .ar { font: 400 22px/1.9 var(--f-ar); text-align: right; }
+.v .tr { font: 400 15.5px/1.45 var(--f-read); }
+.v.sel { background: var(--hl-reflect); box-shadow: inset 0 0 0 1.5px var(--c-sand); }
+.v-actions { display: flex; flex-wrap: wrap; gap: 4px; padding-top: 8px; }
+.v-actions span {
+  font-size: 11.5px; font-weight: 600; padding: 4px 8px; border-radius: 7px;
+  background: var(--surface); border: 1px solid var(--line);
+}
+
+.board {
+  position: relative; min-height: 400px; overflow: hidden;
+  background-color: var(--bg);
+  background-image: radial-gradient(var(--grid) 1.2px, transparent 1.2px);
+  background-size: 22px 22px;
+}
+.el { position: absolute; border-radius: 12px; }
+.card {
+  background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow);
+  padding: 12px 14px; width: min(46%, 300px);
+}
+.card .num { font-size: 11px; font-weight: 600; color: var(--faint); }
+.card .ar { font: 400 21px/1.8 var(--f-ar); text-align: right; }
+.card .tr { font: 400 14.5px/1.4 var(--f-read); }
+.card.a { left: 5%; top: 8%; background: var(--hl-reflect); border-color: color-mix(in srgb, var(--c-sand) 45%, transparent); }
+.card.b { right: 5%; bottom: 9%; background: var(--hl-question); border-color: color-mix(in srgb, var(--c-sky) 40%, transparent); }
+.note {
+  left: 9%; bottom: 10%; width: min(40%, 240px); padding: 10px 14px;
+  background: var(--surface); border: 1.5px dashed color-mix(in srgb, var(--c-sage) 60%, transparent);
+  font: 500 21px/1.15 var(--f-hand); color: var(--c-sage); transform: rotate(-1.5deg);
+}
+.arrow { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.arrow path { fill: none; stroke: var(--c-rose); stroke-width: 2; stroke-dasharray: 5 5; vector-effect: non-scaling-stroke; }
+.arrow-tag {
+  position: absolute; left: 50%; top: 47%; transform: translate(-50%, -50%);
+  font-size: 11.5px; font-weight: 600; color: var(--c-rose);
+  background: var(--hl-link); padding: 3px 8px; border-radius: 999px;
+}
+.cursor { position: absolute; right: 30%; top: 30%; display: flex; align-items: flex-start; gap: 2px; animation: drift 7s ease-in-out infinite; }
+.cursor svg { width: 16px; height: 16px; fill: var(--k); }
+.cursor span {
+  margin-top: 12px; font-size: 11.5px; font-weight: 600; color: var(--surface);
+  background: var(--k); padding: 2px 7px; border-radius: 6px 6px 6px 2px;
+}
+@keyframes drift {
+  0%, 100% { transform: translate(0, 0); }
+  40% { transform: translate(-26px, 18px); }
+  70% { transform: translate(10px, 30px); }
+}
+@media (prefers-reduced-motion: reduce) { .cursor { animation: none; } }
+.preview .caption { text-align: center; color: var(--faint); font-size: 13px; padding-top: 14px; }
+
+/* Sections */
+section { padding-block: 64px; }
+.eyebrow { font-size: 12.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+h2 { font: 500 clamp(30px, 4vw, 42px)/1.12 var(--f-read); text-wrap: balance; }
+.sec-head { display: grid; gap: 10px; max-width: 60ch; margin-bottom: 36px; }
+.sec-head p { color: var(--muted); font-size: 16.5px; }
+
+.features { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px 40px; }
+.feature { display: grid; gap: 8px; align-content: start; border-top: 1px solid var(--line); padding-top: 18px; }
+.feature h3 { font-size: 16.5px; font-weight: 600; }
+.feature p { color: var(--muted); }
+.swatches { display: flex; flex-wrap: wrap; gap: 6px; padding-top: 4px; }
+.sw { font-size: 12.5px; font-weight: 600; padding: 3px 9px; border-radius: 7px; }
+.sw.t { background: var(--hl-theme); color: var(--c-sage); }
+.sw.q { background: var(--hl-question); color: var(--c-sky); }
+.sw.r { background: var(--hl-reflect); color: var(--c-sand); }
+.sw.l { background: var(--hl-link); color: var(--c-rose); }
+.wbw { display: flex; flex-direction: row-reverse; flex-wrap: wrap; gap: 6px; padding-top: 4px; }
+.wbw span {
+  display: grid; justify-items: center; gap: 0; padding: 4px 8px; border-radius: 8px;
+  background: var(--surface); border: 1px solid var(--line);
+  font: 400 19px/1.6 var(--f-ar);
+}
+.wbw span i {
+  font: italic 400 12.5px/1.2 var(--f-read); color: var(--faint);
+  border-bottom: 1px dashed var(--grid); min-width: 3.2em; text-align: center;
+}
+
+.ayah {
+  background: var(--surface); border-block: 1px solid var(--line);
+  padding-block: 72px;
+}
+.ayah .wrap { display: grid; justify-items: center; gap: 18px; text-align: center; }
+.ayah .ar { font: 400 clamp(28px, 4.2vw, 40px)/1.7 var(--f-ar); color: var(--accent); }
+.ayah blockquote { font: italic 400 clamp(21px, 2.6vw, 27px)/1.4 var(--f-read); max-width: 34ch; text-wrap: balance; }
+.ayah cite { font-style: normal; font-size: 13px; color: var(--faint); }
+
+.steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; counter-reset: step; list-style: none; }
+.steps li { display: grid; gap: 6px; align-content: start; counter-increment: step; }
+.steps li::before {
+  content: counter(step); width: 32px; height: 32px; border-radius: 50%;
+  display: grid; place-items: center; margin-bottom: 6px;
+  background: var(--accent-soft); color: var(--accent); font-weight: 700; font-size: 14px;
+}
+.steps h3 { font-size: 16.5px; font-weight: 600; }
+.steps p { color: var(--muted); }
+
+.final { text-align: center; }
+.final .wrap { display: grid; justify-items: center; gap: 16px; }
+.final p { color: var(--muted); max-width: 52ch; font-size: 16.5px; }
+
+footer { border-top: 1px solid var(--line); padding-block: 28px 40px; color: var(--faint); font-size: 13px; }
+footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; }
+footer a { text-decoration: underline; }
+
+@media (max-width: 820px) {
+  .features { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .app-body { grid-template-columns: minmax(0, 1fr); }
+  .reading { border-right: 0; border-bottom: 1px solid var(--line); }
+  .reading .v:not(.sel), .reading .sura { display: none; }
+}
+@media (max-width: 560px) {
+  .features, .steps { grid-template-columns: minmax(0, 1fr); }
+  .top nav .link { display: none; }
+  .hero { padding-block: 36px 28px; }
+  .board { min-height: 460px; }
+  .card { width: 78%; }
+  .card.a { left: 4%; top: 4%; }
+  .card.b { right: 4%; bottom: 4%; }
+  .note { left: 6%; top: 40%; bottom: auto; width: 62%; }
+  .cursor { right: 12%; top: 36%; }
+  .arrow-tag { top: 62%; left: 74%; }
+}
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#">
+      <span class="mark" aria-hidden="true">م</span>
+      Majalis
+    </a>
+    <nav aria-label="Navigation principale">
+      <a class="link" href="#fonctions">Fonctions</a>
+      <a class="link" href="#lire">Lire le Coran</a>
+      <a class="btn small" href="#">Se connecter</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap hero">
+    <p class="ar" lang="ar" dir="rtl">لِّيَدَّبَّرُوٓا۟ ءَايَٰتِهِۦ</p>
+    <h1>Méditer le Coran, <span class="hl">ensemble</span>.</h1>
+    <p class="lede">
+      Majalis réunit votre cercle d'étude autour des versets. On lit, on surligne, on relie les idées sur un
+      tableau partagé et on traduit mot à mot en wolof, chacun à sa place, en même temps.
+    </p>
+    <div class="ctas">
+      <a class="btn primary" href="#">Créer mon cercle</a>
+      <a class="btn" href="#lire">Lire sans compte</a>
+    </div>
+    <p class="hint">Connexion par lien e-mail, sans mot de passe.</p>
+  </div>
+
+  <div class="wrap preview">
+    <figure class="app" aria-label="Aperçu d'une séance dans Majalis">
+      <div class="app-bar">
+        <span class="mark" aria-hidden="true">م</span>
+        <span class="crumb">Cercle du mardi · <b>Sâd, versets 28 et 29</b></span>
+        <span class="avatars" aria-label="Deux personnes connectées">
+          <span class="av me">A</span>
+          <span class="av k">K</span>
+        </span>
+      </div>
+      <div class="app-body">
+        <div class="reading">
+          <div class="sura" lang="ar">سورة ص</div>
+          <div class="v">
+            <span class="num">38:28</span>
+            <p class="tr">Traiterons-Nous ceux qui croient et accomplissent les bonnes œuvres comme ceux qui commettent du désordre sur terre&nbsp;? ou traiterons-Nous les pieux comme les pervers&nbsp;?</p>
+          </div>
+          <div class="v sel">
+            <span class="num">38:29</span>
+            <p class="ar" lang="ar" dir="rtl">كِتَٰبٌ أَنزَلْنَٰهُ إِلَيْكَ مُبَٰرَكٌ لِّيَدَّبَّرُوٓا۟ ءَايَٰتِهِۦ وَلِيَتَذَكَّرَ أُو۟لُوا۟ ٱلْأَلْبَٰبِ</p>
+            <p class="tr">[Voici] un Livre béni que Nous avons fait descendre vers toi, afin qu'ils méditent sur ses versets et que les doués d'intelligence réfléchissent&nbsp;!</p>
+            <div class="v-actions" aria-hidden="true">
+              <span>Ajouter au tableau</span><span>Réflexion</span><span>Commenter</span><span>Surligner</span>
+            </div>
+          </div>
+        </div>
+        <div class="board">
+          <svg class="arrow" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M 34 40 C 52 34, 62 52, 66 64"/>
+          </svg>
+          <div class="el card a">
+            <span class="num">38:29 · À méditer</span>
+            <p class="ar" lang="ar" dir="rtl">لِّيَدَّبَّرُوٓا۟ ءَايَٰتِهِۦ</p>
+            <p class="tr">afin qu'ils méditent sur ses versets</p>
+          </div>
+          <span class="arrow-tag">Lien</span>
+          <div class="el card b">
+            <span class="num">47:24 · Question</span>
+            <p class="ar" lang="ar" dir="rtl">أَفَلَا يَتَدَبَّرُونَ ٱلْقُرْءَانَ</p>
+            <p class="tr">Ne méditent-ils pas sur le Coran&nbsp;?</p>
+          </div>
+          <div class="el note">Le Livre est descendu pour être médité, pas seulement récité.</div>
+          <div class="cursor" aria-hidden="true">
+            <svg viewBox="0 0 16 16"><path d="M1 1l5.5 13 2-5.5L14 6.5z"/></svg>
+            <span>Khadija</span>
+          </div>
+        </div>
+      </div>
+    </figure>
+    <p class="caption">Exemple de séance : le verset lu à gauche, les réflexions du cercle sur le tableau.</p>
+  </div>
+
+  <section id="fonctions">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="eyebrow">Dans un majlis</span>
+        <h2>Tout ce qu'il faut pour étudier à plusieurs, rien de plus.</h2>
+        <p>Chaque outil apparaît quand vous en avez besoin. Le reste du temps, il reste le texte et vos réflexions.</p>
+      </div>
+      <div class="features">
+        <div class="feature">
+          <h3>Lire</h3>
+          <p>Le texte uthmani complet, sourate par sourate, avec la traduction de Muhammad Hamidullah sous chaque verset.</p>
+        </div>
+        <div class="feature">
+          <h3>Annoter sur un tableau</h3>
+          <p>Posez des versets, des notes, des cadres et des flèches qui suivent ce qu'elles relient. Écrivez au clavier ou à main levée.</p>
+        </div>
+        <div class="feature">
+          <h3>Surligner avec un sens</h3>
+          <p>Quatre couleurs, quatre usages, les mêmes pour tout le cercle.</p>
+          <div class="swatches">
+            <span class="sw t">Thème</span><span class="sw q">Question</span><span class="sw r">À méditer</span><span class="sw l">Lien</span>
+          </div>
+        </div>
+        <div class="feature">
+          <h3>Traduire mot à mot en wolof</h3>
+          <p>Traduisez chaque mot, puis le verset entier. Les mots déjà traduits par le cercle reviennent en suggestion.</p>
+          <div class="wbw" lang="ar" dir="rtl" aria-hidden="true">
+            <span>كِتَٰبٌ<i>…</i></span><span>أَنزَلْنَٰهُ<i>…</i></span><span>إِلَيْكَ<i>…</i></span>
+          </div>
+        </div>
+        <div class="feature">
+          <h3>Discuter sur un verset</h3>
+          <p>Ouvrez un fil sur un verset, un mot ou une note. Mentionnez quelqu'un avec @ et marquez le fil comme résolu.</p>
+        </div>
+        <div class="feature">
+          <h3>Étudier en même temps</h3>
+          <p>Vous voyez qui est là et où chacun écrit. Les changements arrivent chez tous sans recharger la page.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="ayah">
+    <div class="wrap">
+      <p class="ar" lang="ar" dir="rtl">أَفَلَا يَتَدَبَّرُونَ ٱلْقُرْءَانَ أَمْ عَلَىٰ قُلُوبٍ أَقْفَالُهَآ</p>
+      <blockquote>Ne méditent-ils pas sur le Coran&nbsp;? Ou y a-t-il des cadenas sur leurs cœurs&nbsp;?</blockquote>
+      <cite>Sourate Muhammad, 47:24</cite>
+    </div>
+  </div>
+
+  <section>
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="eyebrow">Pour commencer</span>
+        <h2>Votre cercle prêt en trois étapes.</h2>
+      </div>
+      <ol class="steps">
+        <li>
+          <h3>Créez un espace</h3>
+          <p>Donnez-lui le nom de votre cercle : la famille, une classe, les amis du vendredi.</p>
+        </li>
+        <li>
+          <h3>Invitez par un lien</h3>
+          <p>Envoyez le lien à ceux qui étudient avec vous. Il reste valable deux semaines.</p>
+        </li>
+        <li>
+          <h3>Ouvrez une séance</h3>
+          <p>Choisissez une sourate et commencez. Tout ce que vous écrivez reste dans la séance pour la prochaine fois.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="final" id="lire">
+    <div class="wrap">
+      <h2>Le prochain majlis commence ici.</h2>
+      <p>La lecture est ouverte à tous, sans compte. Connectez-vous pour annoter et étudier avec votre cercle.</p>
+      <div class="ctas">
+        <a class="btn primary" href="#">Créer mon cercle</a>
+        <a class="btn" href="#">Ouvrir Al-Fâtiha</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Majalis · lire, méditer et annoter le Coran ensemble</span>
+    <span>Texte arabe : <a href="https://tanzil.net" target="_blank" rel="noreferrer">Tanzil</a>, CC BY 3.0 · Traduction : Muhammad Hamidullah</span>
+  </div>
+</footer>

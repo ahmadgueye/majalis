@@ -1,42 +1,446 @@
+@import "tailwindcss";
+
+/* Jetons de design de Majalis (repris du prototype v2). Les polices viennent de next/font (layout.tsx).
+   Ces variables sont la seule source des couleurs et des polices : Tailwind les expose plus bas (@theme). */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #f4f6f4;
+  --surface: #ffffff;
+  --surface-2: #eef2ef;
+  --line: #e1e7e3;
+  --ink: #15221e;
+  --muted: #5b6a64;
+  --faint: #8a9792;
+  --accent: #0d5c52;
+  --accent-ink: #ffffff;
+  --accent-soft: #dcebe6;
+  --grid: #d5ddd8;
+  --hl-theme: #e2eedb;
+  --hl-question: #dde9f5;
+  --hl-reflect: #f6ebcd;
+  --hl-link: #f5e0e5;
+  --c-ink: #1f2d29;
+  --c-sand: #b07a14;
+  --c-sage: #4a7a45;
+  --c-rose: #ad4259;
+  --c-sky: #2c6b9b;
+  --me: #0d5c52;
+  --k: #8f45ab;
+  --note-ink: #ffffff;
+  --note-sand: #fbf0d2;
+  --note-sage: #e3efdb;
+  --note-rose: #f8e1e6;
+  --note-sky: #dde9f5;
+  --shadow: 0 1px 2px rgba(20, 40, 34, 0.05), 0 6px 20px rgba(20, 40, 34, 0.08);
+  --shadow-lg: 0 8px 40px rgba(20, 40, 34, 0.16);
+  --f-ui: var(--font-figtree), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-read: var(--f-ui); /* traductions (français, wolof) : même police que l'interface */
+  --f-hand: var(--font-caveat), "Segoe Print", cursive;
+  --f-ar: var(--font-scheherazade), "Geeza Pro", "Traditional Arabic", serif;
 }
 
+/* Sombre : selon le système (sans choix explicite) ou par le bouton de thème (data-theme sur <html>).
+   Les deux blocs doivent garder les mêmes valeurs. */
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-html,
-body {
-  max-width: 100vw;
-  overflow-x: hidden;
-}
-
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-@media (prefers-color-scheme: dark) {
-  html {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1513;
+    --surface: #161e1b;
+    --surface-2: #1c2622;
+    --line: #26312d;
+    --ink: #e5ece9;
+    --muted: #97a6a0;
+    --faint: #6f7d78;
+    --accent: #62bcac;
+    --accent-ink: #06201b;
+    --accent-soft: #1c3a34;
+    --grid: #24302b;
+    --hl-theme: #24341e;
+    --hl-question: #1b2e3e;
+    --hl-reflect: #36301c;
+    --hl-link: #382027;
+    --c-ink: #e5ece9;
+    --c-sand: #e1b45b;
+    --c-sage: #8cc485;
+    --c-rose: #e68aa0;
+    --c-sky: #80b6e2;
+    --me: #62bcac;
+    --k: #c88be2;
+    --note-ink: #1c2622;
+    --note-sand: #373020;
+    --note-sage: #233322;
+    --note-rose: #382229;
+    --note-sky: #1e2e3c;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
+    --shadow-lg: 0 10px 44px rgba(0, 0, 0, 0.5);
     color-scheme: dark;
   }
+}
+
+:root[data-theme="dark"] {
+  --bg: #0f1513;
+  --surface: #161e1b;
+  --surface-2: #1c2622;
+  --line: #26312d;
+  --ink: #e5ece9;
+  --muted: #97a6a0;
+  --faint: #6f7d78;
+  --accent: #62bcac;
+  --accent-ink: #06201b;
+  --accent-soft: #1c3a34;
+  --grid: #24302b;
+  --hl-theme: #24341e;
+  --hl-question: #1b2e3e;
+  --hl-reflect: #36301c;
+  --hl-link: #382027;
+  --c-ink: #e5ece9;
+  --c-sand: #e1b45b;
+  --c-sage: #8cc485;
+  --c-rose: #e68aa0;
+  --c-sky: #80b6e2;
+  --me: #62bcac;
+  --k: #c88be2;
+  --note-ink: #1c2622;
+  --note-sand: #373020;
+  --note-sage: #233322;
+  --note-rose: #382229;
+  --note-sky: #1e2e3c;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 10px 44px rgba(0, 0, 0, 0.5);
+  color-scheme: dark;
+}
+
+/* La palette et les polices par défaut de Tailwind sont retirées : seules les classes tirées des jetons
+   existent (bg-surface, text-accent, font-ar…), ce qui empêche les couleurs en dur. */
+@theme {
+  --color-*: initial;
+  --font-*: initial;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-grid: var(--grid);
+  --color-hl-theme: var(--hl-theme);
+  --color-hl-question: var(--hl-question);
+  --color-hl-reflect: var(--hl-reflect);
+  --color-hl-link: var(--hl-link);
+  --color-c-ink: var(--c-ink);
+  --color-c-sand: var(--c-sand);
+  --color-c-sage: var(--c-sage);
+  --color-c-rose: var(--c-rose);
+  --color-c-sky: var(--c-sky);
+  --color-me: var(--me);
+  --color-k: var(--k);
+  --color-note-ink: var(--note-ink);
+  --color-note-sand: var(--note-sand);
+  --color-note-sage: var(--note-sage);
+  --color-note-rose: var(--note-rose);
+  --color-note-sky: var(--note-sky);
+
+  --font-ui: var(--f-ui);
+  --font-read: var(--f-read);
+  --font-hand: var(--f-hand);
+  --font-ar: var(--f-ar);
+  /* Logo « م » : police arabe système (hérité d'Amiri Quran, qui ne l'affichait pas dans la pastille). */
+  --font-mark: "Geeza Pro", "Noto Naskh Arabic", var(--f-ui);
+
+  --shadow-card: var(--shadow);
+  --shadow-pop: var(--shadow-lg);
+
+  --radius-control: 9px;
+
+  /* Curseur de présence qui se promène (aperçu de la page d'accueil). */
+  --animate-drift: drift 7s ease-in-out infinite;
+  @keyframes drift {
+    0%,
+    100% {
+      transform: translate(0, 0);
+    }
+    40% {
+      transform: translate(-26px, 18px);
+    }
+    70% {
+      transform: translate(10px, 30px);
+    }
+  }
+
+  /* Tailles du texte coranique et des traductions. */
+  --text-ar: 28px;
+  --text-ar--line-height: 2.05;
+  --text-tr: 17.5px;
+  --text-tr--line-height: 1.5;
+}
+
+/* Marges latérales de 16px qui respectent les encoches (iPhone en paysage). */
+@utility px-safe {
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+@layer base {
+  /* min-height pour body : avec height, l'en-tête collant (sticky) partait avec le texte après un écran. */
+  html {
+    height: 100%;
+  }
+  body {
+    min-height: 100%;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--f-ui);
+    font-size: 14px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  /* Défilement doux vers les ancres (#fonctions…). Next.js le coupe pendant les changements de page
+     grâce à data-scroll-behavior sur <html>. */
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+
+  /* Fondu au changement de thème (ThemeToggle, View Transitions). */
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 350ms;
+    animation-timing-function: ease-out;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  [hidden] {
+    display: none !important;
+  }
+}
+
+@layer components {
+  /* Teinte d'un cercle : bg-(--tone), text-(--tone), bg-(--tone-soft)… */
+  .tone-teal {
+    --tone: var(--accent);
+    --tone-soft: var(--accent-soft);
+  }
+  .tone-sage {
+    --tone: var(--c-sage);
+    --tone-soft: var(--hl-theme);
+  }
+  .tone-sky {
+    --tone: var(--c-sky);
+    --tone-soft: var(--hl-question);
+  }
+  .tone-sand {
+    --tone: var(--c-sand);
+    --tone-soft: var(--hl-reflect);
+  }
+  .tone-rose {
+    --tone: var(--c-rose);
+    --tone-soft: var(--hl-link);
+  }
+  .tone-plum {
+    --tone: var(--k);
+    --tone-soft: color-mix(in srgb, var(--k) 16%, var(--surface));
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    border-radius: var(--radius-control);
+    padding: 7px 14px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .btn:hover {
+    background: var(--surface-2);
+  }
+  .btn.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-ink);
+  }
+  .btn.primary:hover {
+    filter: brightness(1.07);
+  }
+  .btn:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+  .btn.ghost {
+    border-color: transparent;
+    background: transparent;
+    color: var(--muted);
+  }
+  .btn.ghost:hover {
+    background: var(--surface-2);
+    color: var(--ink);
+  }
+  .btn svg {
+    width: 16px;
+    height: 16px;
+    flex: none;
+  }
+
+  /* Fenêtres (<dialog>) : CircleDialog et les fenêtres d'action. */
+  dialog.sheet {
+    width: min(860px, calc(100% - 24px));
+    max-height: calc(100% - 24px);
+    margin: auto;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    background: var(--surface);
+    color: var(--ink);
+    box-shadow: var(--shadow-lg);
+  }
+  dialog.sheet.small {
+    width: min(480px, calc(100% - 24px));
+  }
+  dialog.sheet::backdrop {
+    background: color-mix(in srgb, var(--ink) 40%, transparent);
+    backdrop-filter: blur(2px);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    dialog.sheet[open] {
+      animation: sheet-in 0.22s ease-out;
+    }
+  }
+  @keyframes sheet-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px) scale(0.98);
+    }
+  }
+
+  /* Panneau latéral (liste des sourates sur téléphone) : <dialog> collé à gauche, toute la hauteur. */
+  dialog.drawer {
+    width: min(380px, calc(100% - 40px));
+    height: 100dvh;
+    max-height: 100dvh;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-right: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink);
+    box-shadow: var(--shadow-lg);
+  }
+  dialog.drawer[open] {
+    display: flex;
+    flex-direction: column;
+  }
+  dialog.drawer::backdrop {
+    background: color-mix(in srgb, var(--ink) 40%, transparent);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    dialog.drawer[open] {
+      animation: drawer-in 0.2s ease-out;
+    }
+  }
+  @keyframes drawer-in {
+    from {
+      transform: translateX(-24px);
+      opacity: 0;
+    }
+  }
+
+  /* Squelettes de chargement (loading.tsx) : blocs gris du thème, reflet doux qui passe.
+     .skeleton-page n'apparaît qu'après 150 ms, pour ne pas clignoter quand la page arrive vite. */
+  .skeleton {
+    --bone: color-mix(in srgb, var(--faint) 24%, var(--surface-2));
+    background: var(--bone);
+    border-radius: 8px;
+  }
+  .skeleton-page {
+    animation: skeleton-show 0s linear 0.15s both;
+  }
+  @keyframes skeleton-show {
+    from {
+      visibility: hidden;
+    }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .skeleton {
+      background: linear-gradient(
+          100deg,
+          transparent 30%,
+          color-mix(in srgb, var(--surface) 55%, transparent) 50%,
+          transparent 70%
+        )
+        var(--bone);
+      background-size: 220% 100%;
+      animation: skeleton-shine 1.4s ease-in-out infinite;
+    }
+  }
+  @keyframes skeleton-shine {
+    from {
+      background-position: 120% 0;
+    }
+    to {
+      background-position: -100% 0;
+    }
+  }
+
+  .field-input {
+    width: 100%;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink);
+    border-radius: var(--radius-control);
+    padding: 9px 12px;
+  }
+  .field-input::placeholder {
+    color: var(--faint);
+  }
+
+  /* Tableau : zones de clic invisibles des traits (cadres, flèches, crayon), qui suivent leur contour. */
+  .board-hit {
+    fill: none;
+    stroke: transparent;
+    pointer-events: stroke;
+  }
+  .board-stage[data-tool="select"] [data-id] {
+    cursor: move;
+  }
+  .board-stage[data-tool="arrow"] [data-id] {
+    cursor: crosshair;
+  }
+  .board-editable:empty::before {
+    content: attr(data-ph);
+    color: var(--muted);
+  }
+}
+
+/* Façon de lire (src/lib/reading.ts). Hors couche : ces règles l'emportent sur les utilitaires.
+   data-read : ar | both | tr (défaut both) ; data-lang : fr | wo | both (défaut both).
+   Parties marquées : ar, fr, wo, wo-missing (français en attendant le wolof), lang-choice. */
+html[data-read="ar"] .read-list,
+html:not([data-read="ar"]) .read-mushaf,
+html[data-read="tr"] [data-part="ar"],
+html[data-read="ar"] [data-part="fr"],
+html[data-read="ar"] [data-part="wo"],
+html[data-read="ar"] [data-part="wo-missing"],
+html[data-read="ar"] [data-part="lang-choice"],
+html[data-lang="wo"] [data-part="fr"],
+html[data-lang="fr"] [data-part="wo"],
+html:not([data-lang="wo"]) [data-part="wo-missing"] {
+  display: none;
 }
