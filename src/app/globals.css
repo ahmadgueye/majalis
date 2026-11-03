@@ -231,6 +231,20 @@
   }
 }
 
+/* Impression (page PDF de Traduire) : A4, marges de document, fonds et couleurs gardés. */
+@page {
+  size: A4;
+  margin: 16mm 15mm;
+}
+@media print {
+  html,
+  body {
+    background: transparent;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
 @layer components {
   /* Teinte d'un cercle : bg-(--tone), text-(--tone), bg-(--tone-soft)… */
   .tone-teal {

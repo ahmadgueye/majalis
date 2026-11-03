@@ -12,6 +12,7 @@ import {
 } from "react";
 import { BookOpenText, LayoutGrid, Search, X } from "lucide-react";
 import { VerseNote } from "@/components/notes/VerseNote";
+import { PdfExport } from "./PdfExport";
 import { SurahPicker } from "@/components/reader/SurahPicker";
 import { PageBar } from "@/components/SiteHeader";
 import { publishWolof } from "@/app/traduire/actions";
@@ -391,6 +392,7 @@ export function TranslateView({
             <BookOpenText aria-hidden className="size-4" />
             Voir la lecture
           </Link>
+          <PdfExport surah={n} ayas={text.verses.length} flush={flush} />
           <button
             type="button"
             className="btn"

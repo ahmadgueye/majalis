@@ -15,7 +15,7 @@ Ce fichier donne tout le contexte nécessaire pour reprendre le projet. Lis-le e
 
 - **Langue** : toute l'interface est en **français**. Le wolof s'écrit en **alphabet latin** (lettres à é ë ó ñ ŋ).
 - **Commits** : **ne jamais ajouter de ligne `Co-Authored-By`** ni aucune attribution à une IA dans les messages de commit. Messages en français.
-- **Branches** : on travaille sur des branches de fonctionnalité (`feat/...`), pas sur `main`.
+- **Branches** : depuis le 03/11/2026, le porteur autorise à **travailler directement sur `main`** (toujours `git pull` avant de commencer). Pousser `main` met le site en ligne (Vercel) : demander avant de pousser. Les gros chantiers peuvent garder une branche `feat/...`.
 - **Pas d'API à l'exécution pour le Coran** : le texte est servi par l'app elle-même (voir « Données coraniques »).
 - **Coût zéro** : uniquement des offres gratuites (Supabase, Vercel). Ne pas introduire de service payant ni de bibliothèque sous licence payante. **tldraw est exclu** (clé de licence payante en production) : le tableau est fait maison.
 - **Le texte Tanzil ne doit jamais être modifié** (licence) : on peut seulement le découper pour l'affichage, comme la séparation de la basmala.
@@ -132,6 +132,7 @@ src/app/(site)/traduire/[surah]/ mot à mot wolof (traducteurs seulement) ; src/
 src/components/wolof/        TranslateView : tuiles des mots, suggestions, fusions, lettres, glossaire, Publier
 src/lib/wolof.ts             découpage, normalisation, suggestions, texte wolof affiché (client et serveur)
 src/lib/wolof-server.ts      isTranslator(), publishedWolof() (lisible sans session)
+src/app/traduire/[surah]/pdf/ page A4 à enregistrer en PDF (PrintBar dans src/components/pdf/, bouton PdfExport dans src/components/wolof/)
 src/app/(site)/traduire/page.tsx accueil de Traduire (TranslateHome) : avancement, reprise, recherche, export
 src/app/(site)/notes/        Mes notes (NotesList) ; src/components/notes/ : VerseNote, ReadingNotes (notes dans la Lecture)
 src/lib/notes.ts             saveNote(), ordre des versets
@@ -192,7 +193,7 @@ src/app/(site)/               pages qui partagent l'en-tête (layout.tsx) : accu
 - **En ligne** (depuis le 02/11/2026) : projet Supabase `majalis` (`ytaqsethdedaeiszbayx`, `eu-west-1`), relié par `supabase link` ; migrations envoyées par `npx supabase db push`. Sur Supabase en ligne, **les fonctions de pgcrypto sont dans le schéma `extensions`** : les appeler `extensions.gen_random_bytes(…)` (l'appel nu passe en local mais échoue en ligne). Connexion Google : identifiant OAuth « Web » dans le projet Google Cloud **deenshare** du porteur (limite de projets atteinte), redirection `https://ytaqsethdedaeiszbayx.supabase.co/auth/v1/callback`.
 - **Port** : l'app tourne sur **http://localhost:3100** (`npm run dev`), car le 3000 est pris par un autre projet du porteur. `site_url` et les redirections de `supabase/config.toml` suivent ce port.
 
-## État d'avancement (au 02/11/2026)
+## État d'avancement (au 03/11/2026)
 
 **En ligne sur https://majalis.bayanun.com** (Vercel, branche `main`, fusionnée depuis `feat/fondations`). Branche `feat/fondations`, poussée sur GitHub (ahmadgueye/majalis). Ne jamais mettre de clé, même locale, dans le dépôt : GitHub bloque le push (protection des secrets).
 
@@ -248,6 +249,7 @@ src/app/(site)/               pages qui partagent l'en-tête (layout.tsx) : accu
 
   Testé : saisie, suggestion acceptée, fusion, lettres, rechargement, publication d'un verset (le brouillon d'un autre reste invisible), glossaire, affichage dans la Lecture et la séance. Règles vérifiées en SQL : un visiteur lit seulement le publié ; un membre non traducteur ne lit pas les brouillons, n'écrit rien et ne peut pas publier.
 - **Traduire, accueil** (`/traduire`) : avancement global et par sourate (mots traduits, mots fusionnés comptés une fois ; versets publiés ; notes), « Reprendre au verset … » (dernier verset modifié), **recherche dans les traductions** (sans tenir compte des accents), filtre Toutes / Commencées, « Exporter mes traductions et notes ». Chaque sourate de Traduire a « Toutes les sourates ».
+- **PDF du mot à mot** : bouton « PDF » dans la barre de Traduire, petite fenêtre « Créer un PDF » (toute la sourate ou du verset … au verset …, « Inclure mes notes »). Ouvre `/traduire/<n>/pdf?de=&a=&notes=1` (`src/app/traduire/[surah]/pdf/`, hors du groupe `(site)` : pas d'en-tête), une page A4 faite pour l'impression : en-tête de sourate, basmala, et par verset l'arabe, les tuiles arabe/wolof (mots fusionnés compris), le français, le wolof (phrase ou mots bout à bout) et la note ; sources en pied. **Le PDF est fait par le navigateur** (« Enregistrer au format PDF », fenêtre ouverte toute seule une fois les polices chargées) : les bibliothèques PDF gratuites lient mal les lettres arabes. Le document reste clair même en thème sombre (`data-theme="light"` posé par `PrintBar`), `@page` A4 dans `globals.css`, versets jamais coupés entre deux pages (`break-inside-avoid`). Le titre de la page sert de nom de fichier. C'est le **brouillon** qui est imprimé (outil de travail).
 - **Notes personnelles** (`VerseNote`) : « Ajouter une note » sous chaque verset, dans Traduire et dans la Lecture (une fois connecté ; la Lecture étant générée à l'avance, les notes y sont lues dans le navigateur, sourate par sourate). Enregistrées toutes seules (700 ms), « Visible par toi seul ». Page **Mes notes** (`/notes`, lien de l'en-tête) : chaque note sous son verset, modifiable sur place, recherche, export. Testé : écriture, relecture dans la Lecture et Mes notes, règles RLS, export.
 - **Règle suivie** : la rangée d'un verset montre « Ajouter au tableau », « Réflexion » et « Surligner ». « Commenter » et « Tafsir » y seront ajoutés **quand leur fonction existera** (aucun bouton inactif).
 - Pas encore : supprimer un cercle ou une séance, quitter un cercle.
