@@ -89,7 +89,7 @@ export function PdfExport({ surah, ayas, flush }: { surah: number; ayas: number;
           </fieldset>
           <label className="flex items-center gap-2 text-[14px]">
             <input type="checkbox" checked={notes} onChange={(e) => setNotes(e.target.checked)} />
-            Inclure mes notes
+            Inclure mes notes et l&apos;« À propos » de la sourate
           </label>
           <div className="flex justify-end gap-2">
             <button type="button" className="btn ghost" onClick={close}>

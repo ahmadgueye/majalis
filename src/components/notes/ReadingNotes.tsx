@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { SurahAbout } from "./SurahAbout";
 import { VerseNote } from "./VerseNote";
 
 type Loaded = { surah: number; notes: Record<string, string> } | null;
@@ -34,6 +35,17 @@ export function ReadingNotes({ children }: { children: React.ReactNode }) {
   }, [db, surah]);
 
   return <Ctx.Provider value={loaded?.surah === surah ? loaded : null}>{children}</Ctx.Provider>;
+}
+
+/** « ⓘ À propos » sous le titre de la sourate : seulement une fois connecté. */
+export function AboutSlot({ surah, tname }: { surah: number; tname: string }) {
+  const loaded = useContext(Ctx);
+  if (!loaded) return null;
+  return (
+    <div className="mt-2">
+      <SurahAbout key={surah} surah={surah} tname={tname} initial={loaded.notes[`${surah}:0`] ?? ""} />
+    </div>
+  );
 }
 
 /** Place de la note sous un verset : rien tant qu'on ne sait pas si quelqu'un est connecté. */

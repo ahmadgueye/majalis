@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Download, Search } from "lucide-react";
 import { PageBar } from "@/components/SiteHeader";
+import { ABOUT_PLACEHOLDER } from "./SurahAbout";
 import { VerseNote } from "./VerseNote";
 
 export type NoteItem = { ref: string; body: string; updated_at: string; tname: string; ar: string; fr: string };
@@ -73,28 +74,37 @@ export function NotesList({ notes, translator }: { notes: NoteItem[]; translator
             <ol className="grid gap-3">
               {shown.map((n) => {
                 const [s, v] = n.ref.split(":");
+                const about = v === "0"; // « À propos » de la sourate
                 return (
                   <li key={n.ref} className="rounded-xl border border-line bg-surface px-4 pt-3 pb-3.5">
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                       <span className="text-[12.5px] font-semibold text-muted">
-                        {n.ref} · {n.tname}
+                        {about ? `À propos de la sourate ${s} · ${n.tname}` : `${n.ref} · ${n.tname}`}
                       </span>
                       <span className="ml-auto flex gap-1">
-                        <Link className="btn ghost" href={`/lire/${s}#v${v}`}>
+                        <Link className="btn ghost" href={about ? `/lire/${s}` : `/lire/${s}#v${v}`}>
                           Lire
                         </Link>
                         {translator && (
-                          <Link className="btn ghost" href={`/traduire/${s}#v${v}`}>
+                          <Link className="btn ghost" href={about ? `/traduire/${s}` : `/traduire/${s}#v${v}`}>
                             Traduire
                           </Link>
                         )}
                       </span>
                     </div>
-                    <p className="my-1 text-right font-ar text-[24px] leading-[1.9]" lang="ar" dir="rtl">
-                      {n.ar}
-                    </p>
-                    <p className="font-read text-[13.5px] leading-normal text-muted">{n.fr}</p>
-                    <VerseNote verseRef={n.ref} initial={n.body} />
+                    {!about && (
+                      <>
+                        <p className="my-1 text-right font-ar text-[24px] leading-[1.9]" lang="ar" dir="rtl">
+                          {n.ar}
+                        </p>
+                        <p className="font-read text-[13.5px] leading-normal text-muted">{n.fr}</p>
+                      </>
+                    )}
+                    {about ? (
+                      <VerseNote verseRef={n.ref} initial={n.body} label="À propos" placeholder={ABOUT_PLACEHOLDER} />
+                    ) : (
+                      <VerseNote verseRef={n.ref} initial={n.body} />
+                    )}
                   </li>
                 );
               })}

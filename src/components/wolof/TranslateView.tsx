@@ -13,6 +13,7 @@ import {
 import { BookOpenText, LayoutGrid, Search, X } from "lucide-react";
 import { VerseNote } from "@/components/notes/VerseNote";
 import { PdfExport } from "./PdfExport";
+import { SurahAbout } from "@/components/notes/SurahAbout";
 import { SurahPicker } from "@/components/reader/SurahPicker";
 import { PageBar } from "@/components/SiteHeader";
 import { publishWolof } from "@/app/traduire/actions";
@@ -465,6 +466,9 @@ export function TranslateView({
           </div>
           <div className="text-[13px] text-muted">
             {text.tname} · mot à mot en wolof
+          </div>
+          <div className="mt-2">
+            <SurahAbout surah={n} tname={text.tname} initial={notes[`${n}:0`] ?? ""} />
           </div>
         </div>
         <p className="mx-auto mb-5 max-w-[620px] text-center text-[13px] leading-normal text-muted">

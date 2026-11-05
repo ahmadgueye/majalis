@@ -53,6 +53,7 @@ export default async function SurahPdf({ params, searchParams }: Props) {
   const drafts = new Map<string, WolofVerse>((rows ?? []).map((r) => [r.ref, fromWolofRow(r)]));
   const notes = new Map((noteRows ?? []).map((r) => [r.ref, r.body]));
   const whole = x === 1 && y === meta.ayas;
+  const about = notes.get(`${n}:0`); // « À propos » de la sourate, avec les notes
   const today = new Date().toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
 
   return (
@@ -75,6 +76,13 @@ export default async function SurahPdf({ params, searchParams }: Props) {
             </p>
           )}
         </header>
+
+        {about && (
+          <section className="mb-8 break-inside-avoid rounded-lg border border-line px-4 py-3">
+            <h2 className="mb-1 text-[13px] font-bold text-muted">À propos de la sourate</h2>
+            <p className="font-read text-[14.5px] leading-relaxed whitespace-pre-wrap">{about}</p>
+          </section>
+        )}
 
         <div className="grid gap-7">
           {verses.map((v) => {

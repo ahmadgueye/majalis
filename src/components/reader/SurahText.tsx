@@ -1,7 +1,7 @@
 import { DEFAULT_TRANSLATION, QURAN_NOTICE, type getSurah } from "@/lib/quran";
 import { verseEnd } from "@/lib/reading";
 import { wolofText, type WolofVerse } from "@/lib/wolof";
-import { VerseNoteSlot } from "@/components/notes/ReadingNotes";
+import { AboutSlot, VerseNoteSlot } from "@/components/notes/ReadingNotes";
 import { VerseTranslations } from "./VerseTranslations";
 
 type Surah = NonNullable<Awaited<ReturnType<typeof getSurah>>>;
@@ -29,6 +29,7 @@ export function SurahText({
           {meta.tname} · {meta.type === "Meccan" ? "mecquoise" : "médinoise"} ·{" "}
           {meta.ayas} versets
         </div>
+        <AboutSlot surah={meta.n} tname={meta.tname} />
       </div>
       {basmala && (
         <p
