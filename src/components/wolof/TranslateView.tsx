@@ -58,6 +58,10 @@ const SAVE_LABEL: Record<Save, string> = {
   error: "Échec de l'enregistrement : vérifie ta connexion.",
 };
 
+/** Boîte du champ d'un mot et de sa copie invisible : mêmes marges et même texte, pour la même taille. */
+const WORD_BOX =
+  "w-full min-w-0 rounded-[7px] border px-1.5 py-[5px] text-center text-sm font-medium leading-snug whitespace-pre-wrap break-words";
+
 /** Actions d'un verset, stables d'un rendu à l'autre (les lignes sont mémorisées). */
 type Act = {
   setWord(ref: string, i: number, value: string): void;
@@ -297,7 +301,7 @@ export function TranslateView({
       nextVerse(v) {
         const next = document
           .getElementById(`v${v + 1}`)
-          ?.querySelector("input");
+          ?.querySelector<HTMLTextAreaElement>("textarea[data-i]");
         if (next) {
           next.focus({ preventScroll: true });
           next.scrollIntoView({ block: "nearest", behavior: "smooth" });
@@ -360,8 +364,8 @@ export function TranslateView({
 
   function goToWord(ref: string, i: number) {
     if (window.matchMedia("(max-width: 767px)").matches) setGlossary(null);
-    const input = document.querySelector<HTMLInputElement>(
-      `input[data-ref="${ref}"][data-i="${i}"]`,
+    const input = document.querySelector<HTMLTextAreaElement>(
+      `textarea[data-ref="${ref}"][data-i="${i}"]`,
     );
     input?.focus({ preventScroll: true });
     input?.scrollIntoView({ block: "center", behavior: "smooth" });
@@ -625,7 +629,7 @@ const VerseRow = memo(function VerseRow({
           )}
         </div>
       )}
-      <div className="my-2 flex flex-wrap gap-x-1.5 gap-y-2.5" dir="rtl">
+      <div className="my-2 flex flex-wrap items-start gap-x-1.5 gap-y-2.5" dir="rtl">
         {ts.map((t, k) => {
           const value = draft.words[t.i] ?? "";
           const key = `${ref}|${t.i}`;
@@ -634,7 +638,7 @@ const VerseRow = memo(function VerseRow({
             <div
               key={t.i}
               dir="ltr"
-              className="relative flex max-w-[200px] min-w-[86px] flex-col items-stretch gap-[3px] text-center"
+              className="relative flex max-w-[260px] min-w-[86px] flex-col items-stretch gap-[3px] text-center"
             >
               <button
                 type="button"
@@ -658,36 +662,45 @@ const VerseRow = memo(function VerseRow({
               >
                 {t.ar}
               </button>
-              <input
-                data-ref={ref}
-                data-i={t.i}
-                value={value}
-                placeholder={sug?.text ?? "…"}
-                aria-label={`Wolof pour ${t.ar}`}
-                autoComplete="off"
-                spellCheck={false}
-                lang="wo"
-                onFocus={(e) => act.focused(e.currentTarget)}
-                onChange={(e) => act.setWord(ref, t.i, e.target.value)}
-                onBlur={act.commit}
-                onKeyDown={(e) => {
-                  if (e.key === "Tab" && !e.shiftKey && !value && sug)
-                    act.setWord(ref, t.i, sug.text);
-                  if (e.key === "Escape" && !value && sug) {
-                    e.preventDefault();
-                    act.ignore(key);
-                  }
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    act.nextVerse(verse.n);
-                  }
-                }}
-                className={`w-full min-w-0 rounded-[7px] border px-1.5 py-[5px] text-center text-sm font-medium outline-none focus:border-accent focus:ring-3 focus:ring-accent-soft ${
-                  value.trim()
-                    ? "border-transparent bg-accent-soft"
-                    : "border-line bg-surface"
-                } ${sug ? "placeholder:text-accent placeholder:italic" : "placeholder:text-faint"}`}
-              />
+              {/* Le champ revient à la ligne : une copie invisible du texte donne la taille (la tuile
+                  s'élargit jusqu'à 260 px, puis le texte passe à la ligne et le champ grandit en hauteur). */}
+              <div className="grid">
+                <span aria-hidden className={`${WORD_BOX} invisible col-start-1 row-start-1 border-transparent`}>
+                  {value || sug?.text || "…"}{" "}
+                </span>
+                <textarea
+                  rows={1}
+                  cols={1}
+                  data-ref={ref}
+                  data-i={t.i}
+                  value={value}
+                  placeholder={sug?.text ?? "…"}
+                  aria-label={`Wolof pour ${t.ar}`}
+                  autoComplete="off"
+                  spellCheck={false}
+                  lang="wo"
+                  onFocus={(e) => act.focused(e.currentTarget)}
+                  onChange={(e) => act.setWord(ref, t.i, e.target.value)}
+                  onBlur={act.commit}
+                  onKeyDown={(e) => {
+                    if (e.key === "Tab" && !e.shiftKey && !value && sug)
+                      act.setWord(ref, t.i, sug.text);
+                    if (e.key === "Escape" && !value && sug) {
+                      e.preventDefault();
+                      act.ignore(key);
+                    }
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      act.nextVerse(verse.n);
+                    }
+                  }}
+                  className={`${WORD_BOX} col-start-1 row-start-1 resize-none overflow-hidden outline-none focus:border-accent focus:ring-3 focus:ring-accent-soft ${
+                    value.trim()
+                      ? "border-transparent bg-accent-soft"
+                      : "border-line bg-surface"
+                  } ${sug ? "placeholder:text-accent placeholder:italic" : "placeholder:text-faint"}`}
+                />
+              </div>
               {sug && (
                 <small className="text-[10.5px] font-semibold text-accent">
                   {sug.kind === "same" ? "déjà traduit" : "forme proche"} ·{" "}
